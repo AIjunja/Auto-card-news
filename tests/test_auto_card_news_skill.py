@@ -157,8 +157,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.2.0")
-        self.assertIn("0.2.0", read_text(changelog))
+        self.assertEqual(read_text(version).strip(), "0.2.1")
+        self.assertIn("0.2.1", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
@@ -166,6 +166,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "last30days",
             "https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news",
             "https://github.com/mvanhorn/last30days-skill",
+            "https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days",
+            "One-Line Install",
             "install.ps1",
             "install.sh",
             "$auto-card-news",
@@ -175,8 +177,14 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             self.assertIn(phrase, text)
 
         self.assertIn("auto-card-news", read_text(install_ps1))
+        self.assertIn("last30days", read_text(install_ps1))
+        self.assertIn("https://github.com/mvanhorn/last30days-skill.git", read_text(install_ps1))
+        self.assertIn("skills/last30days", read_text(install_ps1))
         self.assertNotIn("ai-source-scout", read_text(install_ps1))
         self.assertIn("auto-card-news", read_text(install_sh))
+        self.assertIn("last30days", read_text(install_sh))
+        self.assertIn("https://github.com/mvanhorn/last30days-skill.git", read_text(install_sh))
+        self.assertIn("skills/last30days", read_text(install_sh))
         self.assertNotIn("ai-source-scout", read_text(install_sh))
 
 

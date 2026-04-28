@@ -1,11 +1,18 @@
 $ErrorActionPreference = "Stop"
 
-$repoUrl = "https://github.com/AIjunja/Auto-card-news.git"
-$repoZip = "https://github.com/AIjunja/Auto-card-news/archive/refs/heads/master.zip"
+$autoCardNewsRepoUrl = "https://github.com/AIjunja/Auto-card-news.git"
+$autoCardNewsRepoZip = "https://github.com/AIjunja/Auto-card-news/archive/refs/heads/master.zip"
+$last30DaysRepoUrl = "https://github.com/mvanhorn/last30days-skill.git"
+$last30DaysRepoZip = "https://github.com/mvanhorn/last30days-skill/archive/refs/heads/main.zip"
+$last30DaysSkillPath = "skills/last30days"
+
 $tempRoot = Join-Path $env:TEMP ("auto-card-news-" + [System.Guid]::NewGuid().ToString("N"))
-$zipPath = Join-Path $tempRoot "auto-card-news.zip"
-$extractPath = Join-Path $tempRoot "repo"
-$clonePath = Join-Path $tempRoot "clone"
+$autoCardNewsZipPath = Join-Path $tempRoot "auto-card-news.zip"
+$last30DaysZipPath = Join-Path $tempRoot "last30days-skill.zip"
+$autoCardNewsExtractPath = Join-Path $tempRoot "auto-card-news-repo"
+$last30DaysExtractPath = Join-Path $tempRoot "last30days-repo"
+$autoCardNewsClonePath = Join-Path $tempRoot "auto-card-news"
+$last30DaysClonePath = Join-Path $tempRoot "last30days-skill"
 
 if ($env:CODEX_HOME) {
     $codexHome = $env:CODEX_HOME
@@ -14,7 +21,41 @@ if ($env:CODEX_HOME) {
 }
 
 $skillsDir = Join-Path $codexHome "skills"
-$skillNames = @("auto-card-news")
+
+function Get-ZipRoot {
+    param (
+        [string]$Uri,
+        [string]$ZipPath,
+        [string]$ExtractPath
+    )
+
+    Invoke-WebRequest -Uri $Uri -OutFile $ZipPath
+    Expand-Archive -LiteralPath $ZipPath -DestinationPath $ExtractPath -Force
+
+    return Get-ChildItem -Path $ExtractPath -Directory |
+        Select-Object -First 1 |
+        ForEach-Object { $_.FullName }
+}
+
+function Install-SkillFromPath {
+    param (
+        [string]$Source,
+        [string]$SkillName
+    )
+
+    $dest = Join-Path $skillsDir $SkillName
+
+    if (-not (Test-Path (Join-Path $Source "SKILL.md"))) {
+        throw "Could not find $SkillName skill in downloaded repository."
+    }
+
+    if (Test-Path $dest) {
+        Remove-Item -Recurse -Force -LiteralPath $dest
+    }
+
+    Copy-Item -Recurse -Force -LiteralPath $Source -Destination $dest
+    Write-Host "Installed $SkillName to $dest"
+}
 
 New-Item -ItemType Directory -Force $tempRoot | Out-Null
 New-Item -ItemType Directory -Force $skillsDir | Out-Null
@@ -22,33 +63,22 @@ New-Item -ItemType Directory -Force $skillsDir | Out-Null
 try {
     $git = Get-Command git -ErrorAction SilentlyContinue
     if ($git) {
-        git clone --depth 1 $repoUrl $clonePath | Out-Null
-        $skillsSourceRoot = Join-Path $clonePath "skills"
+        git clone --depth 1 $autoCardNewsRepoUrl $autoCardNewsClonePath | Out-Null
+        git clone --depth 1 $last30DaysRepoUrl $last30DaysClonePath | Out-Null
+
+        $autoCardNewsSkillSource = Join-Path (Join-Path $autoCardNewsClonePath "skills") "auto-card-news"
+        $last30DaysSkillSource = Join-Path $last30DaysClonePath $last30DaysSkillPath
     } else {
-        Invoke-WebRequest -Uri $repoZip -OutFile $zipPath
-        Expand-Archive -LiteralPath $zipPath -DestinationPath $extractPath -Force
+        $autoCardNewsRepoRoot = Get-ZipRoot -Uri $autoCardNewsRepoZip -ZipPath $autoCardNewsZipPath -ExtractPath $autoCardNewsExtractPath
+        $last30DaysRepoRoot = Get-ZipRoot -Uri $last30DaysRepoZip -ZipPath $last30DaysZipPath -ExtractPath $last30DaysExtractPath
 
-        $repoRoot = Get-ChildItem -Path $extractPath -Directory |
-            Select-Object -First 1 |
-            ForEach-Object { $_.FullName }
-        $skillsSourceRoot = Join-Path $repoRoot "skills"
+        $autoCardNewsSkillSource = Join-Path (Join-Path $autoCardNewsRepoRoot "skills") "auto-card-news"
+        $last30DaysSkillSource = Join-Path $last30DaysRepoRoot $last30DaysSkillPath
     }
 
-    foreach ($skillName in $skillNames) {
-        $source = Join-Path $skillsSourceRoot $skillName
-        $dest = Join-Path $skillsDir $skillName
+    Install-SkillFromPath -Source $autoCardNewsSkillSource -SkillName "auto-card-news"
+    Install-SkillFromPath -Source $last30DaysSkillSource -SkillName "last30days"
 
-        if (-not (Test-Path (Join-Path $source "SKILL.md"))) {
-            throw "Could not find $skillName skill in downloaded repository."
-        }
-
-        if (Test-Path $dest) {
-            Remove-Item -Recurse -Force -LiteralPath $dest
-        }
-
-        Copy-Item -Recurse -Force -LiteralPath $source -Destination $dest
-        Write-Host "Installed $skillName to $dest"
-    }
     Write-Host "Restart Codex to pick up new skills."
 }
 finally {

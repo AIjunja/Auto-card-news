@@ -1,6 +1,6 @@
 # Auto-card-news Skill
 
-Version: `0.2.0`
+Version: `0.2.1`
 
 `auto-card-news` is a Codex skill for making channel-aware card news and Instagram carousel content through conversation.
 
@@ -19,37 +19,30 @@ This is not a hosted app and does not upload to Instagram. It is a reusable Code
 
 ## Install With Codex
 
-If your Codex has the `skill-installer` skill, paste this GitHub URL and ask Codex to install it:
+If your Codex has the `skill-installer` skill, paste these GitHub URLs and ask Codex to install them:
 
 ```text
 https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news
+https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
 ```
 
 Example prompt:
 
 ```text
-Install this Codex skill:
+Install these Codex skills:
 https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news
-```
-
-Restart Codex after installation so the new skill is loaded.
-
-## Recommended Source Discovery Skill
-
-For fresh source discovery, install `last30days` from [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill). `auto-card-news` is written to use that skill when the user has no source yet or needs current AI information.
-
-Codex install prompt:
-
-```text
-Install this Codex skill:
 https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
 ```
 
-After restarting Codex, you can ask `$auto-card-news` to use `last30days` for source discovery before creating the carousel.
+Restart Codex after installation so the new skills are loaded.
+
+## Recommended Source Discovery Skill
+
+For fresh source discovery, this setup uses `last30days` from [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill). The one-line installers below install both `auto-card-news` and `last30days`; if you use the Codex installer manually, install both URLs shown above.
 
 ## One-Line Install
 
-These commands work when the repository is public. If the repository is private, use the Codex install prompt above or clone with a GitHub account that has access.
+These commands install both `auto-card-news` and `last30days`. They work when the repository is public. If the repository is private, use the Codex install prompt above or clone with a GitHub account that has access.
 
 ### Windows PowerShell
 
@@ -67,22 +60,26 @@ Restart Codex after installation.
 
 ## Manual Install
 
-Clone the repository and copy the skill folder into your Codex skills directory.
+Clone both repositories and copy the skill folders into your Codex skills directory.
 
 ### Windows PowerShell
 
 ```powershell
 git clone https://github.com/AIjunja/Auto-card-news.git
+git clone https://github.com/mvanhorn/last30days-skill.git
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
 Copy-Item -Recurse -Force ".\Auto-card-news\skills\auto-card-news" "$env:USERPROFILE\.codex\skills\auto-card-news"
+Copy-Item -Recurse -Force ".\last30days-skill\skills\last30days" "$env:USERPROFILE\.codex\skills\last30days"
 ```
 
 ### macOS / Linux
 
 ```bash
 git clone https://github.com/AIjunja/Auto-card-news.git
+git clone https://github.com/mvanhorn/last30days-skill.git
 mkdir -p "$HOME/.codex/skills"
 cp -R Auto-card-news/skills/auto-card-news "$HOME/.codex/skills/auto-card-news"
+cp -R last30days-skill/skills/last30days "$HOME/.codex/skills/last30days"
 ```
 
 Restart Codex after installation.

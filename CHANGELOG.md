@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Updated one-line installers to install both `auto-card-news` and `last30days`.
+- Updated Codex and manual install docs to include the `last30days` companion skill.
+- Kept `last30days` as an external dependency fetched from https://github.com/mvanhorn/last30days-skill.
+
 ## 0.2.0
 
 - Updated `auto-card-news` to use the external `last30days` skill for fresh source discovery.
