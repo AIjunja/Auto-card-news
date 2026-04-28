@@ -1,0 +1,3 @@
+display_name: Auto Card News
+short_description: Create channel-aware carousel posts with HTML previews, PNG cards, and MP4 motion cards.
+default_prompt: 카드뉴스 또는 인스타 캐러셀을 만들고 싶어요. 채널 프로필부터 잡고, HTML 미리보기 후 PNG/MP4로 출력해 주세요.
