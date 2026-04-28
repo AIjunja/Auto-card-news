@@ -126,3 +126,24 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         finally:
             if temp_path.exists():
                 shutil.rmtree(temp_path)
+
+    def test_distribution_docs_explain_installation(self):
+        readme = ROOT / "README.md"
+        install_ps1 = ROOT / "install.ps1"
+        install_sh = ROOT / "install.sh"
+
+        self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
+        self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
+        self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
+
+        text = read_text(readme)
+        required_phrases = [
+            "auto-card-news",
+            "https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news",
+            "install.ps1",
+            "install.sh",
+            "$auto-card-news",
+            "Restart Codex",
+        ]
+        for phrase in required_phrases:
+            self.assertIn(phrase, text)
