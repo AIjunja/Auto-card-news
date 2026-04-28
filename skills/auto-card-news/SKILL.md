@@ -30,6 +30,8 @@ This is a conversation-driven production workflow, not a SaaS app and not an upl
 
 3. **Intake source material**
    - Accept URLs, reports, memos, drafts, pasted GPT conversations, screenshots, captions, or raw notes.
+   - If the user has no source, asks for source discovery, or needs current AI information, use the installed `last30days` skill first: https://github.com/mvanhorn/last30days-skill
+   - Ask `last30days` for fresh source discovery, then convert its research output into `source-pack.md` with source candidates, verification notes, and recommended angles.
    - If a URL is blocked or incomplete, ask the user to paste the relevant text or provide screenshots.
    - Save source material to `source.md` in the project.
 
@@ -94,6 +96,7 @@ Use `scripts/init_project.py` to scaffold this structure when helpful.
 - Read `references/project-workflow.md` when turning source material into angles, copy, and storyboard.
 - Read `references/design-and-references.md` before writing `design.md`, `channel.css`, or card layouts.
 - Read `references/rendering-and-motion.md` before deciding PNG vs MP4 or producing final exports.
+- Use `last30days` when 소스가 없거나 fresh source discovery is needed before carousel production.
 
 ## Completion Criteria
 

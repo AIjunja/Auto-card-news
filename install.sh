@@ -10,7 +10,7 @@ clone_path="$tmp_root/clone"
 
 codex_home="${CODEX_HOME:-$HOME/.codex}"
 skills_dir="$codex_home/skills"
-dest="$skills_dir/auto-card-news"
+skill_names=("auto-card-news")
 
 cleanup() {
   rm -rf "$tmp_root"
@@ -21,7 +21,7 @@ mkdir -p "$extract_path" "$skills_dir"
 
 if command -v git >/dev/null 2>&1; then
   git clone --depth 1 "$repo_url" "$clone_path" >/dev/null
-  source_dir="$clone_path/skills/auto-card-news"
+  skills_source_root="$clone_path/skills"
 else
   if command -v curl >/dev/null 2>&1; then
     curl -fsSL "$repo_zip" -o "$zip_path"
@@ -39,16 +39,22 @@ else
     exit 1
   fi
 
-  source_dir="$(find "$extract_path" -maxdepth 2 -type d -path '*/skills/auto-card-news' | head -n 1)"
+  repo_root="$(find "$extract_path" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+  skills_source_root="$repo_root/skills"
 fi
 
-if [ -z "$source_dir" ] || [ ! -f "$source_dir/SKILL.md" ]; then
-  echo "Could not find auto-card-news skill in downloaded repository." >&2
-  exit 1
-fi
+for skill_name in "${skill_names[@]}"; do
+  source_dir="$skills_source_root/$skill_name"
+  dest="$skills_dir/$skill_name"
 
-rm -rf "$dest"
-cp -R "$source_dir" "$dest"
+  if [ -z "$source_dir" ] || [ ! -f "$source_dir/SKILL.md" ]; then
+    echo "Could not find $skill_name skill in downloaded repository." >&2
+    exit 1
+  fi
 
-echo "Installed auto-card-news to $dest"
+  rm -rf "$dest"
+  cp -R "$source_dir" "$dest"
+  echo "Installed $skill_name to $dest"
+done
+
 echo "Restart Codex to pick up new skills."

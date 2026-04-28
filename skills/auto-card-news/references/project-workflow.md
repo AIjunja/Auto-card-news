@@ -6,6 +6,8 @@ Use this reference when converting source material into a carousel project.
 
 Accepted inputs include URLs, reports, memos, drafts, pasted GPT conversations, screenshots, captions, and raw notes. Save the original material to `source.md`.
 
+If the user has no source, asks for source discovery, or needs current AI information, use the installed `last30days` skill from https://github.com/mvanhorn/last30days-skill before writing carousel copy. Treat `last30days` as the fresh source discovery step, then convert its output into `source-pack.md` containing source candidates, source quality notes, freshness checks, and a recommended angle for `auto-card-news`.
+
 When the source is a URL, fetch the accessible content. If access is blocked, ask the user to paste the relevant parts or provide screenshots. State the limitation clearly in `brief.md`.
 
 ## Source Summary

@@ -38,15 +38,35 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertIn("motion", description)
 
         required_phrases = [
-            "한국어",
-            "채널 프로필",
-            "HTML/CSS 미리보기",
+            "Korean",
+            "channel profile",
+            "HTML/CSS preview",
             "PNG",
             "MP4",
-            "업로드하지 않는다",
+            "Do not automatically upload",
         ]
         for phrase in required_phrases:
             self.assertIn(phrase, text)
+
+    def test_auto_card_news_uses_last30days_for_source_discovery(self):
+        text = read_text(SKILL_MD)
+        workflow = read_text(SKILL_DIR / "references" / "project-workflow.md")
+        combined = text + "\n" + workflow
+
+        required_phrases = [
+            "last30days",
+            "https://github.com/mvanhorn/last30days-skill",
+            "fresh source discovery",
+            "source-pack.md",
+        ]
+        for phrase in required_phrases:
+            self.assertIn(phrase, combined)
+
+        self.assertNotIn("ai-source-scout", combined)
+        self.assertFalse(
+            (ROOT / "skills" / "ai-source-scout" / "SKILL.md").exists(),
+            "Use the external last30days skill instead of shipping ai-source-scout.",
+        )
 
     def test_references_exist_and_are_linked_from_skill(self):
         skill_text = read_text(SKILL_MD)
@@ -131,15 +151,21 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         readme = ROOT / "README.md"
         install_ps1 = ROOT / "install.ps1"
         install_sh = ROOT / "install.sh"
+        version = ROOT / "VERSION"
+        changelog = ROOT / "CHANGELOG.md"
 
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
+        self.assertEqual(read_text(version).strip(), "0.2.0")
+        self.assertIn("0.2.0", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
             "auto-card-news",
+            "last30days",
             "https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news",
+            "https://github.com/mvanhorn/last30days-skill",
             "install.ps1",
             "install.sh",
             "$auto-card-news",
@@ -147,3 +173,12 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         ]
         for phrase in required_phrases:
             self.assertIn(phrase, text)
+
+        self.assertIn("auto-card-news", read_text(install_ps1))
+        self.assertNotIn("ai-source-scout", read_text(install_ps1))
+        self.assertIn("auto-card-news", read_text(install_sh))
+        self.assertNotIn("ai-source-scout", read_text(install_sh))
+
+
+if __name__ == "__main__":
+    unittest.main()

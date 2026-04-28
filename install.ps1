@@ -14,7 +14,7 @@ if ($env:CODEX_HOME) {
 }
 
 $skillsDir = Join-Path $codexHome "skills"
-$dest = Join-Path $skillsDir "auto-card-news"
+$skillNames = @("auto-card-news")
 
 New-Item -ItemType Directory -Force $tempRoot | Out-Null
 New-Item -ItemType Directory -Force $skillsDir | Out-Null
@@ -23,26 +23,32 @@ try {
     $git = Get-Command git -ErrorAction SilentlyContinue
     if ($git) {
         git clone --depth 1 $repoUrl $clonePath | Out-Null
-        $source = Join-Path $clonePath "skills\auto-card-news"
+        $skillsSourceRoot = Join-Path $clonePath "skills"
     } else {
         Invoke-WebRequest -Uri $repoZip -OutFile $zipPath
         Expand-Archive -LiteralPath $zipPath -DestinationPath $extractPath -Force
 
-        $source = Get-ChildItem -Path $extractPath -Directory |
+        $repoRoot = Get-ChildItem -Path $extractPath -Directory |
             Select-Object -First 1 |
-            ForEach-Object { Join-Path $_.FullName "skills\auto-card-news" }
+            ForEach-Object { $_.FullName }
+        $skillsSourceRoot = Join-Path $repoRoot "skills"
     }
 
-    if (-not (Test-Path (Join-Path $source "SKILL.md"))) {
-        throw "Could not find auto-card-news skill in downloaded repository."
-    }
+    foreach ($skillName in $skillNames) {
+        $source = Join-Path $skillsSourceRoot $skillName
+        $dest = Join-Path $skillsDir $skillName
 
-    if (Test-Path $dest) {
-        Remove-Item -Recurse -Force -LiteralPath $dest
-    }
+        if (-not (Test-Path (Join-Path $source "SKILL.md"))) {
+            throw "Could not find $skillName skill in downloaded repository."
+        }
 
-    Copy-Item -Recurse -Force -LiteralPath $source -Destination $dest
-    Write-Host "Installed auto-card-news to $dest"
+        if (Test-Path $dest) {
+            Remove-Item -Recurse -Force -LiteralPath $dest
+        }
+
+        Copy-Item -Recurse -Force -LiteralPath $source -Destination $dest
+        Write-Host "Installed $skillName to $dest"
+    }
     Write-Host "Restart Codex to pick up new skills."
 }
 finally {
