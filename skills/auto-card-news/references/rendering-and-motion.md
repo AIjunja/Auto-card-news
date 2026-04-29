@@ -42,7 +42,45 @@ Recommend motion for:
 - Official demo clips or UI walkthroughs
 - Screenshot callouts with zoom, cursor, or tap movement
 
-Use Remotion-style structure when creating motion cards. Keep motion short and purposeful. Respect the channel design system. Ask for approval before generating motion output.
+Keep motion short and purposeful. Respect the channel design system. Ask for approval before generating motion output.
+
+## Motion Engine Selection
+
+Prefer HyperFrames first for normal card-news motion when the card is already designed in HTML/CSS.
+
+Use HyperFrames for:
+
+- Short 3-6 second card animations
+- Typing effects, side panels, chip movement, tooltip reveals, cursor/tap paths, UI callouts, and simple zooms
+- HTML/CSS/GSAP-native scenes that should stay close to the static card design
+- Fast copy and layout iteration where the user may revise wording, line breaks, or placement
+- Browser-extension-style previews or future workflows where text editing happens directly on HTML cards
+
+Use Remotion when:
+
+- The card needs complex timeline control, React components, audio, heavy video compositing, or multiple media tracks
+- A searched demo video must be cut, layered, timed, or combined with other footage
+- HyperFrames is unavailable, fails to render reliably, or cannot handle the required media
+- A reusable production video template is more important than direct HTML/CSS editability
+
+Record the chosen engine in `motion-plan.md` for every motion card:
+
+```text
+Card 02
+- Output: MP4
+- Engine: HyperFrames
+- Reason: HTML side-panel typing motion; copy and chip placement may change often.
+```
+
+Do not choose motion just because an engine is available. If a card is clearer as a static save-worthy card, keep it PNG.
+
+## HyperFrames Render Notes
+
+Run `hyperframes lint` and `hyperframes inspect` before final rendering when HyperFrames is used. If lint warns that a composition file is too large, split scenes or layers into smaller composition files before making the pattern reusable.
+
+HyperFrames rendering needs Chrome and FFmpeg. If rendering reaches encoding and fails with `spawn ffmpeg ENOENT`, add a known FFmpeg directory to `PATH` or use the FFmpeg bundled with an existing Remotion install when available.
+
+Use `npx hyperframes render ... --quality draft` for quick proof renders, then render final quality only after the user approves the motion direction.
 
 ## Video Reference Search
 
@@ -66,6 +104,7 @@ For each MP4 card, define:
 - Source media: video, screenshot, generated scene, or HTML-native animation
 - Motion idea: reveal, zoom, comparison, callout, tap/cursor path, timeline, or loop
 - Duration: usually 3-6 seconds for a carousel card
+- Engine: HyperFrames, Remotion, or another explicitly chosen renderer
 - Export target: MP4 for motion cards, PNG fallback if motion is not approved
 
 Keep the first second strong. If the card only becomes clear after several seconds, rewrite the hook or simplify the animation.

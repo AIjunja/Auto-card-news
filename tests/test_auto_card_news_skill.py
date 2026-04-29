@@ -46,6 +46,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "orphaned word",
             "Media Bottom Labels",
             "Spacing Relationship QA",
+            "HyperFrames",
+            "Remotion",
             "HTML/CSS preview",
             "PNG",
             "MP4",
@@ -166,8 +168,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.3.3")
-        self.assertIn("0.3.3", read_text(changelog))
+        self.assertEqual(read_text(version).strip(), "0.3.4")
+        self.assertIn("0.3.4", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
@@ -182,6 +184,7 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "line-break QA",
             "lower safe zone",
             "spacing relationship",
+            "HyperFrames-first",
             "install.ps1",
             "install.sh",
             "$auto-card-news",

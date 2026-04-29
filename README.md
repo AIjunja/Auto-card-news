@@ -1,6 +1,6 @@
 # Auto-card-news Skill
 
-Version: `0.3.3`
+Version: `0.3.4`
 
 `auto-card-news` is a Codex skill for making channel-aware card news and Instagram carousel content through conversation.
 
@@ -20,7 +20,7 @@ It guides Codex through:
 - lower safe zone placement for media label chips over screenshots and demo videos
 - spacing relationship checks between chips, badges, and headlines
 - card-by-card static PNG or motion MP4 planning
-- Remotion-style motion planning when a card should become MP4
+- HyperFrames-first motion planning for short HTML/CSS card animations, with Remotion as the fallback for complex video cards
 - reusable `profile.md`, `design.md`, `source-pack.md`, `brief.md`, `storyboard.md`, and `motion-plan.md` files
 
 This is not a hosted app and does not upload to Instagram. It is a reusable Codex skill plus templates and scaffolding.

@@ -73,9 +73,11 @@ Borrow the idea of HTML/CSS templates rendered by Playwright. Useful concepts:
 
 Do not inherit DataTalksClub visual style or unimplemented frame assumptions.
 
-## Remotion Reference
+## Motion Reference
 
-Use Remotion-style thinking for cards that benefit from motion:
+Use HyperFrames-style HTML/CSS motion first when the card can stay close to the static card design. This is especially useful for typography, side panels, chips, UI callouts, cursor paths, simple zooms, and other short card-news motion.
+
+Use Remotion-style thinking for cards that need more complex motion:
 
 - Hook reveal
 - Demo zoom-in
@@ -84,6 +86,7 @@ Use Remotion-style thinking for cards that benefit from motion:
 - Timeline or ranking movement
 - Cursor/tap/app interaction
 - Animated callouts over screenshots or video frames
+- Audio, timeline-heavy edits, video compositing, or reusable React video templates
 
 Motion must clarify the point or increase retention. Do not add motion just to make a card feel busy.
 

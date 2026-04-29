@@ -115,6 +115,9 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
    - For each card, decide whether static PNG or motion MP4 is more effective.
    - Prefer motion when a first-card hook, product demo, before/after, timeline, or workflow will increase retention.
    - Use searched video references, official demos, screenshots, or HTML-native animation as the motion source.
+   - For HTML/CSS-native card motion, prefer HyperFrames first because it matches the per-card HTML workflow and is easier to revise for copy, layout, typing, side-panel, chip, and UI callout motion.
+   - Use Remotion as the backup or primary engine for complex timelines, React-heavy templates, audio, video compositing, advanced media control, or when HyperFrames cannot render reliably.
+   - Record the chosen motion engine per card in `motion-plan.md`, including the reason for choosing HyperFrames, Remotion, or static PNG.
    - Explain motion recommendations briefly.
    - Ask for approval before creating motion output.
    - Read `references/rendering-and-motion.md` for decision rules.
@@ -132,6 +135,7 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
 10. **Render final assets**
    - Static cards default to PNG.
    - Motion cards default to MP4.
+   - Motion-card engine default: HyperFrames for short HTML/CSS/GSAP card animations; Remotion for complex video work or as a reliable fallback.
    - JPEG and PDF are optional and only generated when requested.
 
 ## Ratio Defaults

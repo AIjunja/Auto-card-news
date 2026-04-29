@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.4
+
+- Added HyperFrames-first motion guidance for short HTML/CSS/GSAP card animations.
+- Kept Remotion as the fallback or primary choice for complex timelines, audio, video compositing, and advanced media cards.
+- Updated motion-plan templates to record the chosen motion engine and reason per card.
+
 ## 0.3.3
 
 - Added spacing relationship QA for media label chips, section badges, and headlines.
