@@ -21,6 +21,12 @@ When writing Instagram or social captions for external sources, use `Contents Ed
 
 Keep source attribution separate as `Source · <original owner/source>`.
 
+Also include direct links that help viewers verify or use the source. If the post introduces a GitHub repo, tool, app, paper, official announcement, demo video, guide, or downloadable resource, add a plain CTA link line in the caption, such as:
+
+`써보시려면 여기 GitHub 링크 참고해보세욤: <url>`
+
+Prefer one or two high-signal links over a long source dump.
+
 ## Engagement-First Rule
 
 Do not make PPT-like briefing slides. A carousel must start from the viewer's concrete situation, pain, desire, or curiosity. The source is supporting evidence, not the opening frame.
