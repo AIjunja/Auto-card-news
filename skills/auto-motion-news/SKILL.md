@@ -15,6 +15,18 @@ Ask and explain in Korean by default. Use another language only when the user re
 
 This is a conversation-driven video production workflow, not social upload automation. Do not automatically upload to YouTube, Instagram, TikTok, or any social platform.
 
+## Humanized Marketing Rule
+
+Every script, scene plan, caption, and product-style video must pass a humanized marketing review before motion preview. This rule prevents stiff AI narration and slideshow-style explainers.
+
+- Rewrite narration until it sounds natural when spoken out loud.
+- Remove generic AI phrases, press-release rhythm, and vague benefit words.
+- Check the first 2-second hook, viewer promise, proof, retention reason, and CTA.
+- For product, app, campaign, launch, lead magnet, or PitchCheck promotion, activate ad/conversion mode and define the offer, audience, proof, objection, CTA, and destination.
+- Keep the active channel voice, but keep factual or security content trustworthy.
+
+Read `references/humanized-video-marketing.md` when drafting scripts, converting card-news into video, writing captions, or planning promotional videos.
+
 ## Best Fit
 
 Use this skill for:
@@ -69,6 +81,8 @@ If the user only wants static Instagram carousel cards, use `auto-card-news` ins
    - For card-news, convert card roles into video beats: hook, situation, proof, useful point, channel take, CTA.
    - Do not simply read every card aloud.
    - Keep spoken lines natural and easy to say out loud.
+   - Run the spoken Humanizer pass from `references/humanized-video-marketing.md` before showing the script.
+   - If the video promotes a product or campaign, run ad/conversion mode before writing the final CTA.
 
 5. **Search visual references**
    - Search official demos, product pages, screenshots, GitHub media, documentation, credible creator walkthroughs, and open-license media.
@@ -80,6 +94,7 @@ If the user only wants static Instagram carousel cards, use `auto-card-news` ins
    - Create a scene-by-scene plan with timestamp, line, visual, motion idea, engine, and viewer reason.
    - Keep most scenes short, usually 2-6 seconds.
    - Avoid slideshow pacing. Something meaningful should change every few seconds.
+   - Run the retention marketing check from `references/humanized-video-marketing.md` so every scene has a viewer reason and a visual change.
 
 7. **Choose motion engine**
    - Prefer HyperFrames for short HTML/CSS/GSAP motion: big subtitles, typing, panels, chips, UI callouts, cursor paths, screenshot zooms.
@@ -131,6 +146,7 @@ Use `scripts/init_motion_project.py` to scaffold this structure when helpful.
 ## Reference Loading
 
 - Read `references/video-workflow.md` when converting an input into a short-form script and scene plan.
+- Read `references/humanized-video-marketing.md` when polishing scripts, captions, CTAs, retention beats, or product/ad-style videos.
 - Read `references/media-research-and-rights.md` before searching, using, recreating, or attributing visual references.
 - Read `references/motion-engine-selection.md` before deciding HyperFrames, Remotion, video-use, or static fallback.
 - Use `auto-card-news` when the job starts as a carousel and the user also wants static PNG cards.
@@ -145,7 +161,7 @@ A motion-news project is complete only when:
 - Script, scene plan, source pack, motion plan, and caption are saved.
 - Visual sources are recorded with direct-use, recreate, or reference-only notes.
 - Each scene has a viewer reason and motion reason.
+- Script, scene plan, caption, and CTA pass the Humanizer, Marketing, and ad/conversion checks when applicable.
 - The engine choice is recorded per scene.
 - Preview motion has been reviewed when MP4 is requested.
 - Final files match the approved output plan.
-

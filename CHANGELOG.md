@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1
+
+- Added Humanizer-style copy review for carousel cards, captions, scripts, and CTAs.
+- Added marketing checks for hooks, viewer promise, proof, save/comment/share reasons, and retention beats.
+- Added optional ad/conversion mode for product, campaign, lead magnet, and PitchCheck marketing content.
+- Added reference guides for humanized carousel copy and humanized motion-video marketing.
+
 ## 0.4.0
 
 - Added the new `auto-motion-news` skill for turning scripts, card-news projects, source links, or notes into short-form motion-video plans.

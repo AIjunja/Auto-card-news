@@ -28,3 +28,12 @@
 - Do not simply read card-news text aloud.
 - Keep the first two seconds sharp.
 
+## Humanizer And Marketing QA
+
+- Spoken humanizer notes: {humanizer_notes}
+- Viewer promise: {viewer_promise}
+- Proof / example used: {proof}
+- Retention risk fixed: {retention_risk}
+- CTA: {cta}
+- Ad/conversion mode active?: {ad_conversion_mode}
+- Offer / objection / destination if active: {offer_objection_destination}

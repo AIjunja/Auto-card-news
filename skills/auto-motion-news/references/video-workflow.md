@@ -77,6 +77,19 @@ Avoid:
 - Unverified hype
 - Reading captions as narration
 
+## Humanized Marketing Review
+
+Before script approval, read `references/humanized-video-marketing.md` and revise the script until these are true:
+
+- The first two seconds name a viewer problem, visual shock, useful promise, or urgent check.
+- Every scene has a reason to keep watching.
+- A claim is backed by a visual proof, source, example, checklist, or before/after.
+- The CTA asks for one action only.
+- Product or PitchCheck videos define the offer, audience, proof, objection, CTA, and destination.
+- The caption helps viewers verify or try the source instead of repeating the whole script.
+
+If the script still sounds like a caption paragraph being read aloud, rewrite it before motion work.
+
 ## Approval Flow
 
 Show the script and scene plan first. Do not jump straight to final render.
@@ -88,4 +101,3 @@ After script approval:
 3. Verify readable text and scene rhythm.
 4. Ask for motion approval.
 5. Render final MP4.
-

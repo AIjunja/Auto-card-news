@@ -48,6 +48,9 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "orphaned word",
             "Media Bottom Labels",
             "Spacing Relationship QA",
+            "Humanized Marketing Rule",
+            "Humanizer",
+            "ad/conversion mode",
             "HyperFrames",
             "Remotion",
             "HTML/CSS preview",
@@ -83,6 +86,7 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         references = [
             "references/channel-profiles.md",
             "references/project-workflow.md",
+            "references/humanized-marketing-copy.md",
             "references/design-and-references.md",
             "references/rendering-and-motion.md",
         ]
@@ -99,7 +103,7 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "profile.md": ["# {channel_name}", "Audience", "Tone", "CTA", "Avoid"],
             "design.md": ["# {channel_name} Design", "Typography", "Media Treatment", "Card-News Rhythm", "Motion", "No short word is stranded alone", "Media label chips sit in the lower safe zone", "Check spacing between chips, section badges, and headline"],
             "brief.md": ["# {project_name} Brief", "Viewer Frame", "Ratio", "Source Summary", "Media References"],
-            "storyboard.md": ["# {project_name} Storyboard", "Engagement Frame", "Viewer Trigger", "Output Type", "Line Break Plan"],
+            "storyboard.md": ["# {project_name} Storyboard", "Engagement Frame", "Viewer Trigger", "Output Type", "Line Break Plan", "Humanizer And Marketing QA"],
             "motion-plan.md": ["# {project_name} Motion Plan", "Video / Motion References", "Motion Cards", "Duration", "Format"],
             "source-pack.md": ["# {project_name} Source Pack", "Source Candidates", "Media Candidates", "Recommended Angle"],
         }
@@ -170,8 +174,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.4.0")
-        self.assertIn("0.4.0", read_text(changelog))
+        self.assertEqual(read_text(version).strip(), "0.4.1")
+        self.assertIn("0.4.1", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
@@ -188,6 +192,9 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "line-break QA",
             "lower safe zone",
             "spacing relationship",
+            "Humanizer",
+            "marketing checks",
+            "ad/conversion mode",
             "HyperFrames-first",
             "install.ps1",
             "install.sh",
@@ -235,6 +242,9 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
             "last30days",
             "Do not automatically upload",
             "Approval gate",
+            "Humanized Marketing Rule",
+            "Humanizer",
+            "ad/conversion mode",
             "scene-plan.md",
             "source-pack.md",
             "motion-plan.md",
@@ -247,6 +257,7 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
         skill_text = read_text(MOTION_SKILL_MD)
         references = [
             "references/video-workflow.md",
+            "references/humanized-video-marketing.md",
             "references/media-research-and-rights.md",
             "references/motion-engine-selection.md",
         ]
@@ -260,11 +271,11 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
 
     def test_motion_templates_exist_and_contain_required_sections(self):
         expected = {
-            "script.md": ["# {project_name} Script", "Hook", "Script"],
+            "script.md": ["# {project_name} Script", "Hook", "Script", "Humanizer And Marketing QA"],
             "scene-plan.md": ["# {project_name} Scene Plan", "Retention Frame", "Scenes", "Engine"],
             "source-pack.md": ["# {project_name} Source Pack", "Research Sources", "Media Candidates", "Use Type"],
             "motion-plan.md": ["# {project_name} Motion Plan", "Engine Summary", "Motion Scenes", "HyperFrames", "Remotion"],
-            "caption.md": ["# {project_name} Caption", "Caption Draft", "Source Links", "Contents Editor"],
+            "caption.md": ["# {project_name} Caption", "Caption Draft", "Source Links", "Contents Editor", "Humanizer And Marketing QA"],
             "design.md": ["# {project_name} Motion Design", "Format", "Visual System", "Scene Components", "Avoid"],
         }
 

@@ -27,6 +27,18 @@ Also include direct links that help viewers verify or use the source. If the pos
 
 Prefer one or two high-signal links over a long source dump.
 
+## Humanized Marketing Rule
+
+Every carousel must pass a humanized marketing review before HTML/CSS preview and again before final caption approval. Use this as a quality gate, not an optional polish step.
+
+- Remove AI-sounding filler, stiff summaries, and vague benefit words.
+- Translate jargon into viewer language before it reaches the card.
+- Check the hook, promise, proof, save/comment/share reason, and CTA.
+- For product, app, campaign, launch, lead magnet, or PitchCheck promotion, activate ad/conversion mode and define the offer, audience, proof, objection, CTA, and destination.
+- Keep channel personality, such as a friendly tutor voice for AIjjuun, but do not let cuteness weaken clarity or trust.
+
+Read `references/humanized-marketing-copy.md` when drafting or revising copy, captions, CTAs, promotional angles, or any post that feels too PPT-like or AI-written.
+
 ## Engagement-First Rule
 
 Do not make PPT-like briefing slides. A carousel must start from the viewer's concrete situation, pain, desire, or curiosity. The source is supporting evidence, not the opening frame.
@@ -108,6 +120,8 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
    - Keep each card to one clear job: stop, identify, explain, prove, make useful, interpret, or prompt action.
    - Use human, plain-language copy. Avoid vague phrases such as "체감 이득" unless immediately rewritten as "뭐가 덜 귀찮아지는지 / 뭐가 빨라지는지 / 뭐가 쉬워지는지."
    - Use channel viewpoint labels such as `<채널명> 관점` or `<채널명> 해석`. Avoid awkward labels like `<채널명>식 해석` unless the user prefers it.
+   - Run the Humanizer and Marketing checks from `references/humanized-marketing-copy.md` before asking for copy approval.
+   - If the post is promotional, run ad/conversion mode before writing the CTA.
    - Treat this as first-pass approval, not final approval.
    - Create a text wireframe before HTML/CSS.
 
@@ -129,6 +143,7 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
    - For media-led cards, place small label chips in the lower safe zone instead of over the important visual proof.
    - Check spacing between chips, section badges, and headline; adjust per card instead of forcing one saved position everywhere.
    - Run line-break QA on rendered previews: no awkward wraps, no lonely short words, no clipped text, and no heading that reads unlike natural speech.
+   - Run the humanized marketing review again after layout changes because a line that worked in text may sound stiff or cramped once placed on the card.
    - Run the PPT smell check from `references/project-workflow.md` before final render.
    - Render final files only after approval.
 
@@ -170,6 +185,7 @@ Use `scripts/init_project.py` to scaffold this structure when helpful.
 
 - Read `references/channel-profiles.md` when creating, analyzing, or updating a channel profile.
 - Read `references/project-workflow.md` when turning source material into viewer frames, angles, copy, and storyboard.
+- Read `references/humanized-marketing-copy.md` when polishing card copy, captions, CTAs, ad/conversion angles, or AI-sounding drafts.
 - Read `references/design-and-references.md` before writing `design.md`, `channel.css`, or card layouts.
 - Read `references/rendering-and-motion.md` before deciding PNG vs MP4 or producing final exports.
 - Use `last30days` when fresh source discovery is needed before carousel production.
@@ -181,6 +197,7 @@ A carousel project is complete only when:
 - The active channel is explicit.
 - Source, viewer frame, brief, storyboard, and motion plan are saved when applicable.
 - Each card has a clear viewer reason to swipe, save, comment, or share.
+- Copy, caption, and CTA pass the Humanizer, Marketing, and ad/conversion checks when applicable.
 - HTML/CSS preview has been reviewed.
 - Rendered previews pass line-break QA with no orphaned words or awkward phrase splits.
 - Final output files match the approved card-level export plan.

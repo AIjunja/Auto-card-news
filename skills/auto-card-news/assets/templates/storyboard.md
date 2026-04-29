@@ -29,6 +29,17 @@
 - Card 6 adds the channel viewpoint using `<채널명> 관점` or `<채널명> 해석`.
 - Card 7 gives a specific save, comment, share, or try reason.
 
+## Humanizer And Marketing QA
+
+- AI-sounding phrases removed: {humanizer_notes}
+- Concrete viewer promise: {viewer_promise}
+- Proof used: {proof}
+- Save reason: {save_reason}
+- Comment/share reason: {comment_share_reason}
+- CTA: {cta}
+- Ad/conversion mode active?: {ad_conversion_mode}
+- Offer / objection / destination if active: {offer_objection_destination}
+
 ## Revision Notes
 
 - {revision_note}

@@ -105,6 +105,21 @@ Good user edits should be easy to make by card number:
 
 Keep copy tight. Prefer one main sentence and one support line per card. If a card needs more than three short lines, split it or replace some text with a visual example.
 
+## Humanized Marketing Review
+
+Before asking for copy approval, run the review in `references/humanized-marketing-copy.md`.
+
+The review must answer:
+
+- Does the hook sound like one real person talking to one real viewer?
+- Does the post sell a concrete reason to care, not just a feature?
+- Is every technical term translated into normal viewer language?
+- Is there visible proof, not just a claim?
+- Is there a save, comment, share, or try reason?
+- If this is product or PitchCheck marketing, is the offer, audience, proof, objection, CTA, and destination clear?
+
+Rewrite before design if the draft still sounds like a press release, internal product note, or AI-generated summary.
+
 ## Line Break QA
 
 Before final HTML/CSS approval, inspect rendered cards for awkward line breaks. A headline should read like a person would say it out loud.
@@ -126,6 +141,8 @@ Before HTML/CSS preview, fix the carousel if any of these are true:
 - Visuals are thumbnails or decoration instead of proof.
 - Technical words appear without plain-language translation.
 - Every card uses the same layout rhythm.
+- The CTA asks for attention without giving a clear reason to save, comment, share, click, or try.
+- Promotional posts do not explain the offer, proof, objection, and next action.
 
 ## Review Stages
 

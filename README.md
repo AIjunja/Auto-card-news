@@ -1,6 +1,6 @@
 # Auto-card-news Skills
 
-Version: `0.4.0`
+Version: `0.4.1`
 
 This repository ships Codex skills for making channel-aware card news, Instagram carousel content, and short-form motion-video packages through conversation.
 
@@ -23,6 +23,9 @@ Included skills:
 - one-HTML-file-per-card previews
 - media-led design with readable dim, blur, and gradient treatments
 - line-break QA so headings do not leave awkward orphan words alone
+- Humanizer-style copy review to remove AI-sounding phrasing and stiff summaries
+- marketing checks for hook, promise, proof, save/comment/share reason, and CTA
+- optional ad/conversion mode for product, app, campaign, lead magnet, and PitchCheck marketing posts
 - lower safe zone placement for media label chips over screenshots and demo videos
 - spacing relationship checks between chips, badges, and headlines
 - card-by-card static PNG or motion MP4 planning
@@ -36,6 +39,9 @@ Included skills:
 - card-news-to-motion conversion
 - source-to-short-video planning
 - visual reference research with usage notes and attribution
+- spoken Humanizer review for scripts and captions
+- retention marketing checks for first 2-second hook, proof, scene reason, and CTA
+- optional ad/conversion planning for product or PitchCheck videos
 - HyperFrames-first motion planning with Remotion as the complex-video fallback
 - reusable `script.md`, `scene-plan.md`, `source-pack.md`, `motion-plan.md`, `caption.md`, and `design.md` files
 
@@ -132,6 +138,8 @@ Use the research output as source material. `auto-card-news` will turn it into a
 
 The current workflow is engagement-first. It should avoid PPT-like briefing slides by defining who will stop scrolling, what they care about, what becomes easier or clearer, and why they would save, comment, share, or keep swiping. For visual topics, it should also look for media references such as official demos, screenshots, product pages, creator walkthroughs, or video clips before finalizing the storyboard. Before final export, it should run line-break QA so short words, particles, or endings do not sit alone on their own line. Media label chips should sit in the lower safe zone so they do not cover the important screenshot or demo proof, then pass a spacing relationship check against nearby badges and headlines.
 
+The copy workflow now includes a Humanizer and marketing review inspired by public marketing/copywriting skill repos. It checks whether the copy sounds like a real channel editor, whether the post gives a concrete reason to care, and whether captions include useful source or try-it links. Product and PitchCheck content can also run ad/conversion mode for offer, proof, objection, CTA, and destination planning.
+
 For short-form video, call:
 
 ```text
@@ -139,6 +147,8 @@ $auto-motion-news
 ```
 
 Then provide a script, card-news project path, pasted card copy, source URL, report, or notes. The skill will create a retention frame, video script, scene plan, media/source pack, HyperFrames or Remotion motion plan, caption, and MP4 render plan.
+
+Motion scripts also run a spoken Humanizer pass so they do not sound like caption paragraphs read aloud. For product or campaign videos, the skill adds marketing/ad checks before preview motion.
 
 ## Repository Layout
 
