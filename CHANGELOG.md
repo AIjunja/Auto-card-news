@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3
+
+- Added spacing relationship QA for media label chips, section badges, and headlines.
+- Clarified that shared label positions are defaults and should be adjusted per card when elements feel crowded.
+
 ## 0.3.2
 
 - Added media bottom label guidance so small chips sit in the lower safe zone of screenshot and demo cards.

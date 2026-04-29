@@ -44,6 +44,14 @@ For cards with a large screenshot, demo video, or tool UI plus small label chips
 - Put supporting chips such as `장면 확인`, `스크립트 생성`, `반복 수정`, `사진 보정`, or `SNS 이미지` near the media-frame bottom.
 - Use this as the default for similar media-led cards unless the visual needs a different callout position.
 
+## Spacing Relationship QA
+
+Do not copy a saved position blindly. After applying a reusable layout rule, check the spacing relationship between chips, section badges, and the first headline line.
+
+- If chips feel crowded against a section badge such as `Adobe 예시` or `Blender 예시`, move the chips slightly within the media gradient or move the badge into the copy block.
+- If the headline is tall or three lines, leave more breathing room between the badge and chips.
+- Prefer a visually balanced relationship over identical pixel positions across different cards.
+
 ## Required Workflow
 
 1. **Confirm channel context**
@@ -104,6 +112,7 @@ For cards with a large screenshot, demo video, or tool UI plus small label chips
    - Review content, layout, spacing, rhythm, visual proof, and design with the user.
    - If using external images or video references, make them large enough to carry the card and protect text readability with dimming, blur, and gradient transitions.
    - For media-led cards, place small label chips in the lower safe zone instead of over the important visual proof.
+   - Check spacing between chips, section badges, and headline; adjust per card instead of forcing one saved position everywhere.
    - Run line-break QA on rendered previews: no awkward wraps, no lonely short words, no clipped text, and no heading that reads unlike natural speech.
    - Run the PPT smell check from `references/project-workflow.md` before final render.
    - Render final files only after approval.

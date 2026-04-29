@@ -45,6 +45,7 @@
 - Text remains readable on mobile.
 - No short word is stranded alone after rendering.
 - Media label chips sit in the lower safe zone and avoid important visual proof.
+- Check spacing between chips, section badges, and headline before approving.
 - Important hierarchy is visible in the first second.
 - The first card names a viewer, situation, or curiosity.
 - Each card has one main job and one main message.

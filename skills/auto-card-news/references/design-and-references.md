@@ -39,6 +39,14 @@ When a card uses a large screenshot, product demo, or tool UI with small support
 
 Use this for chips such as `장면 확인`, `스크립트 생성`, `반복 수정`, `사진 보정`, `SNS 이미지`, and `영상 사이즈`. Keep section badges such as `Blender 예시` or `Adobe 예시` near the copy block unless the card has a deliberate reason to attach the badge to the media.
 
+## Spacing Relationship QA
+
+Shared layout positions are defaults, not locks. After placing labels, judge the relationship between chips, section badges, and the first headline line.
+
+- If a section badge is higher than usual, raise the chips slightly or move the badge down into the copy block.
+- If the headline takes three lines, give the badge and chips extra breathing room.
+- If chips, badge, and headline visually clump together, separate one element even when it breaks the shared position.
+
 ## Layout Rhythm
 
 Vary the rhythm across cards:
@@ -118,6 +126,7 @@ Before rendering final assets, check:
 - Headline line breaks preserve natural phrase chunks.
 - No short word is stranded alone unless it is a deliberate emphasis choice.
 - Media label chips sit in the lower safe zone and do not cover important proof.
+- Check spacing between chips, section badges, and headline before approving.
 - The first card names the viewer, situation, or curiosity clearly.
 - Each card has one main job.
 - Visuals prove or dramatize the message instead of decorating it.
