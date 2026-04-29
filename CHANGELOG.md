@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+- Added the new `auto-motion-news` skill for turning scripts, card-news projects, source links, or notes into short-form motion-video plans.
+- Added motion-video templates, scene planning, source-pack, caption, design, and project scaffolding support.
+- Updated installers and README so GitHub installs include `auto-card-news`, `auto-motion-news`, and `last30days`.
+
 ## 0.3.4
 
 - Added HyperFrames-first motion guidance for short HTML/CSS/GSAP card animations.

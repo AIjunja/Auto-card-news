@@ -76,16 +76,19 @@ if command -v git >/dev/null 2>&1; then
   git clone --depth 1 "$last30days_repo_url" "$last30days_clone_path" >/dev/null
 
   auto_card_news_source_dir="$auto_card_news_clone_path/skills/auto-card-news"
+  auto_motion_news_source_dir="$auto_card_news_clone_path/skills/auto-motion-news"
   last30days_source_dir="$last30days_clone_path/$last30days_skill_path"
 else
   auto_card_news_repo_root="$(extract_zip_root "$auto_card_news_repo_zip" "$auto_card_news_zip_path" "$auto_card_news_extract_path")"
   last30days_repo_root="$(extract_zip_root "$last30days_repo_zip" "$last30days_zip_path" "$last30days_extract_path")"
 
   auto_card_news_source_dir="$auto_card_news_repo_root/skills/auto-card-news"
+  auto_motion_news_source_dir="$auto_card_news_repo_root/skills/auto-motion-news"
   last30days_source_dir="$last30days_repo_root/$last30days_skill_path"
 fi
 
 install_skill "$auto_card_news_source_dir" "auto-card-news"
+install_skill "$auto_motion_news_source_dir" "auto-motion-news"
 install_skill "$last30days_source_dir" "last30days"
 
 echo "Restart Codex to pick up new skills."

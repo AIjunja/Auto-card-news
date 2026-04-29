@@ -9,6 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_DIR = ROOT / "skills" / "auto-card-news"
 SKILL_MD = SKILL_DIR / "SKILL.md"
+MOTION_SKILL_DIR = ROOT / "skills" / "auto-motion-news"
+MOTION_SKILL_MD = MOTION_SKILL_DIR / "SKILL.md"
 
 
 def read_text(path: Path) -> str:
@@ -168,14 +170,16 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.3.4")
-        self.assertIn("0.3.4", read_text(changelog))
+        self.assertEqual(read_text(version).strip(), "0.4.0")
+        self.assertIn("0.4.0", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
             "auto-card-news",
+            "auto-motion-news",
             "last30days",
             "https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news",
+            "https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-motion-news",
             "https://github.com/mvanhorn/last30days-skill",
             "https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days",
             "One-Line Install",
@@ -188,21 +192,134 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "install.ps1",
             "install.sh",
             "$auto-card-news",
+            "$auto-motion-news",
             "Restart Codex",
         ]
         for phrase in required_phrases:
             self.assertIn(phrase, text)
 
         self.assertIn("auto-card-news", read_text(install_ps1))
+        self.assertIn("auto-motion-news", read_text(install_ps1))
         self.assertIn("last30days", read_text(install_ps1))
         self.assertIn("https://github.com/mvanhorn/last30days-skill.git", read_text(install_ps1))
         self.assertIn("skills/last30days", read_text(install_ps1))
         self.assertNotIn("ai-source-scout", read_text(install_ps1))
         self.assertIn("auto-card-news", read_text(install_sh))
+        self.assertIn("auto-motion-news", read_text(install_sh))
         self.assertIn("last30days", read_text(install_sh))
         self.assertIn("https://github.com/mvanhorn/last30days-skill.git", read_text(install_sh))
         self.assertIn("skills/last30days", read_text(install_sh))
         self.assertNotIn("ai-source-scout", read_text(install_sh))
+
+
+class AutoMotionNewsSkillTest(unittest.TestCase):
+    def test_motion_skill_frontmatter_and_core_workflow(self):
+        text = read_text(MOTION_SKILL_MD)
+        frontmatter = parse_frontmatter(text)
+
+        self.assertEqual(frontmatter["name"], "auto-motion-news")
+        description = frontmatter["description"].lower()
+        self.assertIn("script", description)
+        self.assertIn("motion", description)
+        self.assertIn("mp4", description)
+
+        required_phrases = [
+            "Korean",
+            "Script to Motion",
+            "Card News to Script",
+            "Card News to Motion",
+            "Source to Video Package",
+            "HyperFrames",
+            "Remotion",
+            "video-use",
+            "last30days",
+            "Do not automatically upload",
+            "Approval gate",
+            "scene-plan.md",
+            "source-pack.md",
+            "motion-plan.md",
+            "caption.md",
+        ]
+        for phrase in required_phrases:
+            self.assertIn(phrase, text)
+
+    def test_motion_references_exist_and_are_linked_from_skill(self):
+        skill_text = read_text(MOTION_SKILL_MD)
+        references = [
+            "references/video-workflow.md",
+            "references/media-research-and-rights.md",
+            "references/motion-engine-selection.md",
+        ]
+
+        for reference in references:
+            self.assertIn(reference, skill_text)
+            path = MOTION_SKILL_DIR / reference
+            self.assertTrue(path.exists(), f"Missing reference: {reference}")
+            text = read_text(path)
+            self.assertGreater(len(text.strip()), 500, f"Reference too thin: {reference}")
+
+    def test_motion_templates_exist_and_contain_required_sections(self):
+        expected = {
+            "script.md": ["# {project_name} Script", "Hook", "Script"],
+            "scene-plan.md": ["# {project_name} Scene Plan", "Retention Frame", "Scenes", "Engine"],
+            "source-pack.md": ["# {project_name} Source Pack", "Research Sources", "Media Candidates", "Use Type"],
+            "motion-plan.md": ["# {project_name} Motion Plan", "Engine Summary", "Motion Scenes", "HyperFrames", "Remotion"],
+            "caption.md": ["# {project_name} Caption", "Caption Draft", "Source Links", "Contents Editor"],
+            "design.md": ["# {project_name} Motion Design", "Format", "Visual System", "Scene Components", "Avoid"],
+        }
+
+        for filename, sections in expected.items():
+            path = MOTION_SKILL_DIR / "assets" / "templates" / filename
+            self.assertTrue(path.exists(), f"Missing template: {filename}")
+            text = read_text(path)
+            for section in sections:
+                self.assertIn(section, text, f"{filename} missing {section}")
+
+    def test_init_motion_project_script_scaffolds_expected_files(self):
+        script = MOTION_SKILL_DIR / "scripts" / "init_motion_project.py"
+        self.assertTrue(script.exists())
+
+        temp_path = ROOT / ".test-tmp" / "auto-motion-news"
+        if temp_path.exists():
+            shutil.rmtree(temp_path)
+        try:
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(script),
+                    "--root",
+                    str(temp_path),
+                    "--channel",
+                    "ai-jjuun",
+                    "--project",
+                    "2026-04-30-test-video",
+                ],
+                cwd=ROOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            project = temp_path / "carousel-workspace" / "motion-projects" / "ai-jjuun" / "2026-04-30-test-video"
+            expected_paths = [
+                project / "source.md",
+                project / "script.md",
+                project / "scene-plan.md",
+                project / "source-pack.md",
+                project / "motion-plan.md",
+                project / "caption.md",
+                project / "design.md",
+                project / "assets",
+                project / "scenes",
+                project / "output",
+            ]
+
+            for path in expected_paths:
+                self.assertTrue(path.exists(), f"Missing scaffold path: {path}")
+        finally:
+            if temp_path.exists():
+                shutil.rmtree(temp_path)
 
 
 if __name__ == "__main__":

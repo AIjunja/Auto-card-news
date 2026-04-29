@@ -66,17 +66,22 @@ try {
         git clone --depth 1 $autoCardNewsRepoUrl $autoCardNewsClonePath | Out-Null
         git clone --depth 1 $last30DaysRepoUrl $last30DaysClonePath | Out-Null
 
-        $autoCardNewsSkillSource = Join-Path (Join-Path $autoCardNewsClonePath "skills") "auto-card-news"
+        $autoCardNewsSkillsRoot = Join-Path $autoCardNewsClonePath "skills"
+        $autoCardNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-card-news"
+        $autoMotionNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-motion-news"
         $last30DaysSkillSource = Join-Path $last30DaysClonePath $last30DaysSkillPath
     } else {
         $autoCardNewsRepoRoot = Get-ZipRoot -Uri $autoCardNewsRepoZip -ZipPath $autoCardNewsZipPath -ExtractPath $autoCardNewsExtractPath
         $last30DaysRepoRoot = Get-ZipRoot -Uri $last30DaysRepoZip -ZipPath $last30DaysZipPath -ExtractPath $last30DaysExtractPath
 
-        $autoCardNewsSkillSource = Join-Path (Join-Path $autoCardNewsRepoRoot "skills") "auto-card-news"
+        $autoCardNewsSkillsRoot = Join-Path $autoCardNewsRepoRoot "skills"
+        $autoCardNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-card-news"
+        $autoMotionNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-motion-news"
         $last30DaysSkillSource = Join-Path $last30DaysRepoRoot $last30DaysSkillPath
     }
 
     Install-SkillFromPath -Source $autoCardNewsSkillSource -SkillName "auto-card-news"
+    Install-SkillFromPath -Source $autoMotionNewsSkillSource -SkillName "auto-motion-news"
     Install-SkillFromPath -Source $last30DaysSkillSource -SkillName "last30days"
 
     Write-Host "Restart Codex to pick up new skills."
