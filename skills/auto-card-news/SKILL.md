@@ -36,6 +36,14 @@ Treat line breaks as part of the copy, not decoration. Do not leave an orphaned 
 - Add manual `<br>` only after deciding the spoken phrase grouping.
 - When a font changes, render again and re-check all headings because glyph width can change the line breaks.
 
+## Media Bottom Labels
+
+For cards with a large screenshot, demo video, or tool UI plus small label chips, place the chips in the lower safe zone of the media frame, over the dark gradient area near the bottom. Do not cover the main subject, cursor, UI state, or proof area with label chips.
+
+- Keep the category badge such as `Blender 예시` or `Adobe 예시` near the copy block if that card uses it as the section label.
+- Put supporting chips such as `장면 확인`, `스크립트 생성`, `반복 수정`, `사진 보정`, or `SNS 이미지` near the media-frame bottom.
+- Use this as the default for similar media-led cards unless the visual needs a different callout position.
+
 ## Required Workflow
 
 1. **Confirm channel context**
@@ -95,6 +103,7 @@ Treat line breaks as part of the copy, not decoration. Do not leave an orphaned 
    - Build one HTML file per card, plus an index preview when useful.
    - Review content, layout, spacing, rhythm, visual proof, and design with the user.
    - If using external images or video references, make them large enough to carry the card and protect text readability with dimming, blur, and gradient transitions.
+   - For media-led cards, place small label chips in the lower safe zone instead of over the important visual proof.
    - Run line-break QA on rendered previews: no awkward wraps, no lonely short words, no clipped text, and no heading that reads unlike natural speech.
    - Run the PPT smell check from `references/project-workflow.md` before final render.
    - Render final files only after approval.

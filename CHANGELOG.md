@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.2
+
+- Added media bottom label guidance so small chips sit in the lower safe zone of screenshot and demo cards.
+- Updated design review checks to keep label chips from covering important visual proof.
+
 ## 0.3.1
 
 - Added line-break QA guidance so headings keep natural Korean phrase chunks together.

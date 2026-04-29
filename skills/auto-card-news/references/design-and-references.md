@@ -33,6 +33,12 @@ When using searched images, screenshots, or video frames:
 
 For first cards, consider motion if a short demo loop, zoom-in, cursor movement, reveal, or before/after will stop scrolling better than a static cover.
 
+## Media Bottom Label Chips
+
+When a card uses a large screenshot, product demo, or tool UI with small supporting labels, put those chips in the lower safe zone of the media frame, over the dark gradient area. This keeps the visual proof readable while still giving the viewer quick anchors.
+
+Use this for chips such as `장면 확인`, `스크립트 생성`, `반복 수정`, `사진 보정`, `SNS 이미지`, and `영상 사이즈`. Keep section badges such as `Blender 예시` or `Adobe 예시` near the copy block unless the card has a deliberate reason to attach the badge to the media.
+
 ## Layout Rhythm
 
 Vary the rhythm across cards:
@@ -111,6 +117,7 @@ Before rendering final assets, check:
 - Important text is visible at mobile size.
 - Headline line breaks preserve natural phrase chunks.
 - No short word is stranded alone unless it is a deliberate emphasis choice.
+- Media label chips sit in the lower safe zone and do not cover important proof.
 - The first card names the viewer, situation, or curiosity clearly.
 - Each card has one main job.
 - Visuals prove or dramatize the message instead of decorating it.
