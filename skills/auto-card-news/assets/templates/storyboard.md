@@ -13,6 +13,12 @@
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Stop hook | {viewer_trigger} | {headline} | {body} | {visual_direction} | {motion_recommendation} | {output_type} |
 
+## Line Break Plan
+
+- Headline chunks that must stay together: {headline_keep_together}
+- Manual line breaks to test in rendered HTML: {manual_line_breaks}
+- Words that must not be stranded alone: {no_orphan_words}
+
 ## Card Role Checklist
 
 - Card 1 stops scrolling by naming the viewer, situation, or curiosity.

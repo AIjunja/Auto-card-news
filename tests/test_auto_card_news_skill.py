@@ -42,6 +42,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "channel profile",
             "Engagement-First",
             "Search media references",
+            "Line Break QA",
+            "orphaned word",
             "HTML/CSS preview",
             "PNG",
             "MP4",
@@ -89,9 +91,9 @@ class AutoCardNewsSkillTest(unittest.TestCase):
     def test_templates_exist_and_contain_required_sections(self):
         expected = {
             "profile.md": ["# {channel_name}", "Audience", "Tone", "CTA", "Avoid"],
-            "design.md": ["# {channel_name} Design", "Typography", "Media Treatment", "Card-News Rhythm", "Motion"],
+            "design.md": ["# {channel_name} Design", "Typography", "Media Treatment", "Card-News Rhythm", "Motion", "No short word is stranded alone"],
             "brief.md": ["# {project_name} Brief", "Viewer Frame", "Ratio", "Source Summary", "Media References"],
-            "storyboard.md": ["# {project_name} Storyboard", "Engagement Frame", "Viewer Trigger", "Output Type"],
+            "storyboard.md": ["# {project_name} Storyboard", "Engagement Frame", "Viewer Trigger", "Output Type", "Line Break Plan"],
             "motion-plan.md": ["# {project_name} Motion Plan", "Video / Motion References", "Motion Cards", "Duration", "Format"],
             "source-pack.md": ["# {project_name} Source Pack", "Source Candidates", "Media Candidates", "Recommended Angle"],
         }
@@ -162,8 +164,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.3.0")
-        self.assertIn("0.3.0", read_text(changelog))
+        self.assertEqual(read_text(version).strip(), "0.3.1")
+        self.assertIn("0.3.1", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
@@ -175,6 +177,7 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "One-Line Install",
             "engagement-first",
             "video reference",
+            "line-break QA",
             "install.ps1",
             "install.sh",
             "$auto-card-news",

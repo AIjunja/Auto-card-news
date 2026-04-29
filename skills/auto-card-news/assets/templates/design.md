@@ -43,6 +43,7 @@
 ## Design Review Checklist
 
 - Text remains readable on mobile.
+- No short word is stranded alone after rendering.
 - Important hierarchy is visible in the first second.
 - The first card names a viewer, situation, or curiosity.
 - Each card has one main job and one main message.

@@ -109,6 +109,8 @@ Before rendering final assets, check:
 
 - Text fits inside each card.
 - Important text is visible at mobile size.
+- Headline line breaks preserve natural phrase chunks.
+- No short word is stranded alone unless it is a deliberate emphasis choice.
 - The first card names the viewer, situation, or curiosity clearly.
 - Each card has one main job.
 - Visuals prove or dramatize the message instead of decorating it.

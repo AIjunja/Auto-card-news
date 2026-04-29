@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1
+
+- Added line-break QA guidance so headings keep natural Korean phrase chunks together.
+- Updated design and storyboard templates to catch orphaned words before final PNG/MP4 render.
+
 ## 0.3.0
 
 - Reworked the skill around an engagement-first carousel workflow so posts start from viewer situation, curiosity, pain, and action reason instead of source-summary slides.

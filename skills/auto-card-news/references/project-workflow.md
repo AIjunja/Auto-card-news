@@ -105,6 +105,15 @@ Good user edits should be easy to make by card number:
 
 Keep copy tight. Prefer one main sentence and one support line per card. If a card needs more than three short lines, split it or replace some text with a visual example.
 
+## Line Break QA
+
+Before final HTML/CSS approval, inspect rendered cards for awkward line breaks. A headline should read like a person would say it out loud.
+
+- Do not strand a short Korean word, particle, or ending on its own line unless that isolation is the intended joke or punch.
+- Keep noun phrases and audience labels together: `AI 따로 쓰는 분들`, `포토샵 쓰는 디자이너`, `내 작업에 붙이는 AI`.
+- If a manual `<br>` is used, write the intended line grouping in the storyboard first.
+- After changing fonts, weights, card width, or copy length, rerender and inspect again.
+
 ## PPT Smell Check
 
 Before HTML/CSS preview, fix the carousel if any of these are true:
@@ -126,7 +135,7 @@ Use these stages in order:
 2. Copy review for message and flow
 3. Media reference review for images, video, demos, screenshots, and attribution
 4. Text wireframe review for hierarchy
-5. HTML/CSS preview review for actual layout
+5. HTML/CSS preview review for actual layout and line-break QA
 6. Motion preview review for MP4 cards when applicable
 7. Final render approval for PNG and MP4
 

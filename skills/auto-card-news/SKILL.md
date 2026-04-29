@@ -28,6 +28,14 @@ Before writing copy, define:
 
 If those answers are vague, fix the angle before designing.
 
+## Line Break QA
+
+Treat line breaks as part of the copy, not decoration. Do not leave an orphaned word, particle, or short ending alone on its own line unless the card is intentionally designed around that emphasis.
+
+- Keep meaning chunks together: `AI 따로 쓰는 분들`, not `AI 따로 쓰는 / 분들`.
+- Add manual `<br>` only after deciding the spoken phrase grouping.
+- When a font changes, render again and re-check all headings because glyph width can change the line breaks.
+
 ## Required Workflow
 
 1. **Confirm channel context**
@@ -87,6 +95,7 @@ If those answers are vague, fix the angle before designing.
    - Build one HTML file per card, plus an index preview when useful.
    - Review content, layout, spacing, rhythm, visual proof, and design with the user.
    - If using external images or video references, make them large enough to carry the card and protect text readability with dimming, blur, and gradient transitions.
+   - Run line-break QA on rendered previews: no awkward wraps, no lonely short words, no clipped text, and no heading that reads unlike natural speech.
    - Run the PPT smell check from `references/project-workflow.md` before final render.
    - Render final files only after approval.
 
@@ -139,5 +148,6 @@ A carousel project is complete only when:
 - Source, viewer frame, brief, storyboard, and motion plan are saved when applicable.
 - Each card has a clear viewer reason to swipe, save, comment, or share.
 - HTML/CSS preview has been reviewed.
+- Rendered previews pass line-break QA with no orphaned words or awkward phrase splits.
 - Final output files match the approved card-level export plan.
 - The user has a mixed output package such as `card-01.png`, `card-02.mp4`, `card-03.png`.
