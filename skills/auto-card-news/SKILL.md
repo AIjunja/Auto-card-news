@@ -9,11 +9,24 @@ Use this skill when the user wants to create a carousel, card-news post, Instagr
 
 ## Operating Language
 
-Ask and explain in 한국어 by default. Use another language only when the user requests it or the source material requires it.
+Ask and explain in Korean by default. Use another language only when the user requests it or the source material requires it.
 
 ## Core Rule
 
-This is a conversation-driven production workflow, not a SaaS app and not an upload automation. Do not automatically upload to Instagram or any social platform. In Korean: 업로드하지 않는다.
+This is a conversation-driven production workflow, not a SaaS app and not upload automation. Do not automatically upload to Instagram or any social platform.
+
+## Engagement-First Rule
+
+Do not make PPT-like briefing slides. A carousel must start from the viewer's concrete situation, pain, desire, or curiosity. The source is supporting evidence, not the opening frame.
+
+Before writing copy, define:
+
+- Who will stop scrolling for this?
+- What are they already frustrated by, curious about, or trying to do?
+- What becomes easier, faster, clearer, or less annoying after knowing this?
+- Why would they save, comment, share, or swipe to the next card?
+
+If those answers are vague, fix the angle before designing.
 
 ## Required Workflow
 
@@ -22,7 +35,7 @@ This is a conversation-driven production workflow, not a SaaS app and not an upl
    - Reconfirm the active channel before working on the source.
    - Keep AI information, football information, and PitchCheck marketing contexts separated.
 
-2. **Create or update the 채널 프로필**
+2. **Create or update the channel profile**
    - If no profile exists, collect the six profile fields one focused question at a time.
    - If the channel already exists, ask for the channel link and recommend at least three representative posts.
    - If posts are unavailable, create a tone-and-direction profile without making strong visual claims.
@@ -35,30 +48,49 @@ This is a conversation-driven production workflow, not a SaaS app and not an upl
    - If a URL is blocked or incomplete, ask the user to paste the relevant text or provide screenshots.
    - Save source material to `source.md` in the project.
 
-4. **Propose carousel angles**
-   - Summarize the source.
-   - Infer audience relevance, core message, useful claims, and risks.
-   - Propose two or three angles even when the user gives a direction.
-   - Each angle includes an angle name, hook example, best-fit audience, and expected 3-5 card flow.
+4. **Define the viewer frame**
+   - Write a short audience-first frame before proposing angles.
+   - Translate abstract claims into plain Korean. Example: "tool integration" becomes "내가 쓰는 프로그램 안에서 바로 시킬 수 있음."
+   - Reject hooks aimed at the wrong audience. Example: if the content is for designers, do not open with a generic "AI 답변 복붙하던 사람들."
+   - Save the frame in `brief.md`.
 
-5. **Draft copy and storyboard**
+5. **Search media references**
+   - For tool, app, product, sports, or visual topics, search for images, screenshots, official demos, product pages, and video references before finalizing the storyboard.
+   - Prefer official demos and credible creator walkthroughs when motion or product understanding matters.
+   - Record media source, URL, usage idea, rights/attribution notes, and whether it is for direct use or reference-only in `source-pack.md`.
+   - If no safe media is available, create HTML-native visuals, generated visuals, or screenshot-style recreations instead of using generic decoration.
+
+6. **Propose carousel angles**
+   - Summarize the source only after the viewer frame is clear.
+   - Propose two or three angles even when the user gives a direction.
+   - Each angle includes an angle name, target situation, hook example, why people keep swiping, and expected 5-8 card flow.
+   - Prefer hooks that name the viewer or situation: "포토샵 켜놓고 AI 따로 쓰던 분들, 이거 꽤 큽니다."
+
+7. **Draft copy and storyboard**
    - After the user chooses or combines angles, write the full card copy draft in one pass.
    - Number every card.
+   - Keep each card to one clear job: stop, identify, explain, prove, make useful, interpret, or prompt action.
+   - Use human, plain-language copy. Avoid vague phrases such as "체감 이득" unless immediately rewritten as "뭐가 덜 귀찮아지는지 / 뭐가 빨라지는지 / 뭐가 쉬워지는지."
+   - Use channel viewpoint labels such as `<채널명> 관점` or `<채널명> 해석`. Avoid awkward labels like `<채널명>식 해석` unless the user prefers it.
    - Treat this as first-pass approval, not final approval.
    - Create a text wireframe before HTML/CSS.
 
-6. **Evaluate static vs motion by card**
+8. **Evaluate static vs motion by card**
    - For each card, decide whether static PNG or motion MP4 is more effective.
+   - Prefer motion when a first-card hook, product demo, before/after, timeline, or workflow will increase retention.
+   - Use searched video references, official demos, screenshots, or HTML-native animation as the motion source.
    - Explain motion recommendations briefly.
    - Ask for approval before creating motion output.
    - Read `references/rendering-and-motion.md` for decision rules.
 
-7. **Create preview before final export**
-   - Build an HTML/CSS 미리보기 first.
-   - Review content, layout, spacing, rhythm, and design with the user.
+9. **Create preview before final export**
+   - Build one HTML file per card, plus an index preview when useful.
+   - Review content, layout, spacing, rhythm, visual proof, and design with the user.
+   - If using external images or video references, make them large enough to carry the card and protect text readability with dimming, blur, and gradient transitions.
+   - Run the PPT smell check from `references/project-workflow.md` before final render.
    - Render final files only after approval.
 
-8. **Render final assets**
+10. **Render final assets**
    - Static cards default to PNG.
    - Motion cards default to MP4.
    - JPEG and PDF are optional and only generated when requested.
@@ -79,6 +111,7 @@ carousel-workspace/
     channel.css
   projects/<channel-slug>/<date-topic-slug>/
     source.md
+    source-pack.md
     brief.md
     storyboard.md
     motion-plan.md
@@ -93,17 +126,18 @@ Use `scripts/init_project.py` to scaffold this structure when helpful.
 ## References
 
 - Read `references/channel-profiles.md` when creating, analyzing, or updating a channel profile.
-- Read `references/project-workflow.md` when turning source material into angles, copy, and storyboard.
+- Read `references/project-workflow.md` when turning source material into viewer frames, angles, copy, and storyboard.
 - Read `references/design-and-references.md` before writing `design.md`, `channel.css`, or card layouts.
 - Read `references/rendering-and-motion.md` before deciding PNG vs MP4 or producing final exports.
-- Use `last30days` when 소스가 없거나 fresh source discovery is needed before carousel production.
+- Use `last30days` when fresh source discovery is needed before carousel production.
 
 ## Completion Criteria
 
 A carousel project is complete only when:
 
 - The active channel is explicit.
-- Source, brief, storyboard, and motion plan are saved when applicable.
+- Source, viewer frame, brief, storyboard, and motion plan are saved when applicable.
+- Each card has a clear viewer reason to swipe, save, comment, or share.
 - HTML/CSS preview has been reviewed.
 - Final output files match the approved card-level export plan.
 - The user has a mixed output package such as `card-01.png`, `card-02.mp4`, `card-03.png`.

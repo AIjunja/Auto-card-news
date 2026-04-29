@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Reworked the skill around an engagement-first carousel workflow so posts start from viewer situation, curiosity, pain, and action reason instead of source-summary slides.
+- Added media reference discovery guidance for official demos, screenshots, images, videos, attribution, and reference-only usage.
+- Added motion planning guidance for card-level MP4 decisions, first-card hooks, video references, Remotion-style motion, and source media notes.
+- Updated design guidance to avoid PPT-like layouts and use large visuals with dim, blur, or gradient text protection.
+- Expanded scaffold templates with `source-pack.md`, viewer frames, media references, motion references, and per-card HTML scaffolding.
+
 ## 0.2.1
 
 - Updated one-line installers to install both `auto-card-news` and `last30days`.

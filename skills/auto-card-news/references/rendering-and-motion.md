@@ -39,8 +39,36 @@ Recommend motion for:
 - Before/after transformations
 - Hook reveals
 - Timelines and rankings
+- Official demo clips or UI walkthroughs
+- Screenshot callouts with zoom, cursor, or tap movement
 
 Use Remotion-style structure when creating motion cards. Keep motion short and purposeful. Respect the channel design system. Ask for approval before generating motion output.
+
+## Video Reference Search
+
+When a topic involves a tool, app, product launch, or workflow, look for useful video references before deciding the motion plan:
+
+- Official announcement videos
+- Product demos
+- Documentation demos
+- Credible creator walkthroughs
+- Short clips showing the exact feature, UI, or before/after result
+
+Record the chosen video source, URL, usable segment, and attribution text in `motion-plan.md` or `source-pack.md`.
+
+Do not rely on a video just because it looks exciting. Use it only when it helps the viewer understand what changed, how it works, or why they should care.
+
+## Motion Card Structure
+
+For each MP4 card, define:
+
+- Viewer reason: what will make the viewer stop or keep watching
+- Source media: video, screenshot, generated scene, or HTML-native animation
+- Motion idea: reveal, zoom, comparison, callout, tap/cursor path, timeline, or loop
+- Duration: usually 3-6 seconds for a carousel card
+- Export target: MP4 for motion cards, PNG fallback if motion is not approved
+
+Keep the first second strong. If the card only becomes clear after several seconds, rewrite the hook or simplify the animation.
 
 ## Remotion License Reminder
 

@@ -47,26 +47,55 @@ def scaffold(root: Path, channel: str, project: str) -> Path:
         "typography": "Defined during design profiling.",
         "color": "Defined during design profiling.",
         "layout": "Defined during design profiling.",
+        "card_news_rhythm": "Defined during design profiling.",
         "card_composition": "Defined during design profiling.",
+        "media_treatment": "Use large source media, screenshots, or video frames when they clarify the point. Protect text with dim, blur, or gradient transitions.",
         "components": "Defined during design profiling.",
         "motion": "Defined during motion planning.",
         "goal": "Defined during project brief.",
         "cta": "Defined during project brief.",
         "ratio": "4:5",
+        "who_stops": "Defined by the viewer frame before angle selection.",
+        "viewer_problem": "Defined by the viewer frame before angle selection.",
+        "what_changes": "Defined by the viewer frame before angle selection.",
+        "why_swipe": "Defined by the viewer frame before angle selection.",
+        "why_save_comment_share": "Defined by the viewer frame before angle selection.",
+        "plain_language_rule": "Translate abstract source phrases into ordinary viewer language.",
         "chosen_angle": "Defined after angle selection.",
         "source_summary": "Defined after source intake.",
+        "media_references": "Official demos, screenshots, images, or video references will be listed here.",
         "constraints": "Defined during project brief.",
         "role": "Hook",
+        "viewer_trigger": "Defined by viewer frame.",
         "headline": "Draft headline",
         "body": "Draft body",
         "visual_direction": "Draft visual direction",
+        "motion_recommendation": "Static unless motion improves attention, retention, or understanding.",
         "output_type": "PNG or MP4",
         "revision_note": "Record user-requested revisions here.",
+        "source_name": "Source name",
+        "source_url": "Source URL",
+        "source_type": "Article, docs, post, video, screenshot, or report",
+        "source_importance": "Why this source matters.",
+        "source_verification": "Freshness and credibility notes.",
+        "media_name": "Media reference name",
+        "media_url": "Media reference URL",
+        "media_type": "Image, screenshot, video, or demo",
+        "media_use_case": "How this media helps the carousel.",
+        "media_attribution": "Attribution text.",
+        "recommended_angle": "Recommended after source discovery.",
+        "risk_notes": "Accuracy, rights, or context risks.",
         "card_number": "1",
         "reason": "Motion improves attention or understanding.",
+        "source_media": "Screenshot, video clip, generated visual, or HTML-native animation.",
         "animation_concept": "Short reveal or transition.",
         "duration": "3s",
         "format": "MP4",
+        "video_source": "Official or credible video source",
+        "video_url": "Video URL",
+        "usable_segment": "Timestamp or segment to reference.",
+        "video_reason": "Why the video helps the viewer understand.",
+        "video_attribution": "Attribution text.",
         "static_card_note": "Static cards render as PNG.",
     }
 
@@ -78,6 +107,7 @@ def scaffold(root: Path, channel: str, project: str) -> Path:
     )
 
     write_if_missing(project_dir / "source.md", "# Source\n\nPaste or summarize the source material here.\n")
+    write_if_missing(project_dir / "source-pack.md", render(read_template("source-pack.md"), values))
     write_if_missing(project_dir / "brief.md", render(read_template("brief.md"), values))
     write_if_missing(project_dir / "storyboard.md", render(read_template("storyboard.md"), values))
     write_if_missing(project_dir / "motion-plan.md", render(read_template("motion-plan.md"), values))
@@ -97,6 +127,24 @@ def scaffold(root: Path, channel: str, project: str) -> Path:
     )
     write_if_missing(project_dir / "style.css", f"@import url('../../../profiles/{channel}/channel.css');\n")
     (project_dir / "cards").mkdir(parents=True, exist_ok=True)
+    write_if_missing(
+        project_dir / "cards" / "card-01.html",
+        "<!doctype html>\n"
+        '<html lang="ko">\n'
+        "<head>\n"
+        '  <meta charset="utf-8">\n'
+        f"  <title>{project} card 01</title>\n"
+        '  <link rel="stylesheet" href="../style.css">\n'
+        "</head>\n"
+        "<body>\n"
+        '  <article class="card card-01" data-output="png">\n'
+        '    <p class="eyebrow">Viewer-first hook</p>\n'
+        "    <h1>Draft headline</h1>\n"
+        '    <p class="support">Draft support line</p>\n'
+        "  </article>\n"
+        "</body>\n"
+        "</html>\n",
+    )
     (project_dir / "output").mkdir(parents=True, exist_ok=True)
     return project_dir
 

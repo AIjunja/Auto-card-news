@@ -1,6 +1,6 @@
 # Auto-card-news Skill
 
-Version: `0.2.1`
+Version: `0.3.0`
 
 `auto-card-news` is a Codex skill for making channel-aware card news and Instagram carousel content through conversation.
 
@@ -8,12 +8,17 @@ It guides Codex through:
 
 - channel profile setup
 - source intake from URLs, reports, notes, or GPT conversations
+- fresh source discovery with `last30days`
+- viewer-first framing around the audience's situation, curiosity, pain, and action reason
+- image, screenshot, official demo, and video reference discovery
 - carousel angle proposals
 - full card copy drafts
 - text wireframes
-- HTML/CSS preview
+- one-HTML-file-per-card previews
+- media-led design with readable dim, blur, and gradient treatments
 - card-by-card static PNG or motion MP4 planning
-- reusable `profile.md`, `design.md`, `brief.md`, `storyboard.md`, and `motion-plan.md` files
+- Remotion-style motion planning when a card should become MP4
+- reusable `profile.md`, `design.md`, `source-pack.md`, `brief.md`, `storyboard.md`, and `motion-plan.md` files
 
 This is not a hosted app and does not upload to Instagram. It is a reusable Codex skill plus templates and scaffolding.
 
@@ -101,6 +106,8 @@ $last30days latest AI tools worth testing
 ```
 
 Use the research output as source material. `auto-card-news` will turn it into a `source-pack.md` handoff, then continue with angle proposals, copy, HTML/CSS preview, and final PNG/MP4 export planning.
+
+The current workflow is engagement-first. It should avoid PPT-like briefing slides by defining who will stop scrolling, what they care about, what becomes easier or clearer, and why they would save, comment, share, or keep swiping. For visual topics, it should also look for media references such as official demos, screenshots, product pages, creator walkthroughs, or video clips before finalizing the storyboard.
 
 ## Repository Layout
 
