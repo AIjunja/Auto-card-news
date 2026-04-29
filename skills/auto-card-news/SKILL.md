@@ -15,6 +15,12 @@ Ask and explain in Korean by default. Use another language only when the user re
 
 This is a conversation-driven production workflow, not a SaaS app and not upload automation. Do not automatically upload to Instagram or any social platform.
 
+## Caption Attribution Rule
+
+When writing Instagram or social captions for external sources, use `Contents Editor · <channel/person>` for the channel's curation/editing credit. Do not use `Editor · ...` because that can imply the channel created the original tool, repo, video, or source.
+
+Keep source attribution separate as `Source · <original owner/source>`.
+
 ## Engagement-First Rule
 
 Do not make PPT-like briefing slides. A carousel must start from the viewer's concrete situation, pain, desire, or curiosity. The source is supporting evidence, not the opening frame.
