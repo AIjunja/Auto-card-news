@@ -10,6 +10,7 @@
 ## Visual System
 
 - Typography: {typography}
+- Static/motion match: if this video extends a carousel, reuse the approved card-news font files, weights, size scale, line-height, chip style, brand style, and source style.
 - Color: {color}
 - Background: {background}
 - Subtitle style: {subtitle_style}
@@ -30,4 +31,3 @@
 - Random stock visuals
 - Unclear source ownership
 - Motion that does not clarify the point
-

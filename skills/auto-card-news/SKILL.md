@@ -76,6 +76,107 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
 - If the headline is tall or three lines, leave more breathing room between the badge and chips.
 - Prefer a visually balanced relationship over identical pixel positions across different cards.
 
+## Instagram Typography Baseline
+
+Design for phone readability after Instagram upload, not desktop preview comfort. For the default 4:5 output size (`1080x1350`), start with this larger typography scale and only reduce it when the rendered card proves it still reads clearly on mobile.
+
+- Cover or hook headline: `88-104px`, line-height `1.02-1.08`.
+- Normal card headline: `76-94px`, line-height `1.04-1.12`.
+- Support copy: `34-42px`, line-height `1.28-1.38`.
+- Prompt/code/example text that must be read: `32-38px`.
+- Chips, badges, and labels: `28-34px`.
+- Page numbers and source text: page `26-30px`, source `22-24px`.
+
+Do not use small body text as the main message. Anything under `30px` should be metadata, attribution, or decorative UI only.
+
+When using chunky Korean display fonts such as Griun Mongtori or Moneygraphy-style rounded fonts, check the rendered line breaks after increasing size. Larger is usually better for Instagram, but it must not create orphaned words, clipped text, or chip overlap.
+
+## Static And Motion Typography Consistency
+
+Static PNG cards and motion MP4 cards in the same carousel must feel like one design system. Before rendering a motion card, compare its CSS against the approved static card CSS or `design.md`.
+
+- Use the same primary font file, `font-family`, weight, size scale, line-height, and letter spacing unless the storyboard explicitly calls for a different voice.
+- If a motion card replaces a PNG card in the carousel, copy the matching static card's headline, body, chip, page, brand, and source typography rules first, then add animation.
+- After any font change, render a still frame from the MP4 and compare it with the PNG card before final export.
+
+## Editorial Visual Cover Rule
+
+For the first card of news, tool, launch, or trend carousels, consider an editorial cover before using a plain graphic layout. A strong cover can use a full-bleed photo, generated visual, official screenshot, product UI, or demo frame as the main background, with the text anchored over a dark bottom gradient.
+
+Use this cover pattern when the topic needs a fast stop-scroll signal:
+
+- Full-bleed visual fills the card and carries the topic mood.
+- Top or center brand mark stays small and clean.
+- Category pill sits above the headline, e.g. `AI NEWS | PROMPT`.
+- Main headline is very large, usually `88-104px`, and placed in the lower third.
+- A black gradient, blur, or dim overlay protects text readability.
+- Source attribution remains small but readable near the bottom.
+
+Do not copy another creator's cover image as the final asset. Use user-provided examples as composition references, then use safe media: official screenshots, generated visuals, licensed media, or recreated HTML-native scenes.
+
+This rule is channel-agnostic. Apply it beyond AIjjuun whenever the first card needs stronger feed impact:
+
+- AI/news/tool channels: official UI screenshot, generated 3D object, product mockup, docs page, demo frame.
+- Football channels: stadium photo, match moment, tactics board, player silhouette, app screen, fixture graphic.
+- PitchCheck/app marketing: phone mockup, field/check-in scene, user workflow screenshot, before/after attendance state.
+- General education or info channels: symbolic photo, generated editorial scene, diagram-as-background, creator-style thumbnail visual.
+
+If the first card looks like a PPT title slide, redesign it as an editorial visual cover before final export unless the user explicitly wants a minimal text-only style.
+
+When planning the storyboard, mark Card 01 as one of:
+
+- `Editorial visual cover`
+- `Motion hook cover`
+- `Minimal text cover`
+
+Default to `Editorial visual cover` or `Motion hook cover` for Instagram-first content.
+
+## Media-Led Body Cards
+
+Do not make only the first card visual. For cards after the cover, prefer a media-led editorial layout whenever there is useful visual proof, source material, screenshot, demo frame, generated scene, or simple diagram available.
+
+Recommended body-card structure:
+
+- Top half: large framed image, screenshot, video frame, UI mockup, generated visual, or HTML-native scene.
+- Bottom half: black or dark copy area with a large card number, one clear headline, and 2-4 short lines of explanation.
+- Keep the image or video large enough to explain the point before the viewer reads the text.
+- Use the copy to translate the visual into plain language, not to repeat a long article summary.
+- End with a small channel/source mark, not a large decorative footer.
+
+AI Trend-style article cards are a default fallback for news/tool/explainer body cards:
+
+- Use the upper `45-55%` of the card for the screenshot, demo frame, product UI, generated visual, or visual reconstruction.
+- Use the lower area as a dark editorial text block with a visible card number, a big headline, and only the essential context.
+- Prefer one strong visual plus one plain-language takeaway over several small decorative elements.
+- If the source has a demo video, use a still frame or short motion crop for the relevant card.
+- If safe direct media is unavailable, recreate the idea with HTML-native UI, prompt cards, code panels, checklists, or generated editorial visuals.
+
+For Instagram-first carousels, cards 2-7 should usually alternate between proof image + explanation, before/after visual + takeaway, screenshot/callout + simple interpretation, checklist/diagram + save-worthy use, and motion/demo clip + one sentence result.
+
+If a card looks like a dense slide, replace some text with a visual or split the idea into another card.
+
+## HERMES Editorial Pattern
+
+Use this as the default high-quality pattern for AI/news/tool/security/developer carousels unless the user asks for another style. This pattern was validated by the HERMES/Claude Code issue carousel.
+
+- Card 01: full-bleed or near-full-bleed real source screenshot, product UI, official page, or strong generated editorial visual. Put a large human hook in the lower third over a black gradient.
+- Cards 02-07: use an AI Trend-style editorial layout: upper `45-55%` = one strong visual/proof area; lower area = large card number, one big headline, and only the shortest useful explanation.
+- Every card needs a different job. Do not repeat the same image with slightly different text for several cards. Rotate between proof screenshot, terminal/demo, before-after comparison, diagram, checklist, and source page.
+- Prefer one large visual over many small ornaments. The viewer should understand the card faster from the visual than from the paragraph.
+- Keep the copy concrete and spoken. Say "커밋 메시지에 이 문자가 있으면 요금 경로가 바뀌었다는 보고예요" instead of abstract phrases like "메타데이터 라우팅 이슈입니다."
+- For developer/tool topics, terminal typing, side panel typing, diff reveal, issue page highlight, billing meter, checklist reveal, and cursor/callout motion are strong defaults.
+- Motion should usually replace or enhance one important card, not every card. Pick the card where movement makes the explanation clearer or increases retention.
+- Before final render, compare the motion preview with static PNGs and match the font, size scale, chip style, black background, and label placement.
+- If a visual is generated as SVG, canvas, screenshot-style UI, or HTML-native mockup, use the same approved card font inside that visual too. A different internal font can make the whole carousel feel inconsistent even when the main headline CSS is correct.
+- Rewrite translated source language into Korean social copy. Prefer "목표 하나 던지면 끝까지 물고 간다고?" or "커밋 한 줄 때문에 토큰 폭탄 맞았다고?" over direct translations like "persistent workflows were introduced."
+
+Quality smell checks:
+
+- If three cards could swap their images without changing meaning, the storyboard is too generic.
+- If the card still works after deleting the visual, the visual is too decorative.
+- If the body paragraph explains what the screenshot should have explained, strengthen the visual or simplify the claim.
+- If the output feels like a product deck or PPT, rebuild it with the HERMES pattern.
+
 ## Required Workflow
 
 1. **Confirm channel context**
@@ -103,9 +204,14 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
    - Save the frame in `brief.md`.
 
 5. **Search media references**
-   - For tool, app, product, sports, or visual topics, search for images, screenshots, official demos, product pages, and video references before finalizing the storyboard.
-   - Prefer official demos and credible creator walkthroughs when motion or product understanding matters.
+   - For tool, app, product, sports, or visual topics, search for images, screenshots, official demos, product pages, and video references before finalizing the storyboard. Do this aggressively enough that the final carousel does not feel text-only.
+   - Prefer official demos, official product pages, GitHub issues/releases, docs pages, credible creator walkthroughs, and source videos when motion or product understanding matters.
+   - For news/tool topics, aim to gather at least 3-5 usable visual candidates before designing: cover candidate, proof screenshot, motion/demo candidate, context page, and checklist/source candidate.
+   - Do a per-card media pass, not only a cover search: for each card, try to find or create one visual anchor such as an official screenshot, demo frame, source page, product UI, user-provided file, generated editorial visual, or HTML-native reconstruction.
    - Record media source, URL, usage idea, rights/attribution notes, and whether it is for direct use or reference-only in `source-pack.md`.
+   - For first-card covers, look for a strong full-bleed visual candidate or plan a generated/editorial visual before settling for a plain text card.
+   - For body cards, also look for per-card visual proof or plan HTML-native media panels. Do not stop media planning after the cover.
+   - If the user provides social screenshots, use them as leads or reference unless they explicitly approve direct reuse. Verify the underlying source with official pages, GitHub, docs, blogs, articles, or credible primary material when possible.
    - If no safe media is available, create HTML-native visuals, generated visuals, or screenshot-style recreations instead of using generic decoration.
 
 6. **Propose carousel angles**
@@ -113,11 +219,14 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
    - Propose two or three angles even when the user gives a direction.
    - Each angle includes an angle name, target situation, hook example, why people keep swiping, and expected 5-8 card flow.
    - Prefer hooks that name the viewer or situation: "포토샵 켜놓고 AI 따로 쓰던 분들, 이거 꽤 큽니다."
+   - For each angle, state what the first-card cover visual should be, not just the hook copy.
 
 7. **Draft copy and storyboard**
    - After the user chooses or combines angles, write the full card copy draft in one pass.
    - Number every card.
    - Keep each card to one clear job: stop, identify, explain, prove, make useful, interpret, or prompt action.
+   - For every card, write both the text copy and the visual/media idea. Body cards need a visual plan, not only a headline and paragraph.
+   - Apply the HERMES Editorial Pattern for AI/news/tool/developer topics by default: each card must have a visual job and a copy job.
    - Use human, plain-language copy. Avoid vague phrases such as "체감 이득" unless immediately rewritten as "뭐가 덜 귀찮아지는지 / 뭐가 빨라지는지 / 뭐가 쉬워지는지."
    - Use channel viewpoint labels such as `<채널명> 관점` or `<채널명> 해석`. Avoid awkward labels like `<채널명>식 해석` unless the user prefers it.
    - Run the Humanizer and Marketing checks from `references/humanized-marketing-copy.md` before asking for copy approval.
@@ -140,7 +249,10 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
    - Build one HTML file per card, plus an index preview when useful.
    - Review content, layout, spacing, rhythm, visual proof, and design with the user.
    - If using external images or video references, make them large enough to carry the card and protect text readability with dimming, blur, and gradient transitions.
+   - For first-card editorial covers, check that the image reads immediately and the headline remains dominant over the visual.
+   - For body cards, check that the visual explains the card before the paragraph does. If the viewer must read a long paragraph to understand the card, simplify the copy or strengthen the visual.
    - For media-led cards, place small label chips in the lower safe zone instead of over the important visual proof.
+   - Apply the Instagram Typography Baseline before the first serious preview. If the preview looks fine on desktop but small on a phone-like viewport, increase font size before rendering final files.
    - Check spacing between chips, section badges, and headline; adjust per card instead of forcing one saved position everywhere.
    - Run line-break QA on rendered previews: no awkward wraps, no lonely short words, no clipped text, and no heading that reads unlike natural speech.
    - Run the humanized marketing review again after layout changes because a line that worked in text may sound stiff or cramped once placed on the card.
@@ -200,5 +312,9 @@ A carousel project is complete only when:
 - Copy, caption, and CTA pass the Humanizer, Marketing, and ad/conversion checks when applicable.
 - HTML/CSS preview has been reviewed.
 - Rendered previews pass line-break QA with no orphaned words or awkward phrase splits.
+- Main text follows the Instagram Typography Baseline and remains readable after phone-size review.
+- Static PNG cards and motion MP4 cards share the same approved typography system unless a deliberate exception is documented in `design.md` or `motion-plan.md`.
+- Card 01 has an explicit cover decision, and Instagram-first posts avoid PPT-like title covers unless intentionally chosen.
+- Body cards have explicit visual/media direction and avoid dense PPT-like paragraph slides.
 - Final output files match the approved card-level export plan.
 - The user has a mixed output package such as `card-01.png`, `card-02.mp4`, `card-03.png`.

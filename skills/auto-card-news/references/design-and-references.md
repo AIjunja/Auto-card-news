@@ -33,6 +33,88 @@ When using searched images, screenshots, or video frames:
 
 For first cards, consider motion if a short demo loop, zoom-in, cursor movement, reveal, or before/after will stop scrolling better than a static cover.
 
+## Instagram Typography Baseline
+
+Instagram carousels are consumed on phones, often after compression and inside a busy feed. A desktop preview can make text feel larger than it will feel in the app. Use a larger default scale for 4:5 cards (`1080x1350`):
+
+- Cover or hook headline: `88-104px`.
+- Normal card headline: `76-94px`.
+- Support copy: `34-42px`.
+- Readable prompt, code, or example text: `32-38px`.
+- Chips, badges, and labels: `28-34px`.
+- Page number: `26-30px`.
+- Source text: `22-24px`.
+
+Main explanatory copy should rarely be below `34px`. Text under `30px` should be limited to source attribution, small UI details, or decorative metadata.
+
+After changing fonts or increasing type size, render again and check:
+
+- No headline is clipped.
+- No chip overlaps the final message.
+- No source line collides with the CTA or bottom text.
+- No single short word is stranded on its own line.
+- The card is still readable when viewed at phone size.
+
+## Static And Motion Typography Match
+
+Static cards and motion cards from one carousel must look like the same content family. Motion is allowed to move, reveal, type, zoom, or highlight, but it should not silently switch to a different font voice.
+
+- Start motion CSS from the approved static card CSS or `design.md`.
+- Match primary font file, `font-family`, weight, line-height, size scale, letter spacing, chip text, page number, brand, and source attribution styles.
+- If a different display font is used for a special beat, document why in `motion-plan.md` and preview a still frame next to the static PNG.
+- Do not approve final MP4 until one still frame has been checked against the matching PNG or HTML card.
+
+## Editorial Visual Cover Pattern
+
+For first-card covers, prefer a feed-native editorial image layout when the topic is a news item, tool launch, AI trend, product update, or creator-facing story.
+
+Recommended structure:
+
+- Full-bleed background: official screenshot, product UI, demo frame, generated 3D/illustration, or licensed visual.
+- Overlay: bottom-heavy black gradient with optional subtle blur so the headline remains readable.
+- Brand mark: small top-center or top-left text, not the main focus.
+- Category pill: compact rounded label above the headline, such as `AI NEWS | CODE`.
+- Headline: large, blunt, and placed in the lower third.
+- Optional proof element: floating UI card, prompt snippet, cursor, badge, or callout that connects the visual to the story.
+
+The cover should feel like a post people would stop on in the Instagram feed, not like a title slide. If the background is too abstract, add a concrete UI, tool screen, device, or generated object that immediately explains the topic.
+
+Use user-provided competitor/reference images only as mood and composition references. Do not reuse their artwork as final output unless the user explicitly owns or licenses it.
+
+This pattern applies across all channel profiles, not only AI news:
+
+- AI/tool/news: official UI, docs page, generated 3D mascot/object, app screen, demo frame.
+- Football: pitch photo, tactical board, player action, stadium atmosphere, fixture or stat visual.
+- App/product marketing: device mockup, user workflow, product screen, field/lifestyle scene, before/after state.
+- Education/info: symbolic editorial photo, generated scene, diagram background, creator thumbnail-style visual.
+
+During storyboard review, reject a first card that is only a title on a plain background if the topic has a useful visual proof or visual metaphor available.
+
+## Media-Led Body Cards
+
+The visual system should not collapse after the cover. For Instagram-first posts, body cards should usually look like editorial article cards: visual proof on top, clean explanation below.
+
+Use this pattern when explaining examples, features, steps, tools, products, sports moments, app workflows, or source-backed claims:
+
+- Top visual area: screenshot, video frame, generated scene, UI mockup, photo, tactical board, app screen, or HTML-native diagram.
+- Bottom copy area: large number, large headline, short plain-language explanation.
+- Copy density: one headline plus 2-4 short lines. If a card needs more, split it or move detail to the caption.
+- Visual density: the image or demo should be big enough to make the topic understandable at a glance.
+- Attribution: keep it small, clear, and separated from the main message.
+
+For external media, prefer official sources, user-provided files, licensed media, or generated visuals. If using public screenshots or demo clips as source material, record the URL and attribution in `source-pack.md` and caption sources. Do not treat random viral images as free assets.
+
+Run a per-card media search pass before locking the storyboard. Every card should have one planned visual anchor: direct-use media, reference-only media, generated visual, source screenshot, product UI, HTML-native reconstruction, chart, checklist, or motion crop. If a card has no visual anchor, simplify the copy or redesign the card.
+
+For AI Trend-style reference layouts, build body cards like mini editorial articles:
+
+- Upper visual: large enough to understand before reading, usually `45-55%` of the card height.
+- Lower copy: black or very dark area with a round/soft card number, oversized title, and short context.
+- Body copy should usually be `2-3` lines. If it needs more explanation, move detail into the caption.
+- Use one actual proof visual per card when possible: official page, demo frame, product screen, source screenshot, workflow capture, or user-provided media.
+- If using a video reference, choose the exact moment that proves the card's point; do not use random motion just because motion exists.
+- If no direct media is safe, recreate the scene with HTML-native UI panels, prompt examples, terminal windows, checklist blocks, or generated editorial imagery.
+
 ## Media Bottom Label Chips
 
 When a card uses a large screenshot, product demo, or tool UI with small supporting labels, put those chips in the lower safe zone of the media frame, over the dark gradient area. This keeps the visual proof readable while still giving the viewer quick anchors.
@@ -126,6 +208,8 @@ Before rendering final assets, check:
 
 - Text fits inside each card.
 - Important text is visible at mobile size.
+- Main copy follows the Instagram Typography Baseline, not tiny desktop-preview sizing.
+- First-card covers use a strong full-bleed visual when the topic benefits from it.
 - Headline line breaks preserve natural phrase chunks.
 - No short word is stranded alone unless it is a deliberate emphasis choice.
 - Media label chips sit in the lower safe zone and do not cover important proof.

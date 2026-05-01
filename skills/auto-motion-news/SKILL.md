@@ -27,6 +27,14 @@ Every script, scene plan, caption, and product-style video must pass a humanized
 
 Read `references/humanized-video-marketing.md` when drafting scripts, converting card-news into video, writing captions, or planning promotional videos.
 
+## Visual Source And Typography Rule
+
+For motion made from card-news, the MP4 should feel like the moving version of the approved cards, not a separate template.
+
+- Search for useful official demos, screenshots, product pages, source pages, or credible reference clips for each scene, not only the opening scene.
+- When a motion scene replaces or extends a static card, match the approved card typography: primary font file, `font-family`, weight, line-height, size scale, chip style, brand style, and source style.
+- After rendering, inspect at least one still frame and compare it with the static card or `design.md` before calling the motion final.
+
 ## Best Fit
 
 Use this skill for:
