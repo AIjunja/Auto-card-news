@@ -40,6 +40,14 @@
 - Ad/conversion mode active?: {ad_conversion_mode}
 - Offer / objection / destination if active: {offer_objection_destination}
 
+## Korean Persona Copy QA
+
+- Nemotron-Personas-Korea sampled?: {nemotron_sampled}
+- Reader panel summary: {reader_panel_summary}
+- Phrases that felt translated or too technical: {translated_or_technical_phrases}
+- Rewrites made for Korean social copy: {korean_copy_rewrites}
+- Remaining fallback or uncertainty notes: {persona_qa_notes}
+
 ## Revision Notes
 
 - {revision_note}

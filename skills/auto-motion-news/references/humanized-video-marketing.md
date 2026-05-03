@@ -30,6 +30,26 @@ With:
 
 Each scene should sound like one person talking to one viewer. Short-form scripts should not read like caption paragraphs.
 
+## Korean Persona Video QA
+
+When the hook, narration, overlay, or caption still sounds like translated source text, run Korean Persona Video QA before motion work.
+
+Use `references/korean-persona-video-qa.md` and sample real rows from `nvidia/Nemotron-Personas-Korea` with:
+
+```powershell
+python skills\auto-motion-news\scripts\sample_korean_personas.py --count 7 --topic "<topic>"
+```
+
+Use the sampled personas as a synthetic Korean viewer panel. The panel should catch:
+
+- first 2-second hooks that only developers or AI insiders understand;
+- spoken lines that sound like product documentation;
+- overlay phrases that are too abstract to read quickly;
+- scenes with no visual reason to keep watching;
+- captions that are useful but too long for social viewing.
+
+Keep the final script short, spoken, and source-backed.
+
 ## Retention Marketing Check
 
 Before motion work, each scene needs a reason to keep watching:

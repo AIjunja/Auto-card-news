@@ -38,6 +38,26 @@ For Korean social copy, remove literal translations and internal-business phrasi
 
 For AIjjuun-style AI information, the voice can be friendly, tutor-like, and slightly cute. Use endings like `~요` or `~욤` only when the caption or CTA benefits from warmth. Do not use cute phrasing inside a serious security warning or when it weakens trust.
 
+## Korean Persona Copy QA
+
+When Korean copy still feels like English source text translated into Korean, run Korean Persona Copy QA before design.
+
+Use `references/korean-persona-copy-qa.md` and sample real rows from `nvidia/Nemotron-Personas-Korea` with:
+
+```powershell
+python skills\auto-card-news\scripts\sample_korean_personas.py --count 7 --topic "<topic>"
+```
+
+Use the sampled personas as a synthetic Korean reader panel. The panel should catch:
+
+- hooks that name the wrong audience;
+- technical terms a non-expert Korean reader would skip;
+- global SaaS/product phrases that Korean Instagram users would not say;
+- captions that explain too much but do not give a reason to save, share, or comment;
+- cute channel phrasing that weakens factual trust.
+
+The output should be a rewrite note, not a demographic essay. Keep the final copy short and social-native.
+
 ## Marketing Check
 
 Before HTML/CSS preview, answer these checks in `storyboard.md` or review notes:

@@ -34,10 +34,30 @@ Every carousel must pass a humanized marketing review before HTML/CSS preview an
 - Remove AI-sounding filler, stiff summaries, and vague benefit words.
 - Translate jargon into viewer language before it reaches the card.
 - Check the hook, promise, proof, save/comment/share reason, and CTA.
+- Run Korean Persona Copy QA with real `Nemotron-Personas-Korea` samples when the copy risks sounding translated, too global, too technical, or weak for Korean viewers.
 - For product, app, campaign, launch, lead magnet, or PitchCheck promotion, activate ad/conversion mode and define the offer, audience, proof, objection, CTA, and destination.
 - Keep channel personality, such as a friendly tutor voice for AIjjuun, but do not let cuteness weaken clarity or trust.
 
 Read `references/humanized-marketing-copy.md` when drafting or revising copy, captions, CTAs, promotional angles, or any post that feels too PPT-like or AI-written.
+
+Read `references/korean-persona-copy-qa.md` when the source is translated from English, the first hook feels generic, the topic is technical, or the user asks for more Korean-native copy. Use `scripts/sample_korean_personas.py` to sample real rows from `nvidia/Nemotron-Personas-Korea` before relying on imagined personas. If network or dependencies are unavailable, use cached samples first and only use a clearly labeled fallback panel when no real sample is available.
+
+## Korean Persona Copy QA
+
+Use Korean Persona Copy QA as the default rewrite layer for Korean Instagram-first posts where audience fit matters.
+
+- Build a 5-7 person reader panel from real `Nemotron-Personas-Korea` samples whenever practical.
+- Do not quote sampled personas as real people; use them as synthetic reader testers.
+- Ask what each sampled reader understands in 2 seconds, what feels translated, and what phrase would make the point feel closer to daily life.
+- Rewrite hooks, card headlines, body copy, captions, and CTA until the meaning is clear to a non-expert Korean reader.
+- Record the panel summary and rewrite notes in `storyboard.md`.
+- If the dataset cannot be accessed, write why and use cached samples or a labeled fallback panel.
+
+Sampler command:
+
+```powershell
+python skills\auto-card-news\scripts\sample_korean_personas.py --count 7 --topic "<topic>"
+```
 
 ## Engagement-First Rule
 
@@ -241,7 +261,13 @@ Quality smell checks:
    - Reject hooks aimed at the wrong audience. Example: if the content is for designers, do not open with a generic "AI 답변 복붙하던 사람들."
    - Save the frame in `brief.md`.
 
-5. **Search media references**
+5. **Build a Korean reader panel when copy risk is high**
+   - If the topic comes from English source material, AI docs, GitHub, technical news, or global product copy, run Korean Persona Copy QA before finalizing angles.
+   - Use `scripts/sample_korean_personas.py` to sample real `Nemotron-Personas-Korea` rows when network and dependencies are available.
+   - Save the sampled panel, translation-smell notes, and rewrite decisions in `storyboard.md`.
+   - If the sampler cannot run, record the reason and use cached samples before using an imagined fallback panel.
+
+6. **Search media references**
    - For tool, app, product, sports, or visual topics, search for images, screenshots, official demos, product pages, and video references before finalizing the storyboard. Do this aggressively enough that the final carousel does not feel text-only.
    - Prefer official demos, official product pages, GitHub issues/releases, docs pages, credible creator walkthroughs, and source videos when motion or product understanding matters.
    - For news/tool topics, aim to gather at least 3-5 usable visual candidates before designing: cover candidate, proof screenshot, motion/demo candidate, context page, and checklist/source candidate.
@@ -252,14 +278,14 @@ Quality smell checks:
    - If the user provides social screenshots, use them as leads or reference unless they explicitly approve direct reuse. Verify the underlying source with official pages, GitHub, docs, blogs, articles, or credible primary material when possible.
    - If no safe media is available, create HTML-native visuals, generated visuals, or screenshot-style recreations instead of using generic decoration.
 
-6. **Propose carousel angles**
+7. **Propose carousel angles**
    - Summarize the source only after the viewer frame is clear.
    - Propose two or three angles even when the user gives a direction.
    - Each angle includes an angle name, target situation, hook example, why people keep swiping, and expected 5-8 card flow.
    - Prefer hooks that name the viewer or situation: "포토샵 켜놓고 AI 따로 쓰던 분들, 이거 꽤 큽니다."
    - For each angle, state what the first-card cover visual should be, not just the hook copy.
 
-7. **Draft copy and storyboard**
+8. **Draft copy and storyboard**
    - After the user chooses or combines angles, write the full card copy draft in one pass.
    - Number every card.
    - Keep each card to one clear job: stop, identify, explain, prove, make useful, interpret, or prompt action.
@@ -268,11 +294,12 @@ Quality smell checks:
    - Use human, plain-language copy. Avoid vague phrases such as "체감 이득" unless immediately rewritten as "뭐가 덜 귀찮아지는지 / 뭐가 빨라지는지 / 뭐가 쉬워지는지."
    - Use channel viewpoint labels such as `<채널명> 관점` or `<채널명> 해석`. Avoid awkward labels like `<채널명>식 해석` unless the user prefers it.
    - Run the Humanizer and Marketing checks from `references/humanized-marketing-copy.md` before asking for copy approval.
+   - Run Korean Persona Copy QA from `references/korean-persona-copy-qa.md` before copy approval when the copy risks sounding translated or too abstract for Korean readers.
    - If the post is promotional, run ad/conversion mode before writing the CTA.
    - Treat this as first-pass approval, not final approval.
    - Create a text wireframe before HTML/CSS.
 
-8. **Evaluate static vs motion by card**
+9. **Evaluate static vs motion by card**
    - For each card, decide whether static PNG or motion MP4 is more effective.
    - Prefer motion when a first-card hook, product demo, before/after, timeline, or workflow will increase retention.
    - Use searched video references, official demos, screenshots, or HTML-native animation as the motion source.
@@ -283,7 +310,7 @@ Quality smell checks:
    - Ask for approval before creating motion output.
    - Read `references/rendering-and-motion.md` for decision rules.
 
-9. **Create preview before final export**
+10. **Create preview before final export**
    - Build one HTML file per card, plus an index preview when useful.
    - Review content, layout, spacing, rhythm, visual proof, and design with the user.
    - If using external images or video references, make them large enough to carry the card and protect text readability with dimming, blur, and gradient transitions.
@@ -297,7 +324,7 @@ Quality smell checks:
    - Run the PPT smell check from `references/project-workflow.md` before final render.
    - Render final files only after approval.
 
-10. **Render final assets**
+11. **Render final assets**
    - Static cards default to PNG.
    - Motion cards default to MP4.
    - Motion-card engine default: HyperFrames for short HTML/CSS/GSAP card animations; Remotion for complex video work or as a reliable fallback.
@@ -336,6 +363,7 @@ Use `scripts/init_project.py` to scaffold this structure when helpful.
 - Read `references/channel-profiles.md` when creating, analyzing, or updating a channel profile.
 - Read `references/project-workflow.md` when turning source material into viewer frames, angles, copy, and storyboard.
 - Read `references/humanized-marketing-copy.md` when polishing card copy, captions, CTAs, ad/conversion angles, or AI-sounding drafts.
+- Read `references/korean-persona-copy-qa.md` when testing Korean hooks, translated source copy, captions, or CTA against real `Nemotron-Personas-Korea` samples.
 - Read `references/design-and-references.md` before writing `design.md`, `channel.css`, or card layouts.
 - Read `references/rendering-and-motion.md` before deciding PNG vs MP4 or producing final exports.
 - Use `last30days` when fresh source discovery is needed before carousel production.
@@ -348,6 +376,7 @@ A carousel project is complete only when:
 - Source, viewer frame, brief, storyboard, and motion plan are saved when applicable.
 - Each card has a clear viewer reason to swipe, save, comment, or share.
 - Copy, caption, and CTA pass the Humanizer, Marketing, and ad/conversion checks when applicable.
+- Korean Persona Copy QA is recorded when the topic is technical, translated, or at risk of sounding unlike Korean social copy.
 - HTML/CSS preview has been reviewed.
 - Rendered previews pass line-break QA with no orphaned words or awkward phrase splits.
 - Main text follows the Instagram Typography Baseline and remains readable after phone-size review.

@@ -50,6 +50,9 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "Spacing Relationship QA",
             "Humanized Marketing Rule",
             "Humanizer",
+            "Korean Persona Copy QA",
+            "Nemotron-Personas-Korea",
+            "sample_korean_personas.py",
             "ad/conversion mode",
             "HyperFrames",
             "Remotion",
@@ -87,6 +90,7 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "references/channel-profiles.md",
             "references/project-workflow.md",
             "references/humanized-marketing-copy.md",
+            "references/korean-persona-copy-qa.md",
             "references/design-and-references.md",
             "references/rendering-and-motion.md",
         ]
@@ -218,6 +222,21 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertIn("skills/last30days", read_text(install_sh))
         self.assertNotIn("ai-source-scout", read_text(install_sh))
 
+    def test_korean_persona_sampler_supports_real_nemotron_samples(self):
+        script = SKILL_DIR / "scripts" / "sample_korean_personas.py"
+        self.assertTrue(script.exists(), "Korean persona sampler is required")
+        text = read_text(script)
+
+        required_phrases = [
+            "nvidia/Nemotron-Personas-Korea",
+            "load_dataset",
+            "--count",
+            "--cache-dir",
+            "CC BY 4.0",
+        ]
+        for phrase in required_phrases:
+            self.assertIn(phrase, text)
+
 
 class AutoMotionNewsSkillTest(unittest.TestCase):
     def test_motion_skill_frontmatter_and_core_workflow(self):
@@ -240,6 +259,9 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
             "Remotion",
             "video-use",
             "last30days",
+            "Korean Persona Video QA",
+            "Nemotron-Personas-Korea",
+            "sample_korean_personas.py",
             "Do not automatically upload",
             "Approval gate",
             "Humanized Marketing Rule",
@@ -258,6 +280,7 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
         references = [
             "references/video-workflow.md",
             "references/humanized-video-marketing.md",
+            "references/korean-persona-video-qa.md",
             "references/media-research-and-rights.md",
             "references/motion-engine-selection.md",
         ]
@@ -285,6 +308,21 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
             text = read_text(path)
             for section in sections:
                 self.assertIn(section, text, f"{filename} missing {section}")
+
+    def test_motion_korean_persona_sampler_supports_real_nemotron_samples(self):
+        script = MOTION_SKILL_DIR / "scripts" / "sample_korean_personas.py"
+        self.assertTrue(script.exists(), "Motion Korean persona sampler is required")
+        text = read_text(script)
+
+        required_phrases = [
+            "nvidia/Nemotron-Personas-Korea",
+            "load_dataset",
+            "--count",
+            "--cache-dir",
+            "CC BY 4.0",
+        ]
+        for phrase in required_phrases:
+            self.assertIn(phrase, text)
 
     def test_init_motion_project_script_scaffolds_expected_files(self):
         script = MOTION_SKILL_DIR / "scripts" / "init_motion_project.py"

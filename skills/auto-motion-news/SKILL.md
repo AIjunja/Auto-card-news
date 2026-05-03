@@ -22,10 +22,29 @@ Every script, scene plan, caption, and product-style video must pass a humanized
 - Rewrite narration until it sounds natural when spoken out loud.
 - Remove generic AI phrases, press-release rhythm, and vague benefit words.
 - Check the first 2-second hook, viewer promise, proof, retention reason, and CTA.
+- Run Korean Persona Video QA with real `Nemotron-Personas-Korea` samples when the script risks sounding translated, too global, or too technical for Korean viewers.
 - For product, app, campaign, launch, lead magnet, or PitchCheck promotion, activate ad/conversion mode and define the offer, audience, proof, objection, CTA, and destination.
 - Keep the active channel voice, but keep factual or security content trustworthy.
 
 Read `references/humanized-video-marketing.md` when drafting scripts, converting card-news into video, writing captions, or planning promotional videos.
+
+Read `references/korean-persona-video-qa.md` when the hook, narration, overlays, or caption need to feel natural to Korean viewers. Use `scripts/sample_korean_personas.py` to sample real rows from `nvidia/Nemotron-Personas-Korea`; use cached samples before any imagined fallback.
+
+## Korean Persona Video QA
+
+Use Korean Persona Video QA before scene approval for Korean Reels/Shorts where the topic is technical, translated, or easy to explain like a lecture.
+
+- Build a 5-7 person viewer panel from real `Nemotron-Personas-Korea` samples whenever practical.
+- Do not quote sampled personas as real people; use them as synthetic viewer testers.
+- Ask whether each sampled viewer understands the first 2 seconds, which line sounds translated, which scene needs a familiar example, and what would keep them watching.
+- Rewrite spoken lines, scene labels, overlays, and captions until they sound like natural Korean.
+- Record the panel summary and rewrite notes in `scene-plan.md` or `script.md`.
+
+Sampler command:
+
+```powershell
+python skills\auto-motion-news\scripts\sample_korean_personas.py --count 7 --topic "<topic>"
+```
 
 ## Visual Source And Typography Rule
 
@@ -174,46 +193,53 @@ Do not require its ElevenLabs Scribe path unless the user asks for that exact wo
    - Define why the viewer keeps watching after each scene.
    - Define the save, comment, share, or try reason.
 
-4. **Draft or convert the script**
+4. **Build a Korean viewer panel when script risk is high**
+   - If the source is English, technical, product-doc-like, or likely to sound translated, run Korean Persona Video QA before finalizing the hook.
+   - Use `scripts/sample_korean_personas.py` to sample real `Nemotron-Personas-Korea` rows when network and dependencies are available.
+   - Save sampled panel notes and rewrite decisions in `script.md` or `scene-plan.md`.
+   - If the sampler cannot run, record the reason and use cached samples before using a labeled fallback panel.
+
+5. **Draft or convert the script**
    - For raw scripts, tighten the opening and remove slow exposition.
    - For card-news, convert card roles into video beats: hook, situation, proof, useful point, channel take, CTA.
    - Do not simply read every card aloud.
    - Keep spoken lines natural and easy to say out loud.
    - Run the spoken Humanizer pass from `references/humanized-video-marketing.md` before showing the script.
+   - Run Korean Persona Video QA from `references/korean-persona-video-qa.md` before scene approval when the script risks sounding translated or too abstract for Korean viewers.
    - If the video promotes a product or campaign, run ad/conversion mode before writing the final CTA.
 
-5. **Search visual references**
+6. **Search visual references**
    - Search official demos, product pages, screenshots, GitHub media, documentation, credible creator walkthroughs, and open-license media.
    - If fresh source discovery is needed, use `last30days`: https://github.com/mvanhorn/last30days-skill
    - Record all source URLs and usage notes in `source-pack.md`.
    - Read `references/media-research-and-rights.md` before using outside media.
 
-6. **Build scene plan**
+7. **Build scene plan**
    - Create a scene-by-scene plan with timestamp, line, visual, motion idea, engine, and viewer reason.
    - Keep most scenes short, usually 2-6 seconds.
    - Avoid slideshow pacing. Something meaningful should change every few seconds.
    - Run the retention marketing check from `references/humanized-video-marketing.md` so every scene has a viewer reason and a visual change.
 
-7. **Choose motion engine**
+8. **Choose motion engine**
    - Prefer HyperFrames for short HTML/CSS/GSAP motion: big subtitles, typing, panels, chips, UI callouts, cursor paths, screenshot zooms.
    - Use Remotion for narration sync, audio timing, longer timelines, video compositing, or reusable React video templates.
    - Treat `video-use` as a companion/reference for editing user-recorded footage, not as the default script-to-motion engine and not as a mandatory paid-API path.
    - Read `references/motion-engine-selection.md`.
 
-8. **Approval gate: script and scene plan**
+9. **Approval gate: script and scene plan**
    - Show the script and scene plan before creating motion output.
    - Ask for approval or revision.
 
-9. **Create preview motion**
+10. **Create preview motion**
    - Build preview scenes only after approval.
    - For HyperFrames, run lint and inspect before final render.
    - For Remotion, verify preview frames and audio/video timing when used.
 
-10. **Approval gate: motion preview**
+11. **Approval gate: motion preview**
     - Show preview image or MP4 path.
     - Ask for final approval before rendering final assets.
 
-11. **Render final package**
+12. **Render final package**
     - Render MP4 only after approval.
     - Save caption and source notes.
     - Do not upload automatically.
@@ -245,6 +271,7 @@ Use `scripts/init_motion_project.py` to scaffold this structure when helpful.
 
 - Read `references/video-workflow.md` when converting an input into a short-form script and scene plan.
 - Read `references/humanized-video-marketing.md` when polishing scripts, captions, CTAs, retention beats, or product/ad-style videos.
+- Read `references/korean-persona-video-qa.md` when testing hooks, spoken lines, overlays, or captions against real `Nemotron-Personas-Korea` samples.
 - Read `references/media-research-and-rights.md` before searching, using, recreating, or attributing visual references.
 - Read `references/motion-engine-selection.md` before deciding HyperFrames, Remotion, video-use, or static fallback.
 - Read `references/recorded-footage-edit-mode.md` when the input is a user recording, audio note, screen capture, talking-head clip, demo recording, or tutorial footage.
@@ -262,6 +289,7 @@ A motion-news project is complete only when:
 - For uploaded recordings, raw files remain untouched and privacy-sensitive details are reviewed before final render.
 - Each scene has a viewer reason and motion reason.
 - Script, scene plan, caption, and CTA pass the Humanizer, Marketing, and ad/conversion checks when applicable.
+- Korean Persona Video QA is recorded when the topic is technical, translated, or at risk of sounding unlike Korean social video.
 - The engine choice is recorded per scene.
 - Preview motion has been reviewed when MP4 is requested.
 - Final files match the approved output plan.
