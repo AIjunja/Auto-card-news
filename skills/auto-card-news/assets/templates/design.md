@@ -8,6 +8,13 @@
 
 {typography}
 
+### Default Korean Font
+
+- Main Korean headlines and body copy use `Griun Mongtori` from `Griun_Mongtori-Rg.ttf`.
+- `Moneygraphy Rounded` is a fallback or small UI-label font, not the default headline/body voice.
+- Code, commands, package names, and tool names may use monospace when they need to read as code.
+- Static PNG and motion MP4 output must use the same primary Korean font.
+
 ### Instagram Typography Baseline
 
 - 4:5 cards (`1080x1350`) should be designed for phone readability after Instagram upload.

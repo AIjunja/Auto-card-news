@@ -57,7 +57,7 @@ Remind the user to confirm Remotion license terms for commercial use when the pr
 
 ## video-use
 
-Use video-use as a companion or future workflow when the input is existing footage:
+Use video-use as a companion or reference workflow when the input is existing footage:
 
 - talking-head video
 - screen recording
@@ -67,6 +67,18 @@ Use video-use as a companion or future workflow when the input is existing foota
 - footage that needs transcript-based cuts
 
 It is not the default for "script to generated motion graphics." It is closer to an AI video editor for existing footage.
+
+Do not treat ElevenLabs as mandatory. The original video-use workflow commonly uses ElevenLabs Scribe for word-level timestamps, but this workspace should default to free/local-first editing:
+
+- silence/dead-space cutting from waveform, screen-state changes, and manual preview;
+- user-provided script or notes;
+- HyperFrames/Remotion motion graphics, callouts, zooms, and recap cards;
+- optional local STT only if it materially improves editing and is already available or explicitly approved;
+- paid STT only after explicit user approval.
+
+Subtitles are optional. If the user will add subtitles in post, focus on pacing cleanup, vertical crop, zoom/callout motion, and output a clean subtitle-free edit.
+
+Without word-level timestamps, do not promise word-perfect subtitles or filler-word cuts. Use broader visual/audio cuts, waveform gaps, visible state changes, and manual preview.
 
 ## Static Fallback
 
@@ -79,4 +91,3 @@ Choose static PNG or no motion when:
 - the scene should be a card-news asset instead of a video scene
 
 Motion should earn its place.
-

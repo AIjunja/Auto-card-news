@@ -16,6 +16,7 @@ Replace:
 - "Users can leverage advanced capabilities"
 - "The platform enables productivity gains"
 - "In today's rapidly changing AI landscape"
+- literal translations or internal phrases that Korean viewers would not say out loud
 
 With:
 
@@ -23,6 +24,9 @@ With:
 - "This matters because the tool starts helping where you already work."
 - "The win is not fancy. It is fewer repeat clicks."
 - "If your team uses this, check the version first."
+- "바로 코딩하지 말고 먼저 순서를 잡아줘요."
+- "커밋 한 줄 때문에 토큰 폭탄 맞았다고?"
+- "GitHub에서 별 제일 많은 레포가 뭘까?"
 
 Each scene should sound like one person talking to one viewer. Short-form scripts should not read like caption paragraphs.
 
@@ -34,6 +38,8 @@ Before motion work, each scene needs a reason to keep watching:
 - Scene 2: explain what this is in one plain sentence.
 - Middle scenes: alternate proof, example, and consequence. Do not stack abstract explanation.
 - Final scene: give one action the viewer can take now.
+
+Strong first-scene inputs include concrete social proof: GitHub stars, leaderboard rank, public view count, official release date, benchmark result, or a surprising screenshot. If a metric is changing, keep the narration flexible and record the capture date in source notes.
 
 For every scene, write:
 

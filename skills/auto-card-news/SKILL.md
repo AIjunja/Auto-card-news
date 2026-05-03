@@ -80,6 +80,44 @@ Do not copy a saved position blindly. After applying a reusable layout rule, che
 
 Design for phone readability after Instagram upload, not desktop preview comfort. For the default 4:5 output size (`1080x1350`), start with this larger typography scale and only reduce it when the rendered card proves it still reads clearly on mobile.
 
+- Default Korean headline and main body font: `Griun Mongtori` from `Griun_Mongtori-Rg.ttf`.
+- Use `Moneygraphy Rounded` only as a fallback, for small UI labels, or when the user explicitly asks for a different visual voice.
+- For AIjjuun-style and default card-news output, headline, hook, body copy, thread mockup copy, checklist copy, and HTML-native visual text should use `Griun Mongtori`.
+- Keep code, command, and tool names in a monospace font such as `Consolas` only when they are intentionally shown as code.
+- When copying an older project or script, check that the generated CSS does not set `html, body`, `.title`, `.body`, `.cover-title`, or motion-card text to `Moneygraphy Rounded` as the primary font.
+
+Default CSS pattern:
+
+```css
+@font-face {
+  font-family: "Griun Mongtori";
+  src: url("../assets/fonts/Griun_Mongtori-Rg.ttf") format("truetype");
+  font-weight: 400;
+}
+
+@font-face {
+  font-family: "Moneygraphy Rounded";
+  src: url("../assets/fonts/Moneygraphy-Rounded.woff2") format("woff2");
+  font-weight: 700;
+}
+
+body {
+  font-family: "Moneygraphy Rounded", system-ui, sans-serif;
+}
+
+.cover-title,
+.cover-sub,
+.title,
+.body,
+.thread-text,
+.checklist,
+.visual-copy {
+  font-family: "Griun Mongtori", "Moneygraphy Rounded", system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+```
+
 - Cover or hook headline: `88-104px`, line-height `1.02-1.08`.
 - Normal card headline: `76-94px`, line-height `1.04-1.12`.
 - Support copy: `34-42px`, line-height `1.28-1.38`.

@@ -23,6 +23,19 @@ Do not use external media as decoration only. Each image or video must prove, cl
 
 If a video or image will be used in an exported post, prefer official/public source material and include source attribution. If rights are unclear, use it as reference only and create a new visual, screenshot recreation, or generated/HTML-native scene instead.
 
+## Fresh Proof And Social Metrics
+
+For GitHub repos, tools, models, launch posts, or creator demos, capture proof that makes the viewer believe the story quickly:
+
+- GitHub stars, forks, latest release, README positioning, badges, topic labels, and contributor/activity signals
+- Ranking pages or leaderboards when the angle starts from "most starred", "top ranked", "fastest growing", or similar curiosity
+- Official demo screenshots, docs screenshots, or issue/PR screenshots that show the actual claim
+- View counts, like counts, dates, and post context for social proof when the source is a public post
+
+Treat these numbers as time-sensitive. Write "captured on YYYY-MM-DD" or "캡처 시점 기준" in `source-pack.md`, `brief.md`, or the caption if the metric appears in the final copy.
+
+Use metrics only when they change the viewer's reason to care. A star count can be a strong hook for "why everyone saved this repo", but it should not replace explaining what the viewer can do with the resource.
+
 ## Viewer Frame
 
 Before summarizing the source as a carousel, define the viewer-first frame:

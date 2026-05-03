@@ -37,6 +37,12 @@ For first cards, consider motion if a short demo loop, zoom-in, cursor movement,
 
 Instagram carousels are consumed on phones, often after compression and inside a busy feed. A desktop preview can make text feel larger than it will feel in the app. Use a larger default scale for 4:5 cards (`1080x1350`):
 
+- Default Korean headline and main body copy should use `Griun Mongtori` from `Griun_Mongtori-Rg.ttf`.
+- Use `Moneygraphy Rounded` only as a fallback, for small UI labels, or when the user explicitly asks for that look.
+- Apply `Griun Mongtori` consistently to cover headlines, card titles, body explanations, checklist copy, thread mockups, HTML-native diagrams, and motion-card text.
+- Keep code, command, package, and tool names in monospace only when the text needs to read as code.
+- If a script or old project sets `Moneygraphy Rounded` as the primary font for `.cover-title`, `.title`, `.body`, or motion copy, change it before rendering.
+
 - Cover or hook headline: `88-104px`.
 - Normal card headline: `76-94px`.
 - Support copy: `34-42px`.
