@@ -28,9 +28,9 @@ If a video or image will be used in an exported post, prefer official/public sou
 For GitHub repos, tools, models, launch posts, or creator demos, capture proof that makes the viewer believe the story quickly:
 
 - GitHub stars, forks, latest release, README positioning, badges, topic labels, and contributor/activity signals
-- Ranking pages or leaderboards when the angle starts from "most starred", "top ranked", "fastest growing", or similar curiosity
-- Official demo screenshots, docs screenshots, or issue/PR screenshots that show the actual claim
-- View counts, like counts, dates, and post context for social proof when the source is a public post
+- ranking pages or leaderboards when the angle starts from "most starred", "top ranked", "fastest growing", or similar curiosity
+- official demo screenshots, docs screenshots, or issue/PR screenshots that show the actual claim
+- view counts, like counts, dates, and post context for social proof when the source is a public post
 
 Treat these numbers as time-sensitive. Write "captured on YYYY-MM-DD" or "캡처 시점 기준" in `source-pack.md`, `brief.md`, or the caption if the metric appears in the final copy.
 

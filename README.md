@@ -1,6 +1,6 @@
 # Auto-card-news Skills
 
-Version: `0.4.1`
+Version: `0.4.2`
 
 This repository ships Codex skills for making channel-aware card news, Instagram carousel content, and short-form motion-video packages through conversation.
 
@@ -16,6 +16,7 @@ Included skills:
 - source intake from URLs, reports, notes, or GPT conversations
 - fresh source discovery with `last30days`
 - viewer-first framing around the audience's situation, curiosity, pain, and action reason
+- AIjjuun-style source curation for minor-but-useful AI tools/news from official sources, GitHub, GeekNews, X/Threads, Reddit, demos, and community hype signals
 - image, screenshot, official demo, and video reference discovery
 - carousel angle proposals
 - full card copy drafts
@@ -41,6 +42,7 @@ Included skills:
 - visual reference research with usage notes and attribution
 - spoken Humanizer review for scripts and captions
 - retention marketing checks for first 2-second hook, proof, scene reason, and CTA
+- AIjjuun-style 15-20 second Reel planning with real source proof, practical use-case motion, safe-zone checks, and comment/save/follow CTAs
 - optional ad/conversion planning for product or PitchCheck videos
 - HyperFrames-first motion planning with Remotion as the complex-video fallback
 - reusable `script.md`, `scene-plan.md`, `source-pack.md`, `motion-plan.md`, `caption.md`, and `design.md` files
@@ -140,6 +142,8 @@ The current workflow is engagement-first. It should avoid PPT-like briefing slid
 
 The copy workflow now includes a Humanizer and marketing review inspired by public marketing/copywriting skill repos. It checks whether the copy sounds like a real channel editor, whether the post gives a concrete reason to care, and whether captions include useful source or try-it links. Product and PitchCheck content can also run ad/conversion mode for offer, proof, objection, CTA, and destination planning.
 
+For AIjjuun-style AI news and tool posts, the repo includes a production playbook that formalizes the working style developed through repeated account experiments: do not stop at official blogs, look for minor-but-useful sources, connect every topic to a practical Korean viewer use case, keep the card copy short, use real visual proof, and package each post so it can build toward AX consulting trust.
+
 For short-form video, call:
 
 ```text
@@ -157,12 +161,14 @@ skills/auto-card-news/
   SKILL.md
   agents/openai.yaml
   references/
+    ai-jjuun-production-playbook.md
   assets/templates/
   scripts/init_project.py
 skills/auto-motion-news/
   SKILL.md
   agents/openai.yaml
   references/
+    ai-jjuun-reel-playbook.md
   assets/templates/
   scripts/init_motion_project.py
 tests/

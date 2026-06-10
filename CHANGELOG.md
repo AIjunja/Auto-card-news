@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.2
+
+- Formalized the AIjjuun production playbook for AI news, GitHub/open-source picks, source curation, Korean social copy, captions, visual proof, and AX-consulting bridge content.
+- Added the AIjjuun Reel playbook for 15-20 second source-backed Reels with hook, explanation, engagement CTA, safe-zone, typography, and motion QA rules.
+- Synced the installed `auto-card-news` and `auto-motion-news` skill rules back into the repository so the GitHub-managed version matches the working local skill behavior.
+- Added required Humanize-Korean, source-media, layout, typography, and retention QA references for future card-news and motion packages.
+
 ## 0.4.1
 
 - Added Humanizer-style copy review for carousel cards, captions, scripts, and CTAs.

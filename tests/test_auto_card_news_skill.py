@@ -59,7 +59,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "HTML/CSS preview",
             "PNG",
             "MP4",
-            "Do not automatically upload",
+            "Do not upload to Instagram",
+            "required official API credentials",
         ]
         for phrase in required_phrases:
             self.assertIn(phrase, text)
@@ -88,6 +89,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         skill_text = read_text(SKILL_MD)
         references = [
             "references/channel-profiles.md",
+            "references/ai-jjuun-production-playbook.md",
+            "references/scrapling-source-collection.md",
             "references/project-workflow.md",
             "references/humanized-marketing-copy.md",
             "references/korean-persona-copy-qa.md",
@@ -178,8 +181,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.4.1")
-        self.assertIn("0.4.1", read_text(changelog))
+        self.assertEqual(read_text(version).strip(), "0.4.2")
+        self.assertIn("0.4.2", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
@@ -199,6 +202,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "Humanizer",
             "marketing checks",
             "ad/conversion mode",
+            "AIjjuun-style source curation",
+            "AX consulting",
             "HyperFrames-first",
             "install.ps1",
             "install.sh",
@@ -262,7 +267,8 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
             "Korean Persona Video QA",
             "Nemotron-Personas-Korea",
             "sample_korean_personas.py",
-            "Do not automatically upload",
+            "Do not upload to YouTube",
+            "required official API credentials",
             "Approval gate",
             "Humanized Marketing Rule",
             "Humanizer",
@@ -279,6 +285,7 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
         skill_text = read_text(MOTION_SKILL_MD)
         references = [
             "references/video-workflow.md",
+            "references/ai-jjuun-reel-playbook.md",
             "references/humanized-video-marketing.md",
             "references/korean-persona-video-qa.md",
             "references/media-research-and-rights.md",

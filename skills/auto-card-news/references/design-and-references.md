@@ -26,10 +26,15 @@ Do not fill cards with paragraph explanations. If the text feels like a script, 
 When using searched images, screenshots, or video frames:
 
 - Use the media as a primary visual layer, not a tiny thumbnail.
-- Protect text readability with a dim overlay, blurred edge, or gradient fade from image to copy area.
+- Preserve the original color and recognizability of source media by default.
+- Protect text readability with a local dim overlay, text backdrop, blurred edge, or gradient fade from image to copy area.
 - Keep source attribution small but readable.
 - Prefer actual tool UI, demo clips, product screens, workflow captures, before/after examples, or field-context visuals.
 - Avoid vague stock-like backgrounds when the viewer needs to understand a real tool, product, or scene.
+- Do not grayscale, monochrome-tint, heavily desaturate, over-darken, or globally blur official screenshots, product UIs, demo frames, or user-provided images unless the user explicitly asks for that art direction.
+- If text is hard to read, first move the text, add a bottom gradient, add a small local backdrop, or crop the image differently before applying a destructive filter to the whole media.
+- Fail the design review if the image becomes a mood texture instead of proof.
+- Let source media lead the palette. Use neutral editorial surfaces and only one or two accent colors sampled from the source/product/channel. Do not force every topic into the same teal, purple, grayscale, or monochrome treatment.
 
 For first cards, consider motion if a short demo loop, zoom-in, cursor movement, reveal, or before/after will stop scrolling better than a static cover.
 
