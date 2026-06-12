@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.3
+
+- Added Viral Poster V2 guidance to `auto-card-news` for the new Korean promo-poster/card-news style inspired by restaurant, popup, and local event viral references.
+- Added matching Viral Poster V2 Reel guidance to `auto-motion-news` so the loud carousel style carries into short-form video instead of becoming a static slideshow.
+- Added Instagram thumbnail crop QA so chip/headline collisions and awkward Korean line breaks are checked before final export.
+
 ## 0.4.2
 
 - Formalized the AIjjuun production playbook for AI news, GitHub/open-source picks, source curation, Korean social copy, captions, visual proof, and AX-consulting bridge content.

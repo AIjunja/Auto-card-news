@@ -35,14 +35,17 @@ Before calling a carousel final:
 
 1. Render all cards to PNG.
 2. Create or inspect a contact sheet.
-3. Check for:
+3. Also create or inspect an Instagram grid thumbnail crop sheet, usually a centered 1:1 crop from each 4:5 card. Many overlap problems only appear after Instagram crops the post in profile/grid previews.
+4. Check for:
    - awkward Korean line breaks;
    - orphan words on a line;
    - number badges overlapping headlines;
    - text touching the brand, footer, source, or page number;
+   - chips, labels, stickers, or badges visually colliding with the first line of the headline in full card or 1:1 crop previews;
+   - Korean words splitting unnaturally across lines, such as a final particle or syllable being pushed alone;
    - repeated visuals with only different text;
    - heavy blur hiding the actual source visual.
-4. If any card fails, edit the HTML/CSS and render again.
+5. If any card fails, edit the HTML/CSS and render again.
 
 Do not report completion if the cards were not visually inspected after rendering.
 
@@ -87,6 +90,36 @@ Default fix:
 - keep copy short enough to read while swiping;
 - move detail to `caption.md` or `source.md`;
 - make every card answer one of: "why care?", "what is it?", "how do I try it?", "what should I watch out for?"
+
+## Viral Poster V2 Mode
+
+Use this mode when the user asks for "2탄", "바이럴형", "맛집/팝업 레퍼런스 느낌", "도블락 느낌", "전단지형", or says the current card-news feels too calm, PPT-like, or unlike the uploaded viral references.
+
+This is not the default clean AI news layout. It is a deliberate scroll-stopping poster style adapted from Korean restaurant, popup-store, and local event promo cards.
+
+Core rules:
+
+- Make the first card feel closer to a viral restaurant/event poster than a tech briefing.
+- Use a real or generated hook visual as the full background, then place huge Korean type on top.
+- Use thick layered typography: white outer stroke, black inner stroke, bright fill colors, and a hot-pink or yellow shadow.
+- Prefer short emotional Korean phrases over explanations. The cover should be readable in 1 second.
+- Use loud color accents such as hot pink, red, yellow, mint, and white. Do not make a quiet monochrome tech card.
+- Use stickers, fireworks, arrows, badges, dots, price-tag shapes, speech bubbles, and ">> <<" style emphasis only when they help the hook.
+- Keep body cards photo-first: one big real/demo/source image, one short headline, one practical takeaway.
+- Avoid line charts, thin connector diagrams, muted gradients, and text-heavy panels unless the source itself requires them.
+- Do not reuse the same screenshot on every card with only different text.
+- Keep detail in `caption.md`, `source-pack.md`, or `storyboard.md`; keep cards snackable.
+
+Hard fail and revise if:
+
+- The result looks like the normal AIjjuun dark tech template with only louder colors.
+- The cover could be mistaken for a GitHub repo screenshot thumbnail.
+- The body cards look like presentation slides.
+- Background media is blurred so heavily that viewers cannot tell what it shows.
+- More than one line of body copy is needed to understand the card.
+- The typography creates awkward orphan words, clipped Korean glyphs, or overlaps with page numbers and source text.
+
+Read `references/viral-poster-v2-style.md` before producing this style.
 
 ## Reels-First Package Rule
 

@@ -80,6 +80,33 @@ Default fix:
 - keep each overlay short enough to read in one glance;
 - move detailed context to the caption.
 
+## Viral Poster V2 Reel Mode
+
+Use this mode when the related carousel uses `auto-card-news` Viral Poster V2 Mode, or when the user asks for "2탄", "바이럴형", "맛집/팝업 레퍼런스 느낌", "도블락 느낌", or a louder Reel that does not feel like a tech explainer.
+
+This mode turns AI news into a short viral promo-style Reel:
+
+- 0-2s: moving poster hook. Use giant outlined Korean text, punch-in zoom, sticker pop, quick flash, or a real demo frame.
+- 2-8s: one concrete use case. Show a screen, command, UI, source crop, or generated scene. Do not lecture.
+- 8-15s: why it matters. Use 2-3 sticker chips, checklist reveal, or before/after.
+- 15-20s: comment/save/follow CTA with one keyword.
+
+Visual rules:
+
+- Match the card's loud typography: thick white outer stroke, black inner stroke, hot-pink/yellow shadow, bright fills.
+- Use source images and demo frames clearly. Do not over-blur or grayscale them.
+- Keep the main text away from Instagram lower profile/caption and right-side action UI.
+- Prefer fast readable motion over long smooth slides.
+- Use at least three motion jobs: punch-in zoom, sticker pop, type-in, callout bounce, screenshot crop pan, checklist reveal, or CTA keyword pop.
+
+Hard fail and revise if:
+
+- the Reel is only the static card PNGs fading;
+- the first 2 seconds are calm;
+- text is too small or thin;
+- the source visual is hidden behind blur/dim;
+- it feels like a normal AI news explainer instead of a viral poster/video hybrid.
+
 ## Publishing Automation Rule
 
 Publishing automation is allowed only when the user explicitly requests it and local credentials are configured. Never ask the user to paste access tokens directly into chat.
@@ -538,6 +565,7 @@ Use `scripts/init_motion_project.py` to scaffold this structure when helpful.
 - Read `references/korean-persona-video-qa.md` when testing hooks, spoken lines, overlays, or captions against real `Nemotron-Personas-Korea` samples.
 - Read `references/media-research-and-rights.md` before searching, using, recreating, or attributing visual references.
 - Read `references/motion-engine-selection.md` before deciding HyperFrames, Remotion, video-use, or static fallback.
+- Read `references/viral-poster-v2-reels.md` when the paired carousel uses Viral Poster V2 Mode or the user asks for a loud Korean promo-poster/Reel hybrid.
 - Read `references/recorded-footage-edit-mode.md` when the input is a user recording, audio note, screen capture, talking-head clip, demo recording, or tutorial footage.
 - Read `references/publishing-automation.md` before creating publish queues, upload scripts, Meta API upload flows, or cross-post automation.
 - Use `auto-card-news` when the job starts as a carousel and the user also wants static PNG cards.

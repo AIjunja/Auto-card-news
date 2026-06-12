@@ -96,6 +96,7 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "references/korean-persona-copy-qa.md",
             "references/design-and-references.md",
             "references/rendering-and-motion.md",
+            "references/viral-poster-v2-style.md",
         ]
 
         for reference in references:
@@ -181,8 +182,8 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.4.2")
-        self.assertIn("0.4.2", read_text(changelog))
+        self.assertEqual(read_text(version).strip(), "0.4.3")
+        self.assertIn("0.4.3", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
@@ -197,8 +198,10 @@ class AutoCardNewsSkillTest(unittest.TestCase):
             "engagement-first",
             "video reference",
             "line-break QA",
+            "thumbnail crop",
             "lower safe zone",
             "spacing relationship",
+            "Viral Poster V2",
             "Humanizer",
             "marketing checks",
             "ad/conversion mode",
@@ -290,6 +293,7 @@ class AutoMotionNewsSkillTest(unittest.TestCase):
             "references/korean-persona-video-qa.md",
             "references/media-research-and-rights.md",
             "references/motion-engine-selection.md",
+            "references/viral-poster-v2-reels.md",
         ]
 
         for reference in references:

@@ -1,6 +1,6 @@
 # Auto-card-news Skills
 
-Version: `0.4.2`
+Version: `0.4.3`
 
 This repository ships Codex skills for making channel-aware card news, Instagram carousel content, and short-form motion-video packages through conversation.
 
@@ -17,6 +17,7 @@ Included skills:
 - fresh source discovery with `last30days`
 - viewer-first framing around the audience's situation, curiosity, pain, and action reason
 - AIjjuun-style source curation for minor-but-useful AI tools/news from official sources, GitHub, GeekNews, X/Threads, Reddit, demos, and community hype signals
+- Viral Poster V2 mode for loud Korean promo-poster style card-news when the user asks for `2탄`, `바이럴형`, `맛집/팝업 레퍼런스`, or Doblock-style retention
 - image, screenshot, official demo, and video reference discovery
 - carousel angle proposals
 - full card copy drafts
@@ -24,6 +25,7 @@ Included skills:
 - one-HTML-file-per-card previews
 - media-led design with readable dim, blur, and gradient treatments
 - line-break QA so headings do not leave awkward orphan words alone
+- Instagram thumbnail crop QA so chips, badges, and headlines do not collide in profile/grid previews
 - Humanizer-style copy review to remove AI-sounding phrasing and stiff summaries
 - marketing checks for hook, promise, proof, save/comment/share reason, and CTA
 - optional ad/conversion mode for product, app, campaign, lead magnet, and PitchCheck marketing posts
@@ -43,6 +45,7 @@ Included skills:
 - spoken Humanizer review for scripts and captions
 - retention marketing checks for first 2-second hook, proof, scene reason, and CTA
 - AIjjuun-style 15-20 second Reel planning with real source proof, practical use-case motion, safe-zone checks, and comment/save/follow CTAs
+- Viral Poster V2 Reel mode for moving poster hooks, sticker pops, screenshot zooms, and loud CTA motion that matches the carousel style
 - optional ad/conversion planning for product or PitchCheck videos
 - HyperFrames-first motion planning with Remotion as the complex-video fallback
 - reusable `script.md`, `scene-plan.md`, `source-pack.md`, `motion-plan.md`, `caption.md`, and `design.md` files
