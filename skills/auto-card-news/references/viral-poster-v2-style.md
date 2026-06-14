@@ -1,151 +1,168 @@
 # Viral Poster V2 Style
 
-Use this reference when the user wants the second card-news style: viral Korean promo-poster energy applied to AI news, tools, repos, and tutorials.
+Use this reference when the user asks for `스킬 2`, `2탄`, `바이럴형`, `도블락 느낌`, or points to the VibeVoice result as the desired style.
 
-## Purpose
+## Canonical Benchmark
 
-This mode exists because the normal AI news style can become too calm. The goal is to make viewers stop like they stopped on a restaurant opening, popup event, limited sale, or local hot-place post.
+The canonical benchmark is:
 
-The content is still AI news, but the visual grammar is closer to:
+`carousel-workspace/projects/ai-jjuun/2026-06-11-vibevoice/output`
 
-- restaurant opening cards;
-- popup-store announcements;
-- local event posters;
-- "save this list" viral utility posts;
-- creator-made loud thumbnails.
+This is the style to imitate, not the earlier over-decorated restaurant flyer experiment.
 
-## When To Use
+## What This Style Is
 
-Use it when:
+Viral Poster V2 is an AI쭌-specific viral card-news format:
 
-- the user says `2탄`, `바이럴형`, `맛집 느낌`, `팝업스토어 느낌`, `전단지`, `도블락`, or `레퍼런스랑 더 비슷하게`;
-- the topic needs non-technical people to stop scrolling;
-- the source is useful but visually boring, such as GitHub repos, docs, blog posts, MCP tools, prompts, or coding-agent workflows;
-- the user says the previous output looked like PPT, blog summary, or too clean.
+- dark tech base;
+- subtle grid or soft gradient;
+- GmarketSans Korean type;
+- big readable headlines;
+- actual product/source/demo visuals;
+- white rounded cards and chips;
+- mint, pink, yellow accent colors;
+- short human Korean copy;
+- clear source line and page number.
 
-Do not use it for sensitive crisis, legal, medical, severe security incidents, or serious apology/exploit topics unless the user explicitly wants a loud format. In those cases, keep the hook strong but reduce gimmicks.
+It should feel more viral and punchy than the normal AI news template, but it must still be readable, useful, and source-backed.
 
-## Visual Formula
+## What This Style Is Not
 
-### Cover
+Do not make it:
 
-The cover should be the loudest card.
+- a random restaurant flyer;
+- a PPT slide;
+- a plain GitHub screenshot with text slapped on;
+- a dark blurry background where the source image cannot be recognized;
+- a decorative poster full of arrows, fireworks, badges, and stickers with no clear message.
 
-- Full-bleed background: real demo frame, product screenshot, creator screenshot, official media, or GPT-generated scene.
-- Apply only enough dim/gradient for readability. Do not hide the image.
-- Big Korean title takes 55-75% of the card height.
-- Use 3-5 short title chunks, not a sentence.
-- Use layered text:
-  - outer white stroke;
-  - inner black stroke;
-  - fill in white, pink, red, or yellow;
-  - hot-pink/yellow shadow;
-  - optional small sparkle/firework shapes.
-- Add one small round/black ticket at the bottom for the actual promise.
+## Cover Formula
 
-Good cover rhythm:
+The first card must stop the scroll with a concrete use case or payoff.
+
+Good:
 
 ```text
->> 요즘 AI판 핵심 이슈 <<
-프롬프트만
-잘 쓰면
-끝난 줄
-알았죠?
-
-AI가 혼자 일하게 만드는
-루프 엔지니어링 등장
+녹음 안 했는데
+팟캐스트가
+나옵니다
 ```
 
-Bad cover rhythm:
+Good:
 
 ```text
-Loop Engineering is a technique where developers design automated feedback loops...
+회의 녹음,
+다시 듣지 말고
+쪼개서 보세요
 ```
 
-### Body Cards
-
-Body cards should not become PPT slides. Each body card should show one visual and one idea.
-
-Use:
-
-- one big source/demo image;
-- one oversized headline;
-- 1-2 short support lines;
-- 2-4 sticker chips if useful;
-- clear source line.
-
-Avoid:
-
-- multiple paragraphs;
-- abstract diagrams;
-- tiny screenshots;
-- repeated repo homepage screenshots;
-- decorative lines connecting boxes;
-- body copy that needs more than 3 seconds to read.
-
-### CTA Card
-
-The final card can return to cover energy.
-
-Use:
-
-- one bold takeaway;
-- one action;
-- one comment keyword when useful.
-
-Example:
+Bad:
 
 ```text
-다음엔
-프롬프트
-말고
-루프 짜요
-
-댓글에 "루프" 남기면
-예시 구조 더 풀어볼게요
+Microsoft VibeVoice
+오픈소스 음성 AI 모델 소개
 ```
+
+Rules:
+
+- Use a recognizable hook visual: official demo, product screenshot, source image, generated scene, or reconstructed UI.
+- Use only enough dim/gradient for text readability.
+- Main title should be huge and readable in Instagram grid view.
+- Keep title to 2-4 short chunks.
+- Add one small label chip such as `AI NEWS | VOICE`, `왜 봐야 하냐면`, or `공식 자료`.
+- Add one short subtitle/promise line only if needed.
+
+## Body Card Formula
+
+Each card should explain one thing.
+
+Use this structure:
+
+1. One large visual proof or demo image.
+2. One big Korean headline.
+3. One short support sentence.
+4. Optional 2-4 chips or boxes only if they make the idea easier.
+
+Good body card jobs:
+
+- `what is it?`
+- `why should I care?`
+- `how can I use it?`
+- `what changed?`
+- `what should I watch out for?`
+
+Bad body card jobs:
+
+- listing every feature;
+- explaining the whole repo;
+- summarizing an official blog paragraph;
+- repeating the same screenshot across cards.
 
 ## Copy Rules
 
-Write like a Korean creator explaining something useful to a friend.
+Write like a Korean AI tutor talking to a friend.
 
-- Replace abstract benefits with a concrete situation.
-- Keep card copy short and punchy.
-- Use familiar words before technical names.
-- Put technical terms after the hook, not before it.
-- Keep the AIjjuun cute tutor voice when it helps, but do not make the content childish.
+- Prefer concrete situations over abstract benefits.
+- Use familiar Korean first, technical terms second.
+- Avoid translated-English phrasing.
+- Avoid empty labels like `TTS / ASR / Realtime` unless you immediately explain what they mean.
+- Use `~요`, `~해요`, `~해보세요`, and occasional cute AI쭌 tone in captions, but do not make the card childish.
 
-Use these transformations:
+Transform copy like this:
 
 | Weak | Better |
 | --- | --- |
-| 생산성 향상 | 내가 덜 붙잡고 있어도 됨 |
-| 워크플로우 최적화 | 찾고, 만들고, 검사하는 순서 짜기 |
-| 활용 가치가 큼 | 아침마다 자료조사 시키기 좋음 |
-| 에이전트 성능 개선 | AI가 중간에 길 잃는 걸 줄임 |
-| 개발자에게 유용 | 코드 리뷰, CI 실패, 릴리즈 정리에 바로 씀 |
+| TTS / ASR / Realtime | 대본 읽기 / 녹음 받아쓰기 / 바로 말하기 |
+| 생산성 향상 | 다시 듣는 시간을 줄여줘요 |
+| 워크플로우 최적화 | 찾고, 만들고, 검토하는 순서를 줄여요 |
+| 에이전트 성능 개선 | AI가 중간에 길 잃는 걸 줄여요 |
+| 개발자에게 유용 | 코드 리뷰, CI 실패, 릴리즈 정리에 바로 써요 |
 
-## Layout QA
+## Layout Rules
+
+- Use GmarketSans as default.
+- Use `word-break: keep-all`.
+- Do not scale font size with viewport width.
+- Keep large text away from page numbers and source lines.
+- Number badges must not touch or overlap headlines.
+- If using arrows, keep them large and simple; do not build thin connector diagrams.
+- Chips/boxes must be centered vertically and horizontally.
+- If a chip has two lines, both lines must fit naturally.
+- If text does not fit, shorten the copy before shrinking the font.
+
+## Visual Rules
+
+- Use the real image/video/source when it helps understanding.
+- Do not blur the main visual so much that the subject disappears.
+- Avoid grayscale filters unless the source itself is grayscale.
+- Avoid using the same GitHub repo screenshot on every card.
+- For GitHub repos, capture distinct anchors: repo home, README section, demo image, examples folder, issue/release, or reconstructed use-case UI.
+- If no useful visual exists, create an HTML-native scene that shows the practical workflow.
+
+## QA Checklist
 
 Before final:
 
-1. Render all cards.
-2. Make a contact sheet.
-3. Zoom into card 1 and card 7.
-4. Check that the title reads in one glance.
+1. Render every card to PNG.
+2. Create `contact-sheet.png`.
+3. Create `thumbnail-sheet.png` using the Instagram square crop.
+4. Check card 1 in grid size.
 5. Check no Korean glyph is clipped.
-6. Check text does not overlap brand, source, page number, stickers, or face/object focal points.
-7. Check body cards have distinct visuals.
-8. Check background images remain recognizable.
+6. Check no title overlaps badges, arrows, boxes, source, or page number.
+7. Check each card has a distinct visual job.
+8. Check background/source images are recognizable.
+9. Check there is a caption with `Contents Editor`, source links, and a comment/follow CTA.
+10. If Instagram-first, also make or hand off a Reel using the same visual language.
 
-If a card fails, simplify copy before shrinking the font.
+If a card fails, simplify copy first. Do not fix layout by making all text tiny.
 
 ## Motion Handoff
 
-When also making a Reel, hand this to `auto-motion-news`:
+For `auto-motion-news`, Viral V2 reels should:
 
-- The Reel should begin with moving poster text, a punch-in zoom, or a quick demo moment.
-- Do not just fade through the static PNGs.
-- Use the same thick typography and bright sticker colors.
-- Keep the first hook within 2 seconds.
-- Use 15-20 seconds unless the user asks longer.
+- be 15-20 seconds by default;
+- start with a moving hook in the first 2 seconds;
+- show typing, zoom, cursor highlight, checklist reveal, or source/demo motion;
+- avoid only fading through static cards;
+- keep the safe zone clear for Instagram/Reels UI;
+- use the same GmarketSans, dark tech base, and mint/pink/yellow accents.

@@ -2,53 +2,62 @@
 
 Use this when a Viral Poster V2 carousel needs a matching Reel.
 
+## Canonical Benchmark
+
+Match the visual language of:
+
+`carousel-workspace/projects/ai-jjuun/2026-06-11-vibevoice/output`
+
+This is the moving version of the VibeVoice card-news style, not the older over-decorated flyer experiment.
+
 ## Goal
 
-The Reel should feel like a moving Korean viral promo poster, not a slideshow. The viewer should understand the hook before reading the caption.
-
-## Structure
+The Reel should stop the scroll with a real use case, then explain only enough for the viewer to understand why the source matters.
 
 Default duration: 15-20 seconds.
 
-1. **0-2s Hook**
-   - Giant outlined Korean title enters with bounce or punch-in.
-   - Background is a real demo/source frame or generated use-case scene.
-   - Add a sticker pop, flash, or quick zoom.
+## Style
 
-2. **2-8s Use Case**
-   - Show one concrete workflow.
-   - Examples: typing a command, opening a repo, checking a UI, dragging a file, comparing before/after.
-   - Overlay only one short line.
+- Font: GmarketSans for Korean overlays.
+- Background: dark tech base, subtle grid, or real source/demo media.
+- Accents: mint, pink, yellow, white.
+- UI language: white rounded chips/cards, large readable headline blocks, clear source/footer when needed.
+- Use actual product/source/demo visuals whenever possible.
+- Do not hide source media with heavy Gaussian blur, grayscale, or dark overlays.
+
+## Structure
+
+1. **0-2s Hook**
+   - Show a concrete viewer problem, demo moment, or payoff.
+   - Example: "녹음 안 했는데 팟캐스트가 나옵니다."
+   - Use punch-in zoom, type-in, or quick visual reveal.
+
+2. **2-8s What It Does**
+   - Show the product/source in action or a reconstructed workflow.
+   - Overlay one short Korean line.
 
 3. **8-15s Why It Matters**
-   - Reveal 2-3 chips or checklist items.
-   - Use punchy Korean, not abstract benefits.
+   - Reveal 2-3 chips/checkpoints.
+   - Use concrete situations, not abstract benefits.
 
 4. **15-20s CTA**
    - Ask for save, follow, or one comment keyword.
-   - Keep it inside safe zones.
-
-## Typography
-
-Match the carousel:
-
-- `Griun Mongtori` for Korean text unless the user chooses a different approved font.
-- Thick white outer stroke.
-- Black inner stroke.
-- Pink/yellow/mint accent.
-- Large enough to read on a phone without pausing.
+   - Keep it clear of Instagram/Reels UI safe zones.
 
 ## Motion Jobs
 
-Use at least three:
+Use at least three meaningful motion jobs:
 
-- poster title bounce;
-- screenshot crop zoom;
-- sticker/chip pop;
-- typed prompt or command;
+- typed prompt/command;
+- source screenshot zoom;
 - cursor/tap pulse;
+- chip reveal;
+- before/after swap;
 - checklist reveal;
+- callout bounce;
 - CTA keyword pulse.
+
+Do not deliver only a slideshow of static PNGs fading.
 
 ## QA
 
@@ -56,8 +65,9 @@ Extract stills at approximately 1s, 7s, 14s, and final frame.
 
 Check:
 
-- main message is not covered by Reels UI;
-- source visual remains recognizable;
-- first frame is hook-worthy;
-- text matches the carousel font and color energy;
-- not a slow slideshow.
+- first 2 seconds are hook-worthy;
+- GmarketSans typography matches the Viral V2 cards;
+- source/demo visual remains recognizable;
+- overlay text is not covered by Reels UI;
+- no text is tiny, clipped, or translated-sounding;
+- each scene has a viewer reason and a motion reason.

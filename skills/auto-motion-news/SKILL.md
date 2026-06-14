@@ -82,6 +82,16 @@ Default fix:
 
 ## Viral Poster V2 Reel Mode
 
+Authoritative V2 Reel override:
+
+When paired with an `auto-card-news` Viral V2 carousel, match the VibeVoice-style package rather than the older over-decorated poster experiment. Use GmarketSans, dark tech background, real/demo/source visuals, white rounded chips, mint/pink/yellow accents, and short practical Korean overlays.
+
+Canonical visual benchmark:
+
+`carousel-workspace/projects/ai-jjuun/2026-06-11-vibevoice/output`
+
+For Viral V2 reels, GmarketSans overrides the general AIjjuun Griun Mongtori rule. The video should look like the moving version of the VibeVoice cards.
+
 Use this mode when the related carousel uses `auto-card-news` Viral Poster V2 Mode, or when the user asks for "2탄", "바이럴형", "맛집/팝업 레퍼런스 느낌", "도블락 느낌", or a louder Reel that does not feel like a tech explainer.
 
 This mode turns AI news into a short viral promo-style Reel:

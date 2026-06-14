@@ -121,6 +121,29 @@ Hard fail and revise if:
 
 Read `references/viral-poster-v2-style.md` before producing this style.
 
+### Viral V2 Authoritative Override
+
+When the user says "스킬 2", "2탄", "바이럴형", "도블락 느낌", or points to the VibeVoice result as the good example, use the AI쭌 Viral V2 format. This override supersedes any older wording in the previous section that sounds like a pure restaurant flyer or over-decorated poster.
+
+Canonical benchmark:
+
+`carousel-workspace/projects/ai-jjuun/2026-06-11-vibevoice/output`
+
+Viral V2 should feel like the VibeVoice package: GmarketSans, dark tech base, subtle grid, big readable Korean headlines, real/demo/source visuals, white rounded chips, mint/pink/yellow accents, and very short practical copy.
+
+Viral V2 must follow these non-negotiables:
+
+- Use GmarketSans as the default Korean font unless the user explicitly asks for another font.
+- First card must hook with a concrete situation or payoff, not the repo/product name.
+- Use one recognizable source/demo visual per card; do not bury it under heavy blur, grayscale, or repeated dark screenshots.
+- Use large headlines and short support copy. Details belong in `caption.md`, `source.md`, or `source-pack.md`.
+- Body cards should answer one practical question: "what is it?", "why should I care?", "how do I use it?", or "what should I watch out for?"
+- White rounded cards/chips are allowed when they clarify, but they must be centered, readable, and never overlap arrows, badges, or headings.
+- Avoid thin connector diagrams, random fireworks, too many stickers, decorative arrows, and paragraph-heavy layouts.
+- Render `contact-sheet.png` and `thumbnail-sheet.png`; revise if any title, number badge, source line, or card box overlaps.
+
+Read `references/viral-poster-v2-style.md` and treat it as the canonical V2 style spec before producing this style.
+
 ## Reels-First Package Rule
 
 For Instagram-first or Threads-first source packages, create both a carousel and a Reel plan/output by default unless the user explicitly says static-only.
