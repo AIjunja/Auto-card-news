@@ -120,7 +120,7 @@ Transform copy like this:
 
 ## Layout Rules
 
-- Use GmarketSans as default.
+- Use GmarketSans as default. Before rendering, verify the project contains the actual font files: `assets/fonts/gmarket/GmarketSansTTFBold.ttf`, `GmarketSansTTFMedium.ttf`, and `GmarketSansTTFLight.ttf`. If any file is missing, copy it from the VibeVoice benchmark project or the user's GmarketSans archive before rendering. Do not accept browser fallback fonts.
 - Use `word-break: keep-all`.
 - Do not scale font size with viewport width.
 - Keep large text away from page numbers and source lines.
@@ -153,6 +153,7 @@ Before final:
 8. Check background/source images are recognizable.
 9. Check there is a caption with `Contents Editor`, source links, and a comment/follow CTA.
 10. If Instagram-first, also make or hand off a Reel using the same visual language.
+11. Confirm the rendered typography visually matches the VibeVoice benchmark. If it looks thinner, rounder, handwritten, or browser-default, the font load failed.
 
 If a card fails, simplify copy first. Do not fix layout by making all text tiny.
 

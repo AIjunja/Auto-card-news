@@ -92,22 +92,22 @@ Canonical visual benchmark:
 
 For Viral V2 reels, GmarketSans overrides the general AIjjuun Griun Mongtori rule. The video should look like the moving version of the VibeVoice cards.
 
-Use this mode when the related carousel uses `auto-card-news` Viral Poster V2 Mode, or when the user asks for "2탄", "바이럴형", "맛집/팝업 레퍼런스 느낌", "도블락 느낌", or a louder Reel that does not feel like a tech explainer.
+Use this mode when the related carousel uses `auto-card-news` Viral Poster V2 Mode, or when the user asks for "2탄", "바이럴형", "도블락 느낌", or a louder Reel that matches the VibeVoice package.
 
-This mode turns AI news into a short viral promo-style Reel:
+This mode turns AI news into a short VibeVoice-style viral tech Reel:
 
-- 0-2s: moving poster hook. Use giant outlined Korean text, punch-in zoom, sticker pop, quick flash, or a real demo frame.
+- 0-2s: moving hook. Use a real demo/source frame, punch-in zoom, type-in, cursor movement, or generated scenario visual. Do not open with a calm static title.
 - 2-8s: one concrete use case. Show a screen, command, UI, source crop, or generated scene. Do not lecture.
-- 8-15s: why it matters. Use 2-3 sticker chips, checklist reveal, or before/after.
+- 8-15s: why it matters. Use 2-3 large chips, checklist reveal, or before/after.
 - 15-20s: comment/save/follow CTA with one keyword.
 
 Visual rules:
 
-- Match the card's loud typography: thick white outer stroke, black inner stroke, hot-pink/yellow shadow, bright fills.
+- Match the card typography: GmarketSans, large white Korean text, dark tech base, readable chips, mint/pink/yellow accents. Avoid the old over-decorated flyer look.
 - Use source images and demo frames clearly. Do not over-blur or grayscale them.
 - Keep the main text away from Instagram lower profile/caption and right-side action UI.
 - Prefer fast readable motion over long smooth slides.
-- Use at least three motion jobs: punch-in zoom, sticker pop, type-in, callout bounce, screenshot crop pan, checklist reveal, or CTA keyword pop.
+- Use at least three motion jobs: punch-in zoom, type-in, callout bounce, screenshot crop pan, checklist reveal, cursor/typing motion, or CTA keyword pop.
 
 Hard fail and revise if:
 

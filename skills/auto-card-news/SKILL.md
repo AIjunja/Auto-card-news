@@ -93,37 +93,7 @@ Default fix:
 
 ## Viral Poster V2 Mode
 
-Use this mode when the user asks for "2탄", "바이럴형", "맛집/팝업 레퍼런스 느낌", "도블락 느낌", "전단지형", or says the current card-news feels too calm, PPT-like, or unlike the uploaded viral references.
-
-This is not the default clean AI news layout. It is a deliberate scroll-stopping poster style adapted from Korean restaurant, popup-store, and local event promo cards.
-
-Core rules:
-
-- Make the first card feel closer to a viral restaurant/event poster than a tech briefing.
-- Use a real or generated hook visual as the full background, then place huge Korean type on top.
-- Use thick layered typography: white outer stroke, black inner stroke, bright fill colors, and a hot-pink or yellow shadow.
-- Prefer short emotional Korean phrases over explanations. The cover should be readable in 1 second.
-- Use loud color accents such as hot pink, red, yellow, mint, and white. Do not make a quiet monochrome tech card.
-- Use stickers, fireworks, arrows, badges, dots, price-tag shapes, speech bubbles, and ">> <<" style emphasis only when they help the hook.
-- Keep body cards photo-first: one big real/demo/source image, one short headline, one practical takeaway.
-- Avoid line charts, thin connector diagrams, muted gradients, and text-heavy panels unless the source itself requires them.
-- Do not reuse the same screenshot on every card with only different text.
-- Keep detail in `caption.md`, `source-pack.md`, or `storyboard.md`; keep cards snackable.
-
-Hard fail and revise if:
-
-- The result looks like the normal AIjjuun dark tech template with only louder colors.
-- The cover could be mistaken for a GitHub repo screenshot thumbnail.
-- The body cards look like presentation slides.
-- Background media is blurred so heavily that viewers cannot tell what it shows.
-- More than one line of body copy is needed to understand the card.
-- The typography creates awkward orphan words, clipped Korean glyphs, or overlaps with page numbers and source text.
-
-Read `references/viral-poster-v2-style.md` before producing this style.
-
-### Viral V2 Authoritative Override
-
-When the user says "스킬 2", "2탄", "바이럴형", "도블락 느낌", or points to the VibeVoice result as the good example, use the AI쭌 Viral V2 format. This override supersedes any older wording in the previous section that sounds like a pure restaurant flyer or over-decorated poster.
+Use this mode when the user says "스킬 2", "2탄", "바이럴형", "도블락 느낌", or points to the VibeVoice result as the good example. This mode is not a restaurant flyer clone. It is the AI쭌 VibeVoice-style viral tech card format.
 
 Canonical benchmark:
 
@@ -133,14 +103,14 @@ Viral V2 should feel like the VibeVoice package: GmarketSans, dark tech base, su
 
 Viral V2 must follow these non-negotiables:
 
-- Use GmarketSans as the default Korean font unless the user explicitly asks for another font.
+- Use GmarketSans as the default Korean font unless the user explicitly asks for another font. Before rendering, verify the actual font files exist in the project, usually `assets/fonts/gmarket/GmarketSansTTFBold.ttf`, `GmarketSansTTFMedium.ttf`, and `GmarketSansTTFLight.ttf`. If they are missing, copy them from the approved VibeVoice project or the user's provided GmarketSans archive before rendering. Do not render with a fallback font.
 - First card must hook with a concrete situation or payoff, not the repo/product name.
 - Use one recognizable source/demo visual per card; do not bury it under heavy blur, grayscale, or repeated dark screenshots.
 - Use large headlines and short support copy. Details belong in `caption.md`, `source.md`, or `source-pack.md`.
 - Body cards should answer one practical question: "what is it?", "why should I care?", "how do I use it?", or "what should I watch out for?"
 - White rounded cards/chips are allowed when they clarify, but they must be centered, readable, and never overlap arrows, badges, or headings.
 - Avoid thin connector diagrams, random fireworks, too many stickers, decorative arrows, and paragraph-heavy layouts.
-- Render `contact-sheet.png` and `thumbnail-sheet.png`; revise if any title, number badge, source line, or card box overlaps.
+- Render `contact-sheet.png` and `thumbnail-sheet.png`; visually inspect full cards plus the 1:1 crop preview. Revise if any title, number badge, source line, card box, chip, or visual overlaps, clips, becomes too small, or loses the main message.
 
 Read `references/viral-poster-v2-style.md` and treat it as the canonical V2 style spec before producing this style.
 
