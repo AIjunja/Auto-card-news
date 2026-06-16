@@ -69,6 +69,7 @@ try {
         $autoCardNewsSkillsRoot = Join-Path $autoCardNewsClonePath "skills"
         $autoCardNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-card-news"
         $autoMotionNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-motion-news"
+        $aiJjuunContentEngineSkillSource = Join-Path $autoCardNewsSkillsRoot "ai-jjuun-content-engine"
         $last30DaysSkillSource = Join-Path $last30DaysClonePath $last30DaysSkillPath
     } else {
         $autoCardNewsRepoRoot = Get-ZipRoot -Uri $autoCardNewsRepoZip -ZipPath $autoCardNewsZipPath -ExtractPath $autoCardNewsExtractPath
@@ -77,11 +78,13 @@ try {
         $autoCardNewsSkillsRoot = Join-Path $autoCardNewsRepoRoot "skills"
         $autoCardNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-card-news"
         $autoMotionNewsSkillSource = Join-Path $autoCardNewsSkillsRoot "auto-motion-news"
+        $aiJjuunContentEngineSkillSource = Join-Path $autoCardNewsSkillsRoot "ai-jjuun-content-engine"
         $last30DaysSkillSource = Join-Path $last30DaysRepoRoot $last30DaysSkillPath
     }
 
     Install-SkillFromPath -Source $autoCardNewsSkillSource -SkillName "auto-card-news"
     Install-SkillFromPath -Source $autoMotionNewsSkillSource -SkillName "auto-motion-news"
+    Install-SkillFromPath -Source $aiJjuunContentEngineSkillSource -SkillName "ai-jjuun-content-engine"
     Install-SkillFromPath -Source $last30DaysSkillSource -SkillName "last30days"
 
     Write-Host "Restart Codex to pick up new skills."

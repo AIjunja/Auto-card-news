@@ -1,6 +1,6 @@
 # Auto-card-news Skills
 
-Version: `0.4.3`
+Version: `0.4.4`
 
 This repository ships Codex skills for making channel-aware card news, Instagram carousel content, and short-form motion-video packages through conversation.
 
@@ -8,6 +8,7 @@ Included skills:
 
 - `auto-card-news`: source or report to carousel/card-news, HTML preview, PNG, and optional MP4 motion cards
 - `auto-motion-news`: script, card-news project, or source to short-form scene plan, visual references, HyperFrames/Remotion motion plan, MP4 package, and caption
+- `ai-jjuun-content-engine`: AI쭌 source discovery, hook framing, copy, visual, Reel, caption, QA, and AX-consulting bridge standards distilled from prior AI쭌 projects and references
 - `last30days`: companion external skill for fresh source discovery
 
 `auto-card-news` guides Codex through:
@@ -52,6 +53,8 @@ Included skills:
 
 This is not a hosted app and does not upload to Instagram. It is a reusable Codex skill plus templates and scaffolding.
 
+`ai-jjuun-content-engine` is the top-level AI쭌 preset. Use it when you want the channel's learned production style from prior experiments, including VibeVoice-level GmarketSans cards, real source screenshots, meaningful Reels, Korean-native copy, source discovery beyond official blogs, and AX-consulting positioning.
+
 ## Install With Codex
 
 If your Codex has the `skill-installer` skill, paste these GitHub URLs and ask Codex to install them:
@@ -59,6 +62,7 @@ If your Codex has the `skill-installer` skill, paste these GitHub URLs and ask C
 ```text
 https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news
 https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-motion-news
+https://github.com/AIjunja/Auto-card-news/tree/master/skills/ai-jjuun-content-engine
 https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
 ```
 
@@ -68,6 +72,7 @@ Example prompt:
 Install these Codex skills:
 https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news
 https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-motion-news
+https://github.com/AIjunja/Auto-card-news/tree/master/skills/ai-jjuun-content-engine
 https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
 ```
 
@@ -79,7 +84,7 @@ For fresh source discovery, this setup uses `last30days` from [mvanhorn/last30da
 
 ## One-Line Install
 
-These commands install `auto-card-news`, `auto-motion-news`, and `last30days`. They work when the repository is public. If the repository is private, use the Codex install prompt above or clone with a GitHub account that has access.
+These commands install `auto-card-news`, `auto-motion-news`, `ai-jjuun-content-engine`, and `last30days`. They work when the repository is public. If the repository is private, use the Codex install prompt above or clone with a GitHub account that has access.
 
 ### Windows PowerShell
 
@@ -107,6 +112,7 @@ git clone https://github.com/mvanhorn/last30days-skill.git
 New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
 Copy-Item -Recurse -Force ".\Auto-card-news\skills\auto-card-news" "$env:USERPROFILE\.codex\skills\auto-card-news"
 Copy-Item -Recurse -Force ".\Auto-card-news\skills\auto-motion-news" "$env:USERPROFILE\.codex\skills\auto-motion-news"
+Copy-Item -Recurse -Force ".\Auto-card-news\skills\ai-jjuun-content-engine" "$env:USERPROFILE\.codex\skills\ai-jjuun-content-engine"
 Copy-Item -Recurse -Force ".\last30days-skill\skills\last30days" "$env:USERPROFILE\.codex\skills\last30days"
 ```
 
@@ -118,6 +124,7 @@ git clone https://github.com/mvanhorn/last30days-skill.git
 mkdir -p "$HOME/.codex/skills"
 cp -R Auto-card-news/skills/auto-card-news "$HOME/.codex/skills/auto-card-news"
 cp -R Auto-card-news/skills/auto-motion-news "$HOME/.codex/skills/auto-motion-news"
+cp -R Auto-card-news/skills/ai-jjuun-content-engine "$HOME/.codex/skills/ai-jjuun-content-engine"
 cp -R last30days-skill/skills/last30days "$HOME/.codex/skills/last30days"
 ```
 
@@ -126,6 +133,14 @@ Restart Codex after installation.
 ## Use
 
 After restarting Codex, call the skill:
+
+```text
+$ai-jjuun-content-engine
+```
+
+Use this when you want the full AI쭌 learned content engine: stronger source discovery, result-first hooks, GmarketSans VibeVoice-style cards, real visuals, Reels, captions, and AX-consulting bridge.
+
+For the base carousel workflow, call:
 
 ```text
 $auto-card-news
@@ -174,6 +189,14 @@ skills/auto-motion-news/
     ai-jjuun-reel-playbook.md
   assets/templates/
   scripts/init_motion_project.py
+skills/ai-jjuun-content-engine/
+  SKILL.md
+  agents/openai.yaml
+  references/
+    content-memory-map.md
+    source-discovery-standard.md
+    copy-visual-motion-standard.md
+    monetization-and-ax-bridge.md
 tests/
 docs/superpowers/
 ```

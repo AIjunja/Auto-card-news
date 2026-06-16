@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4
+
+- Added the `ai-jjuun-content-engine` skill as the top-level AI쭌 memory layer for source discovery, hook framing, Korean-native copy, visual proof, Reels, captions, QA, and AX-consulting bridge positioning.
+- Distilled prior AI쭌 content experiments and user-provided references into reusable standards for VibeVoice-level output, real source media, meaningful motion, GmarketSans typography, and monetizable content angles.
+- Updated installers and README so new installs include `auto-card-news`, `auto-motion-news`, `ai-jjuun-content-engine`, and `last30days`.
+
 ## 0.4.3
 
 - Added Viral Poster V2 guidance to `auto-card-news` for the new Korean promo-poster/card-news style inspired by restaurant, popup, and local event viral references.

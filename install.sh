@@ -77,6 +77,7 @@ if command -v git >/dev/null 2>&1; then
 
   auto_card_news_source_dir="$auto_card_news_clone_path/skills/auto-card-news"
   auto_motion_news_source_dir="$auto_card_news_clone_path/skills/auto-motion-news"
+  ai_jjuun_content_engine_source_dir="$auto_card_news_clone_path/skills/ai-jjuun-content-engine"
   last30days_source_dir="$last30days_clone_path/$last30days_skill_path"
 else
   auto_card_news_repo_root="$(extract_zip_root "$auto_card_news_repo_zip" "$auto_card_news_zip_path" "$auto_card_news_extract_path")"
@@ -84,11 +85,13 @@ else
 
   auto_card_news_source_dir="$auto_card_news_repo_root/skills/auto-card-news"
   auto_motion_news_source_dir="$auto_card_news_repo_root/skills/auto-motion-news"
+  ai_jjuun_content_engine_source_dir="$auto_card_news_repo_root/skills/ai-jjuun-content-engine"
   last30days_source_dir="$last30days_repo_root/$last30days_skill_path"
 fi
 
 install_skill "$auto_card_news_source_dir" "auto-card-news"
 install_skill "$auto_motion_news_source_dir" "auto-motion-news"
+install_skill "$ai_jjuun_content_engine_source_dir" "ai-jjuun-content-engine"
 install_skill "$last30days_source_dir" "last30days"
 
 echo "Restart Codex to pick up new skills."

@@ -1,0 +1,3 @@
+display_name: AI쭌 Content Engine
+short_description: Turn AI source links into AI쭌-style card-news and Reels using the learned channel playbook.
+default_prompt: "$ai-jjuun-content-engine 이 링크로 AI쭌 카드뉴스와 릴스 만들어줘. 공식/실사용 소스까지 확인하고, VibeVoice급 퀄리티로 체감 결과 중심 카피와 실제 화면/모션/캡션까지 제작해줘."
