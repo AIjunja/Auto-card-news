@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0
+
+- Reworked `README.md` into a public super-sample landing page for AIjjuun card-news automation.
+- Added Claude Code installation scripts and quickstart docs so the same `SKILL.md` folders can be used from Claude Code as well as Codex.
+- Added one-link prompt examples for turning a single source URL into card-news, Reel planning, captions, source links, and visual references.
+
 ## 0.4.4
 
 - Added the `ai-jjuun-content-engine` skill as the top-level AI쭌 memory layer for source discovery, hook framing, Korean-native copy, visual proof, Reels, captions, QA, and AX-consulting bridge positioning.

@@ -178,45 +178,52 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         readme = ROOT / "README.md"
         install_ps1 = ROOT / "install.ps1"
         install_sh = ROOT / "install.sh"
+        install_claude_ps1 = ROOT / "install-claude.ps1"
+        install_claude_sh = ROOT / "install-claude.sh"
         version = ROOT / "VERSION"
         changelog = ROOT / "CHANGELOG.md"
+        codex_quickstart = ROOT / "docs" / "codex-quickstart.md"
+        claude_quickstart = ROOT / "docs" / "claude-code-quickstart.md"
+        one_link_prompt = ROOT / "examples" / "one-link-ai-news-prompt.md"
 
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
         self.assertTrue(install_sh.exists(), "install.sh is required for macOS/Linux users")
-        self.assertEqual(read_text(version).strip(), "0.4.4")
-        self.assertIn("0.4.4", read_text(changelog))
+        self.assertTrue(install_claude_ps1.exists(), "install-claude.ps1 is required for Claude Code Windows users")
+        self.assertTrue(install_claude_sh.exists(), "install-claude.sh is required for Claude Code macOS/Linux users")
+        self.assertTrue(codex_quickstart.exists(), "Codex quickstart docs are required")
+        self.assertTrue(claude_quickstart.exists(), "Claude Code quickstart docs are required")
+        self.assertTrue(one_link_prompt.exists(), "One-link prompt example is required")
+        self.assertEqual(read_text(version).strip(), "0.5.0")
+        self.assertIn("0.5.0", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
+            "AIjjuun Auto Card News",
+            "AI쭌 카드뉴스 자동화",
+            "source link -> useful angle -> hook -> visual proof -> card-news -> Reel -> caption",
             "auto-card-news",
             "auto-motion-news",
             "ai-jjuun-content-engine",
             "last30days",
-            "https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news",
-            "https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-motion-news",
-            "https://github.com/AIjunja/Auto-card-news/tree/master/skills/ai-jjuun-content-engine",
             "https://github.com/mvanhorn/last30days-skill",
             "https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days",
-            "One-Line Install",
-            "engagement-first",
-            "video reference",
-            "line-break QA",
-            "thumbnail crop",
-            "lower safe zone",
-            "spacing relationship",
-            "Viral Poster V2",
-            "Humanizer",
-            "marketing checks",
-            "ad/conversion mode",
-            "AIjjuun-style source curation",
+            "Quick Start For Codex",
+            "Quick Start For Claude Code",
+            "install-claude.ps1",
+            "install-claude.sh",
+            "SKILL.md",
+            "Hook first",
+            "Do not make PPT slides",
+            "GmarketSans",
+            "GeekNews",
             "AX consulting",
-            "HyperFrames-first",
             "install.ps1",
             "install.sh",
             "$auto-card-news",
             "$auto-motion-news",
             "Restart Codex",
+            "Restart Claude Code",
         ]
         for phrase in required_phrases:
             self.assertIn(phrase, text)
@@ -235,6 +242,17 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertIn("https://github.com/mvanhorn/last30days-skill.git", read_text(install_sh))
         self.assertIn("skills/last30days", read_text(install_sh))
         self.assertNotIn("ai-source-scout", read_text(install_sh))
+        self.assertIn(".claude", read_text(install_claude_ps1))
+        self.assertIn("CLAUDE_HOME", read_text(install_claude_ps1))
+        self.assertIn("ai-jjuun-content-engine", read_text(install_claude_ps1))
+        self.assertIn("last30days", read_text(install_claude_ps1))
+        self.assertIn(".claude", read_text(install_claude_sh))
+        self.assertIn("CLAUDE_HOME", read_text(install_claude_sh))
+        self.assertIn("ai-jjuun-content-engine", read_text(install_claude_sh))
+        self.assertIn("last30days", read_text(install_claude_sh))
+        self.assertIn("$ai-jjuun-content-engine", read_text(codex_quickstart))
+        self.assertIn("Use the ai-jjuun-content-engine skill", read_text(claude_quickstart))
+        self.assertIn("<SOURCE_URL>", read_text(one_link_prompt))
 
     def test_korean_persona_sampler_supports_real_nemotron_samples(self):
         script = SKILL_DIR / "scripts" / "sample_korean_personas.py"

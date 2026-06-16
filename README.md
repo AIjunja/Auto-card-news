@@ -1,98 +1,61 @@
-# Auto-card-news Skills
+# AIjjuun Auto Card News
 
-Version: `0.4.4`
+Version: `0.5.0`
 
-This repository ships Codex skills for making channel-aware card news, Instagram carousel content, and short-form motion-video packages through conversation.
+Turn one source link into an Instagram-ready AI news package:
 
-Included skills:
+- card-news carousel
+- short Reel / Shorts plan
+- caption
+- source pack
+- visual direction
+- QA checklist
 
-- `auto-card-news`: source or report to carousel/card-news, HTML preview, PNG, and optional MP4 motion cards
-- `auto-motion-news`: script, card-news project, or source to short-form scene plan, visual references, HyperFrames/Remotion motion plan, MP4 package, and caption
-- `ai-jjuun-content-engine`: AI쭌 source discovery, hook framing, copy, visual, Reel, caption, QA, and AX-consulting bridge standards distilled from prior AI쭌 projects and references
-- `last30days`: companion external skill for fresh source discovery
+This repository is a public skill sample for creators who want to make AI trend content with Codex or Claude Code.
 
-`auto-card-news` guides Codex through:
+> AI쭌 카드뉴스 자동화: 스킬 깔고 링크 하나만 던지면, 카드뉴스 + 릴스 + 캡션 제작 흐름을 알아서 잡아주는 Agent Skill 샘플입니다.
 
-- channel profile setup
-- source intake from URLs, reports, notes, or GPT conversations
-- fresh source discovery with `last30days`
-- viewer-first framing around the audience's situation, curiosity, pain, and action reason
-- AIjjuun-style source curation for minor-but-useful AI tools/news from official sources, GitHub, GeekNews, X/Threads, Reddit, demos, and community hype signals
-- Viral Poster V2 mode for loud Korean promo-poster style card-news when the user asks for `2탄`, `바이럴형`, `맛집/팝업 레퍼런스`, or Doblock-style retention
-- image, screenshot, official demo, and video reference discovery
-- carousel angle proposals
-- full card copy drafts
-- text wireframes
-- one-HTML-file-per-card previews
-- media-led design with readable dim, blur, and gradient treatments
-- line-break QA so headings do not leave awkward orphan words alone
-- Instagram thumbnail crop QA so chips, badges, and headlines do not collide in profile/grid previews
-- Humanizer-style copy review to remove AI-sounding phrasing and stiff summaries
-- marketing checks for hook, promise, proof, save/comment/share reason, and CTA
-- optional ad/conversion mode for product, app, campaign, lead magnet, and PitchCheck marketing posts
-- lower safe zone placement for media label chips over screenshots and demo videos
-- spacing relationship checks between chips, badges, and headlines
-- card-by-card static PNG or motion MP4 planning
-- HyperFrames-first motion planning for short HTML/CSS card animations, with Remotion as the fallback for complex video cards
-- reusable `profile.md`, `design.md`, `source-pack.md`, `brief.md`, `storyboard.md`, and `motion-plan.md` files
+## What It Does
 
-`auto-motion-news` guides Codex through:
+Give the agent a URL, GitHub repo, official blog post, X/Threads post, GeekNews link, Reddit thread, paper, or memo.
 
-- script-to-motion planning for Instagram Reels and YouTube Shorts
-- card-news-to-script conversion
-- card-news-to-motion conversion
-- source-to-short-video planning
-- visual reference research with usage notes and attribution
-- spoken Humanizer review for scripts and captions
-- retention marketing checks for first 2-second hook, proof, scene reason, and CTA
-- AIjjuun-style 15-20 second Reel planning with real source proof, practical use-case motion, safe-zone checks, and comment/save/follow CTAs
-- Viral Poster V2 Reel mode for moving poster hooks, sticker pops, screenshot zooms, and loud CTA motion that matches the carousel style
-- optional ad/conversion planning for product or PitchCheck videos
-- HyperFrames-first motion planning with Remotion as the complex-video fallback
-- reusable `script.md`, `scene-plan.md`, `source-pack.md`, `motion-plan.md`, `caption.md`, and `design.md` files
+The skills guide the agent to:
 
-This is not a hosted app and does not upload to Instagram. It is a reusable Codex skill plus templates and scaffolding.
+- verify the source instead of copying viral posts blindly
+- find official docs, demos, screenshots, community reactions, and related GitHub repos
+- frame the topic for Korean AI-curious viewers
+- write short, human Korean copy instead of translated AI summaries
+- create an engagement-first carousel storyboard
+- plan or produce motion cards and Reels with HyperFrames or Remotion
+- write a compact Instagram / Threads caption with useful source links
+- connect the content to practical AX consulting angles
 
-`ai-jjuun-content-engine` is the top-level AI쭌 preset. Use it when you want the channel's learned production style from prior experiments, including VibeVoice-level GmarketSans cards, real source screenshots, meaningful Reels, Korean-native copy, source discovery beyond official blogs, and AX-consulting positioning.
-
-## Install With Codex
-
-If your Codex has the `skill-installer` skill, paste these GitHub URLs and ask Codex to install them:
+The goal is not “pretty slides.” The goal is:
 
 ```text
-https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news
-https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-motion-news
-https://github.com/AIjunja/Auto-card-news/tree/master/skills/ai-jjuun-content-engine
-https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
+source link -> useful angle -> hook -> visual proof -> card-news -> Reel -> caption
 ```
 
-Example prompt:
+## Included Skills
 
-```text
-Install these Codex skills:
-https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-card-news
-https://github.com/AIjunja/Auto-card-news/tree/master/skills/auto-motion-news
-https://github.com/AIjunja/Auto-card-news/tree/master/skills/ai-jjuun-content-engine
-https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
-```
+| Skill | Use it when |
+| --- | --- |
+| `ai-jjuun-content-engine` | You want the full AI쭌 production system: source discovery, hook, copy, visual, Reel, caption, QA, and AX bridge |
+| `auto-card-news` | You want a card-news / Instagram carousel workflow |
+| `auto-motion-news` | You want a Reel, Shorts, motion card, or script-to-video package |
+| `last30days` | You want fresh source discovery from the web |
 
-Restart Codex after installation so the new skills are loaded.
+## Quick Start For Codex
 
-## Recommended Source Discovery Skill
+### One-Line Install
 
-For fresh source discovery, this setup uses `last30days` from [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill). The one-line installers below install `auto-card-news`, `auto-motion-news`, and `last30days`; if you use the Codex installer manually, install all URLs shown above.
-
-## One-Line Install
-
-These commands install `auto-card-news`, `auto-motion-news`, `ai-jjuun-content-engine`, and `last30days`. They work when the repository is public. If the repository is private, use the Codex install prompt above or clone with a GitHub account that has access.
-
-### Windows PowerShell
+Windows PowerShell:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/AIjunja/Auto-card-news/master/install.ps1 | iex"
 ```
 
-### macOS / Linux
+macOS / Linux:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/AIjunja/Auto-card-news/master/install.sh | bash
@@ -100,105 +63,196 @@ curl -fsSL https://raw.githubusercontent.com/AIjunja/Auto-card-news/master/insta
 
 Restart Codex after installation.
 
-## Manual Install
+### Use In Codex
 
-Clone both repositories and copy the skill folders into your Codex skills directory.
-
-### Windows PowerShell
-
-```powershell
-git clone https://github.com/AIjunja/Auto-card-news.git
-git clone https://github.com/mvanhorn/last30days-skill.git
-New-Item -ItemType Directory -Force "$env:USERPROFILE\.codex\skills" | Out-Null
-Copy-Item -Recurse -Force ".\Auto-card-news\skills\auto-card-news" "$env:USERPROFILE\.codex\skills\auto-card-news"
-Copy-Item -Recurse -Force ".\Auto-card-news\skills\auto-motion-news" "$env:USERPROFILE\.codex\skills\auto-motion-news"
-Copy-Item -Recurse -Force ".\Auto-card-news\skills\ai-jjuun-content-engine" "$env:USERPROFILE\.codex\skills\ai-jjuun-content-engine"
-Copy-Item -Recurse -Force ".\last30days-skill\skills\last30days" "$env:USERPROFILE\.codex\skills\last30days"
-```
-
-### macOS / Linux
-
-```bash
-git clone https://github.com/AIjunja/Auto-card-news.git
-git clone https://github.com/mvanhorn/last30days-skill.git
-mkdir -p "$HOME/.codex/skills"
-cp -R Auto-card-news/skills/auto-card-news "$HOME/.codex/skills/auto-card-news"
-cp -R Auto-card-news/skills/auto-motion-news "$HOME/.codex/skills/auto-motion-news"
-cp -R Auto-card-news/skills/ai-jjuun-content-engine "$HOME/.codex/skills/ai-jjuun-content-engine"
-cp -R last30days-skill/skills/last30days "$HOME/.codex/skills/last30days"
-```
-
-Restart Codex after installation.
-
-## Use
-
-After restarting Codex, call the skill:
+Paste this into Codex:
 
 ```text
 $ai-jjuun-content-engine
+https://openai.com/index/academy-courses-applying-ai-at-work
+
+AI쭌 채널용으로 카드뉴스랑 릴스랑 캡션 만들어줘.
+실제 사용 이미지/영상 소스도 찾아보고, 첫 장은 후킹되게 잡아줘.
 ```
 
-Use this when you want the full AI쭌 learned content engine: stronger source discovery, result-first hooks, GmarketSans VibeVoice-style cards, real visuals, Reels, captions, and AX-consulting bridge.
-
-For the base carousel workflow, call:
+You can also call the base skills directly:
 
 ```text
 $auto-card-news
-```
+<source URL>
 
-Then provide a source URL, report, memo, draft, or GPT conversation. The skill will first establish the active channel profile so AI information, football information, and PitchCheck marketing content do not mix contexts.
-
-If you do not have a source yet, ask the skill to use `last30days` first, or call it directly:
-
-```text
-$last30days latest AI tools worth testing
-```
-
-Use the research output as source material. `auto-card-news` will turn it into a `source-pack.md` handoff, then continue with angle proposals, copy, HTML/CSS preview, and final PNG/MP4 export planning.
-
-The current workflow is engagement-first. It should avoid PPT-like briefing slides by defining who will stop scrolling, what they care about, what becomes easier or clearer, and why they would save, comment, share, or keep swiping. For visual topics, it should also look for media references such as official demos, screenshots, product pages, creator walkthroughs, or video clips before finalizing the storyboard. Before final export, it should run line-break QA so short words, particles, or endings do not sit alone on their own line. Media label chips should sit in the lower safe zone so they do not cover the important screenshot or demo proof, then pass a spacing relationship check against nearby badges and headlines.
-
-The copy workflow now includes a Humanizer and marketing review inspired by public marketing/copywriting skill repos. It checks whether the copy sounds like a real channel editor, whether the post gives a concrete reason to care, and whether captions include useful source or try-it links. Product and PitchCheck content can also run ad/conversion mode for offer, proof, objection, CTA, and destination planning.
-
-For AIjjuun-style AI news and tool posts, the repo includes a production playbook that formalizes the working style developed through repeated account experiments: do not stop at official blogs, look for minor-but-useful sources, connect every topic to a practical Korean viewer use case, keep the card copy short, use real visual proof, and package each post so it can build toward AX consulting trust.
-
-For short-form video, call:
-
-```text
 $auto-motion-news
+<script or source URL>
 ```
 
-Then provide a script, card-news project path, pasted card copy, source URL, report, or notes. The skill will create a retention frame, video script, scene plan, media/source pack, HyperFrames or Remotion motion plan, caption, and MP4 render plan.
+## Quick Start For Claude Code
 
-Motion scripts also run a spoken Humanizer pass so they do not sound like caption paragraphs read aloud. For product or campaign videos, the skill adds marketing/ad checks before preview motion.
+Claude Code can use the same `SKILL.md`-based skill folders.
+
+### One-Line Install
+
+Windows PowerShell:
+
+```powershell
+powershell -ExecutionPolicy Bypass -Command "iwr -useb https://raw.githubusercontent.com/AIjunja/Auto-card-news/master/install-claude.ps1 | iex"
+```
+
+macOS / Linux:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/AIjunja/Auto-card-news/master/install-claude.sh | bash
+```
+
+Restart Claude Code after installation.
+
+### Use In Claude Code
+
+Paste a request like this:
+
+```text
+Use the ai-jjuun-content-engine skill.
+
+Source:
+https://github.com/microsoft/markitdown
+
+Make an AI쭌-style Korean card-news package:
+- 7-card carousel
+- Reel plan
+- caption
+- source links
+- visual references
+- no stiff translated Korean
+- explain why viewers should care
+```
+
+## Manual Install
+
+### Codex
+
+Copy skills into your Codex skills directory:
+
+```text
+~/.codex/skills/
+```
+
+Required folders:
+
+```text
+skills/ai-jjuun-content-engine
+skills/auto-card-news
+skills/auto-motion-news
+```
+
+Recommended companion:
+
+```text
+https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
+```
+
+### Claude Code
+
+Copy the same skill folders into your Claude skills directory:
+
+```text
+~/.claude/skills/
+```
+
+Required folders:
+
+```text
+skills/ai-jjuun-content-engine
+skills/auto-card-news
+skills/auto-motion-news
+```
+
+Recommended companion:
+
+```text
+https://github.com/mvanhorn/last30days-skill/tree/main/skills/last30days
+```
+
+## Example Output Package
+
+A typical project folder should contain:
+
+```text
+source.md
+source-pack.md
+brief.md
+storyboard.md
+motion-plan.md
+caption.md
+design.md
+cards/
+output/
+  card-01.png
+  card-02.png
+  ...
+  reel-preview.mp4
+  contact-sheet.png
+  thumbnail-sheet.png
+```
+
+The exact rendering depends on the local agent environment, browser tools, image tools, HyperFrames, Remotion, and available media sources.
+
+## AI쭌 Production Rules
+
+This repo encodes the production lessons from many AI쭌 content experiments:
+
+- Hook first. The first card or first 3 seconds must show why the viewer should stop.
+- Do not make PPT slides. Use real visuals, demos, product screenshots, or generated key images.
+- Do not explain technology names first. Start from the viewer’s situation and result.
+- Keep Korean copy short, natural, and useful.
+- Avoid “AI쭌식” wording. Use `AI JJUN` as branding, but make the explanation viewer-first.
+- Use GmarketSans-style readability for Korean card text.
+- For Reels, use hook -> explanation -> proof -> comment/save/follow CTA.
+- Prefer minor-but-useful AI tools, GitHub repos, GeekNews, X/Threads, Reddit, docs, demos, and product updates over generic official-blog summaries.
+- Add a practical AX bridge: how this could help a company, creator, developer, marketer, or solo founder.
+
+## Best Source Types
+
+Good sources:
+
+- official OpenAI / Anthropic / Google / Microsoft / Figma / Adobe docs
+- GitHub repos with clear use cases or hype signals
+- GeekNews and Hacker News discussions
+- X / Threads posts with strong reactions
+- Reddit discussions with practical pain points
+- YouTube demos or product videos
+- release notes, changelogs, examples, cookbooks, papers
+
+Avoid making content from a single viral post without checking the underlying source.
+
+## What This Is Not
+
+This is not a hosted SaaS.
+
+This repository does not automatically upload to Instagram, Threads, TikTok, or YouTube. Upload automation requires official platform API credentials and account review. The skills can prepare the assets and captions; publishing should be handled separately.
 
 ## Repository Layout
 
 ```text
-skills/auto-card-news/
-  SKILL.md
-  agents/openai.yaml
-  references/
-    ai-jjuun-production-playbook.md
-  assets/templates/
-  scripts/init_project.py
-skills/auto-motion-news/
-  SKILL.md
-  agents/openai.yaml
-  references/
-    ai-jjuun-reel-playbook.md
-  assets/templates/
-  scripts/init_motion_project.py
-skills/ai-jjuun-content-engine/
-  SKILL.md
-  agents/openai.yaml
-  references/
-    content-memory-map.md
-    source-discovery-standard.md
-    copy-visual-motion-standard.md
-    monetization-and-ax-bridge.md
+skills/
+  ai-jjuun-content-engine/
+    SKILL.md
+    agents/openai.yaml
+    references/
+  auto-card-news/
+    SKILL.md
+    assets/templates/
+    references/
+    scripts/
+  auto-motion-news/
+    SKILL.md
+    assets/templates/
+    references/
+    scripts/
+docs/
+  codex-quickstart.md
+  claude-code-quickstart.md
+examples/
+  one-link-ai-news-prompt.md
 tests/
-docs/superpowers/
 ```
 
 ## Verify
@@ -207,4 +261,8 @@ docs/superpowers/
 python -m unittest tests.test_auto_card_news_skill -v
 ```
 
-The test suite checks the skill metadata, references, templates, scaffold script, and installation documentation.
+The test suite checks the skill metadata, references, templates, scaffold scripts, installer docs, and Claude/Codex distribution files.
+
+## License
+
+This repository is intended as a reusable Agent Skill sample. Check each external media source, font, screenshot, video clip, and GitHub repository license before using it commercially.
