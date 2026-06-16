@@ -185,6 +185,23 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         codex_quickstart = ROOT / "docs" / "codex-quickstart.md"
         claude_quickstart = ROOT / "docs" / "claude-code-quickstart.md"
         one_link_prompt = ROOT / "examples" / "one-link-ai-news-prompt.md"
+        brand_logo = ROOT / "docs" / "assets" / "brand" / "ai-jjuun-auto-card-news-logo.svg"
+        readme_hero = ROOT / "docs" / "assets" / "showcase" / "readme-hero.png"
+        showcase_cards = [
+            ROOT / "docs" / "assets" / "showcase" / "vibevoice-card-01.png",
+            ROOT / "docs" / "assets" / "showcase" / "openai-academy-card-01.png",
+            ROOT / "docs" / "assets" / "showcase" / "gpt55-prompt-card-01.png",
+            ROOT / "docs" / "assets" / "showcase" / "chromex-card-01.png",
+            ROOT / "docs" / "assets" / "showcase" / "hermes-card-01.png",
+            ROOT / "docs" / "assets" / "showcase" / "google-surf-mcp-card-01.png",
+            ROOT / "docs" / "assets" / "showcase" / "codex-pets-card-01.png",
+            ROOT / "docs" / "assets" / "showcase" / "anthropic-courses-card-01.png",
+        ]
+        i18n_docs = [
+            ROOT / "docs" / "i18n" / "README.ko.md",
+            ROOT / "docs" / "i18n" / "README.ja.md",
+            ROOT / "docs" / "i18n" / "README.zh-CN.md",
+        ]
 
         self.assertTrue(readme.exists(), "README.md is required for GitHub installation")
         self.assertTrue(install_ps1.exists(), "install.ps1 is required for Windows users")
@@ -194,14 +211,28 @@ class AutoCardNewsSkillTest(unittest.TestCase):
         self.assertTrue(codex_quickstart.exists(), "Codex quickstart docs are required")
         self.assertTrue(claude_quickstart.exists(), "Claude Code quickstart docs are required")
         self.assertTrue(one_link_prompt.exists(), "One-link prompt example is required")
-        self.assertEqual(read_text(version).strip(), "0.5.0")
-        self.assertIn("0.5.0", read_text(changelog))
+        self.assertTrue(brand_logo.exists(), "README brand logo is required")
+        self.assertTrue(readme_hero.exists(), "README hero image is required")
+        for path in showcase_cards + i18n_docs:
+            self.assertTrue(path.exists(), f"Missing README distribution asset: {path}")
+        self.assertEqual(read_text(version).strip(), "0.5.1")
+        self.assertIn("0.5.1", read_text(changelog))
 
         text = read_text(readme)
         required_phrases = [
             "AIjjuun Auto Card News",
             "AI쭌 카드뉴스 자동화",
+            "docs/assets/brand/ai-jjuun-auto-card-news-logo.svg",
+            "docs/assets/showcase/readme-hero.png",
             "source link -> useful angle -> hook -> visual proof -> card-news -> Reel -> caption",
+            "Meet The Demo",
+            "Preview Gallery",
+            "Tech Stack",
+            "Channels",
+            "Creator Notes",
+            "docs/i18n/README.ko.md",
+            "docs/i18n/README.ja.md",
+            "docs/i18n/README.zh-CN.md",
             "auto-card-news",
             "auto-motion-news",
             "ai-jjuun-content-engine",

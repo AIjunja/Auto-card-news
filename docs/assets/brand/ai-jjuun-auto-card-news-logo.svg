@@ -1,0 +1,20 @@
+<svg width="420" height="120" viewBox="0 0 420 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AI JJUN Auto Card News logo">
+  <rect width="420" height="120" rx="26" fill="#07111F"/>
+  <rect x="1" y="1" width="418" height="118" rx="25" stroke="#5BFFDB" stroke-opacity="0.38" stroke-width="2"/>
+  <circle cx="64" cy="60" r="34" fill="url(#glow)"/>
+  <rect x="43" y="43" width="42" height="34" rx="12" fill="#111827" stroke="#D8E8FF" stroke-opacity="0.28"/>
+  <circle cx="58" cy="58" r="3.8" fill="#5BFFDB"/>
+  <circle cx="70" cy="58" r="3.8" fill="#5BFFDB"/>
+  <path d="M55 71C61 76 68 76 74 71" stroke="white" stroke-width="3" stroke-linecap="round"/>
+  <path d="M100 35H113V85H100V35Z" fill="#5BFFDB"/>
+  <path d="M122 35H135V85H122V35Z" fill="#FFD35A"/>
+  <text x="158" y="55" fill="white" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="800" letter-spacing="3">AI JJUN</text>
+  <text x="158" y="84" fill="#B7C7D7" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="700">AUTO CARD NEWS</text>
+  <defs>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(64 60) rotate(90) scale(43)">
+      <stop stop-color="#5BFFDB"/>
+      <stop offset="0.48" stop-color="#4567FF"/>
+      <stop offset="1" stop-color="#172554"/>
+    </radialGradient>
+  </defs>
+</svg>

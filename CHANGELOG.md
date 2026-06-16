@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.1
+
+- Restyled the README into a richer open-source showcase with badges, language links, a logo, a hero banner, channel links, creator notes, and real AIjjuun card-news preview assets.
+- Added multilingual README pointers for Korean, Japanese, and Simplified Chinese readers.
+- Added distribution tests for README showcase assets and localized docs.
+
 ## 0.5.0
 
 - Reworked `README.md` into a public super-sample landing page for AIjjuun card-news automation.
