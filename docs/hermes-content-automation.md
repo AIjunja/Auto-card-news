@@ -89,15 +89,11 @@ PUBLIC_MEDIA_BASE_URL=https://cdn.ai-jjuun.com/
 AIJJUN_CDN_REPO_PATH=ai-jjun-cdn
 HERMES_AUTO_PUBLISH_ON_FINAL_APPROVAL=1
 HERMES_AUTO_PUBLISH_EXECUTE=1
-HERMES_AUTO_PUBLISH_PLATFORM=instagram
+HERMES_AUTO_PUBLISH_PLATFORM=auto
 HERMES_AUTO_PUBLISH_KINDS=carousel,reel
 ```
 
-When Threads API credentials are ready, change:
-
-```text
-HERMES_AUTO_PUBLISH_PLATFORM=all
-```
+`auto` means Instagram-only while Threads credentials are empty, then Instagram + Threads once `THREADS_ACCESS_TOKEN` and `THREADS_USER_ID` are filled.
 
 ## 1. Initialize
 
@@ -410,15 +406,25 @@ META_ACCESS_TOKEN=
 INSTAGRAM_USER_ID=
 THREADS_ACCESS_TOKEN=
 THREADS_USER_ID=
+THREADS_GRAPH_BASE_URL=https://graph.threads.net/v1.0
 PUBLIC_MEDIA_BASE_URL=
 AIJJUN_CDN_REPO_PATH=ai-jjun-cdn
 HERMES_AUTO_PUBLISH_ON_FINAL_APPROVAL=1
 HERMES_AUTO_PUBLISH_EXECUTE=1
-HERMES_AUTO_PUBLISH_PLATFORM=instagram
+HERMES_AUTO_PUBLISH_PLATFORM=auto
 HERMES_AUTO_PUBLISH_KINDS=carousel,reel
 ```
 
 `PUBLIC_MEDIA_BASE_URL` must point to a public HTTPS URL where the files under `carousel-workspace` are reachable. Meta APIs cannot upload from local disk paths.
+
+Threads token sanity check:
+
+```powershell
+node tools\automation\hermes-threads-check.mjs
+node tools\automation\hermes-threads-check.mjs --write-user-id
+```
+
+The first command verifies the token without publishing anything. If the returned username is the right Threads profile, run the second command to save `THREADS_USER_ID`.
 
 After this, you do not need to run a publish command manually. Final Telegram
 approval triggers:

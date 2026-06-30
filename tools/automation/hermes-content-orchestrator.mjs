@@ -2716,6 +2716,7 @@ function envTemplate() {
     "THREADS_ACCESS_TOKEN=",
     "THREADS_USER_ID=",
     "THREADS_TOKEN_EXPIRES_AT=",
+    "THREADS_GRAPH_BASE_URL=https://graph.threads.net/v1.0",
     "",
     "# Public base URL where carousel-workspace files are reachable by Meta APIs.",
     "# Example: https://cdn.example.com/carousel-workspace/",
@@ -2726,7 +2727,7 @@ function envTemplate() {
     "AIJJUN_CDN_REPO_PATH=ai-jjun-cdn",
     "HERMES_AUTO_PUBLISH_ON_FINAL_APPROVAL=1",
     "HERMES_AUTO_PUBLISH_EXECUTE=1",
-    "HERMES_AUTO_PUBLISH_PLATFORM=instagram",
+    "HERMES_AUTO_PUBLISH_PLATFORM=auto",
     "HERMES_AUTO_PUBLISH_KINDS=carousel,reel",
     "",
     "# Optional YouTube Data API, used later only with --publish-approved --platform youtube/all --execute",
@@ -2788,7 +2789,7 @@ Auto publish env:
   AIJJUN_CDN_REPO_PATH=ai-jjun-cdn
   HERMES_AUTO_PUBLISH_ON_FINAL_APPROVAL=1
   HERMES_AUTO_PUBLISH_EXECUTE=1
-  HERMES_AUTO_PUBLISH_PLATFORM=instagram
+  HERMES_AUTO_PUBLISH_PLATFORM=auto
   HERMES_AUTO_PUBLISH_KINDS=carousel,reel
 
 Manual CLI commands:
