@@ -1772,31 +1772,101 @@ async function applyConversationalTelegramCommand(text) {
   const action = classifyConversationalTelegramAction(trimmed);
   if (!action) return null;
 
-  const target = await resolveConversationalTelegramTarget();
+  const targetHint = parseConversationalTelegramTargetHint(trimmed);
+  const target = await resolveConversationalTelegramTarget(targetHint, action, trimmed);
   if (!target) return { stage: "shortcut", status: "needs_id", command: "conversation" };
 
+  if (action === "approve" && target.stage === "final" && !isExplicitFinalUploadApproval(trimmed)) {
+    await sendTelegramMessage([
+      "업로드 승인으로 볼지 살짝 애매해요.",
+      "",
+      `대상: ${target.id}`,
+      "",
+      "게시까지 원하면 이렇게 말해주면 돼요:",
+      "- 좋아 올려줘",
+      "- 이걸로 인스타랑 쓰레드 올려",
+      "- 업로드 진행해",
+      "",
+      "그냥 마음에 든다는 뜻이면 보류해둘게욤.",
+    ].join("\n"));
+    return {
+      stage: target.stage,
+      id: target.id,
+      status: "needs_publish_confirmation",
+      command: "conversation",
+    };
+  }
+
   await applyReviewShortcutV2(target, action, trimmed);
+  const status =
+    action === "approve"
+      ? "approved"
+      : action === "hold"
+        ? "pending"
+        : target.stage === "source" && action === "reject"
+          ? "rejected"
+          : "changes_requested";
   return {
     stage: target.stage,
     id: target.id,
-    status: action === "hold" ? "pending" : target.stage === "source" && action === "reject" ? "rejected" : "changes_requested",
+    status,
     command: "conversation",
   };
 }
 
 function classifyConversationalTelegramAction(text) {
+  if (isNumberOnlyTelegramChoice(text)) return "approve";
   if (/(\uB300\uAE30|\uBCF4\uB958|\uB098\uC911\uC5D0|\uC7A0\uAE50\s*\uBA48\uCD94|\uC2A4\uD1B1)/i.test(text)) return "hold";
   if (/(\uBCC4\uB85C|\u3134\u3134|\uB2E4\uC2DC\s*(\uCC3E|\uC11C\uCE6D)|\uC0C8\uB85C\s*(\uCC3E|\uB9CC\uB4E4)|\uB9C8\uC74C\uC5D0\s*\uC548|\uD3D0\uAE30|\uBC84\uB824|\uAC1C\uBCC4\uB85C)/i.test(text)) return "reject";
+  if (/(업로드|게시|발행|인스타|쓰레드|threads|instagram)|((좋아|괜찮|오케이|ㅇㅋ|이걸로|이거로|승인|통과|고고|가자|진행).*(올려|올리자|올려줘))/i.test(text)) return "approve";
   if (/(\uC218\uC815|\uACE0\uCCD0|\uBC14\uAFC0|\uBC14\uAFD4|\uBC18\uC601|\uB2E4\uC2DC\s*\uB9CC\uB4E4|\uB354\s*\uC138\uAC8C|\uD6C5|\uCCAB\s*\uC7A5|\uCCAB\uC7A5|\uD6C4\uD0B9|\uC774\uBBF8\uC9C0|\uC9C0\uD53C\uD2F0|\bGPT\b|\uB3C4\uC2DD|\uB808\uC774\uC544\uC6C3|\uAE00\uC528|\uD3F0\uD2B8|\uCEA1\uC158|\uC9E7\uAC8C|\uAE38\uAC8C|\uD1A4|\uB9D0\uD22C|\uB2E4\uB4EC|\uBCF4\uC644|\uCD94\uAC00|\uBE7C\uC918|\uB0B4\uB824|\uC62C\uB824|\uD0A4\uC6CC|\uC904\uC5EC|\uACB9\uCE58|\uC5B4\uC0C9)/i.test(text)) return "revise";
+  if (/(좋아|괜찮|오케이|ㅇㅋ|\bok\b|\bokay\b|\bgo\b|고고|가자|진행|승인|통과|이걸로|이거로|선택|픽|만들어|제작)/i.test(text)) return "approve";
   return null;
 }
 
-async function resolveConversationalTelegramTarget() {
+function isNumberOnlyTelegramChoice(text) {
+  return /^\s*#?\d+\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?\s*$/i.test(text);
+}
+
+function parseConversationalTelegramTargetHint(text) {
+  const numberMatch = text.match(/(?:^|\s|#)(\d+)\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/i);
+  const stageHint = parseTelegramStageHintV3(text);
+  const slugMatch = numberMatch
+    ? null
+    : text.match(/\b(?:20\d{2}-\d{2}-\d{2}-[a-z0-9-]+|[a-z0-9][a-z0-9-]{5,})\b/i);
+  return {
+    id: slugMatch ? slugMatch[0] : null,
+    number: numberMatch ? Number(numberMatch[1]) : null,
+    stageHint,
+  };
+}
+
+function isExplicitFinalUploadApproval(text) {
+  return /(올려|올려줘|올리자|업로드|게시|발행|배포|인스타|쓰레드|threads|instagram|\u3131\u3131|고고|진행|승인|통과)/i.test(text);
+}
+
+async function resolveConversationalTelegramTarget(targetHint = {}, action = "revise", originalText = "") {
   const pending = await getPendingTelegramReviewTargetsV3();
+
+  if (targetHint.id || targetHint.number || targetHint.stageHint) {
+    return resolveTelegramReviewTargetV3(targetHint);
+  }
+
   if (pending.length === 1) return pending[0];
 
   const pendingFinals = pending.filter((item) => item.stage === "final");
-  if (pendingFinals.length === 1) return pendingFinals[0];
+  if (pendingFinals.length === 1 && (action !== "approve" || isExplicitFinalUploadApproval(originalText))) {
+    return pendingFinals[0];
+  }
+  if (action === "revise" && pendingFinals.length >= 1) {
+    return pendingFinals[0];
+  }
+
+  const pendingSources = pending.filter((item) => item.stage === "source");
+  if (action === "approve" && pendingSources.length === 1 && !pendingFinals.length) return pendingSources[0];
+
+  const fuzzyTarget = resolveFuzzyTelegramTargetFromText(pending, originalText);
+  if (fuzzyTarget) return fuzzyTarget;
 
   if (!pending.length) {
     await sendTelegramMessage("지금 수정/보류할 검수 항목이 없어요. 먼저 소스 후보나 최종 미리보기를 받아야 해욤.");
@@ -1815,6 +1885,35 @@ async function resolveConversationalTelegramTarget() {
     ...formatPendingTelegramTargetsV3(pending),
   ].join("\n"));
   return null;
+}
+
+function resolveFuzzyTelegramTargetFromText(pending, text) {
+  const normalized = normalizeTelegramFuzzyText(text);
+  if (!normalized) return null;
+  const tokens = normalized.split(" ").filter((token) => token.length >= 4);
+  if (!tokens.length) return null;
+
+  const matches = pending.filter((item) => {
+    const haystack = normalizeTelegramFuzzyText([
+      item.id,
+      item.title,
+      item.url,
+      item.bucket,
+      item.summary,
+    ].filter(Boolean).join(" "));
+    return haystack && tokens.some((token) => haystack.includes(token));
+  });
+  return matches.length === 1 ? matches[0] : null;
+}
+
+function normalizeTelegramFuzzyText(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g, " ")
+    .replace(/[^a-z0-9가-힣]+/g, " ")
+    .replace(/\b(좋아|괜찮|오케이|수정|고쳐|바꿔|올려|업로드|게시|발행|대기|보류|별로|다시|첫장|첫|훅|이미지|지피티|gpt|도식|해주세요|해줘|좀|더|세게)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 async function runApprovedSourceProductionNow(sourceId, note = "") {
