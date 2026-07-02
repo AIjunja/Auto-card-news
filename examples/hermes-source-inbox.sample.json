@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "channel": "ai-jjuun",
+  "generated_at": "2026-06-20T09:00:00+09:00",
+  "items": [
+    {
+      "id": "anyscale-ray-vllm-pd",
+      "status": "candidate",
+      "priority": 5,
+      "bucket": "official",
+      "title": "Ray + vLLM prefill/decode disaggregation on AMD MI325X",
+      "url": "https://www.anyscale.com/blog/ray-vllm-prefill-decode-disaggregation-amd-mi325x-67-percent-savings",
+      "summary": "Anyscale says a serving architecture change reduced cost in a specific AMD MI325X benchmark.",
+      "angle": "GPU 비용 때문에 고민하는 AI 개발자에게 '모델보다 서빙 구조를 먼저 보라'는 실무형 이야기.",
+      "sources": [
+        {
+          "label": "official",
+          "url": "https://www.anyscale.com/blog/ray-vllm-prefill-decode-disaggregation-amd-mi325x-67-percent-savings",
+          "summary": "Original benchmark and architecture explanation."
+        }
+      ],
+      "notes": [
+        "Do not imply every workload saves 67%. Present the number as a benchmark-specific reported result.",
+        "Use visual proof: architecture split, GPU cost meter, benchmark screenshot/crop."
+      ]
+    }
+  ]
+}

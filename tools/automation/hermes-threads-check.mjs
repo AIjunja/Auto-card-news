@@ -30,7 +30,9 @@ const profile = await threadsGet("/me", {
   access_token: token,
 });
 
-if (flags.has("write-user-id")) {
+const shouldWriteUserId = flags.has("write-user-id") || flags.has("write_user_id");
+
+if (shouldWriteUserId) {
   await writeEnvValue(envPath, "THREADS_USER_ID", profile.id);
 }
 
@@ -39,8 +41,8 @@ printSummary("threads check", {
   graphBaseUrl,
   userId: profile.id,
   username: profile.username ?? null,
-  wroteUserId: flags.has("write-user-id"),
-  next: flags.has("write-user-id")
+  wroteUserId: shouldWriteUserId,
+  next: shouldWriteUserId
     ? "THREADS_USER_ID is saved. You can run a dry-run upload next."
     : "If this is the right ai_jjuun account, rerun with --write-user-id.",
 });

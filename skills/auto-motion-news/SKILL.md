@@ -17,6 +17,20 @@ This is a conversation-driven video production workflow. Do not upload to YouTub
 
 Default output is a ready-to-publish Reel/Shorts package. If upload credentials are missing, create a publish queue/checklist instead of pretending upload is available.
 
+## Hermes Source Automation Rule
+
+When this skill is called by Hermes for AIjjuun automation:
+
+- Source scouting may show 5-6 compact candidates in Telegram, but Reel production must use only one source per cycle.
+- Use the user-approved source, the highest-priority timed-out source, or a user-supplied direct URL.
+- If the user sends a strong source URL/link directly, skip the recommendation queue and immediately build the Reel package from that source.
+- Even when a source is auto-selected after timeout, never auto-upload the finished Reel immediately. Send the rendered final preview to Telegram at least once and wait for explicit final approval.
+- After one source is selected, archive the other pending candidates as stale so old recommendations do not keep coming back.
+- Never revive old CDN files, old publish queues, stale review state, or previously posted projects as fresh review candidates.
+- Do not create multiple Reels for the same source unless the user explicitly asks for variants.
+
+Default Hermes flow: `source scout -> 5-6 candidates -> one selected source -> 15-20s Reel -> render QA -> final Telegram preview -> approved publish`.
+
 ## Non-Negotiable AIjjuun Reel Standard
 
 For AIjjuun-style AI/tool/news Reels, match the approved card-news look:
@@ -28,6 +42,18 @@ For AIjjuun-style AI/tool/news Reels, match the approved card-news look:
 - Avoid heavy Gaussian blur, grayscale filtering, and generic dark backgrounds that hide the source.
 - Do not deliver a simple slideshow of card PNGs as the final motion output.
 - Use at least three motion jobs: typing, zoom/crop, checklist reveal, callout, cursor/tap pulse, before/after, or proof highlight.
+
+## First Scene Visual Contract
+
+For every source-based AIjjuun Reel, the first 0-2 seconds must use the same standard as the carousel cover:
+
+1. Use a real hook-worthy visual if one exists: official demo, product UI, app screenshot, creator demo, source proof crop, benchmark/proof screen, or user-provided media.
+2. If no strong real visual exists, use GPT Image 2 / generated editorial imagery that summarizes the topic in one concrete scene.
+3. If image generation is unavailable, create an HTML-native editorial scene with recognizable UI/object cues and animate it.
+
+The first scene must communicate the viewer situation, payoff, risk, or "what changes now" before the viewer reads a long overlay. Do not open with a static title, plain repo screenshot, vague AI glow, or generic robot.
+
+For generated first scenes, save the image prompt or visual brief in `motion-plan.md` or `source-pack.md`, then animate the result with punch-in, type-in, cursor/callout, or checklist reveal.
 
 ## Required Reel QA
 
@@ -131,6 +157,10 @@ Safe behavior:
 
 - If Meta API credentials, app permissions, account IDs, or media hosting are missing, stop at `publish-queue.json` and tell the user what is missing.
 - Instagram and Threads uploads must use official Meta APIs and the user's configured professional/business account access.
+- Instagram default cross-post plan: publish the paired card-news carousel and the Reel when both assets exist. Keep Instagram as the richer mixed-media channel.
+- Threads default cross-post plan: publish only the paired card-news image set/carousel, then put source links in a reply/comment. Do not publish the Reel/video to Threads unless the user explicitly asks for a Threads video post.
+- Do not reuse the Instagram caption as-is for Threads. Instagram can keep a fuller caption, but Threads should use a shorter main body, a source/link reply, and the `AI Threads` topic tag by default.
+- Put GitHub, docs, paper, official blog, demo, and source links in the Threads reply/comment unless the user explicitly asks to put them in the main Threads body.
 - Before actual upload, check file paths, aspect ratio, duration, caption, source links, and whether the user approved this exact final package.
 - Do not post private drafts, local-only media URLs, unverified claims, or source screenshots with unclear rights.
 

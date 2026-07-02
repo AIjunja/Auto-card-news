@@ -39,6 +39,32 @@ Turn one source link into an Instagram-ready AI news package:
 
 This repository is a public skill sample for creators who want to make AI trend content with Codex or Claude Code.
 
+## Hermes Automation Loop
+
+For AI JJUN's local workflow, Hermes can keep scouting sources while the PC is on:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\automation\register-hermes-task.ps1 -RefreshSources
+```
+
+That scheduled task runs every hour and follows this approval-first loop:
+
+```text
+search hype sources
+  -> Telegram source approval
+  -> Codex draft
+  -> Telegram draft approval
+  -> Codex final card-news + Reel + caption
+  -> Telegram upload approval
+  -> optional Meta API upload later
+```
+
+Manual source intake is also supported:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools\automation\hermes-add-source.ps1 -Url "https://example.com/source" -Title "source title"
+```
+
 > AI쭌 카드뉴스 자동화: 스킬 깔고 링크 하나만 던지면, 카드뉴스 + 릴스 + 캡션 제작 흐름을 알아서 잡아주는 Agent Skill 샘플입니다.
 
 ## Meet The Demo
@@ -329,6 +355,20 @@ This repo encodes the production lessons from many AI쭌 content experiments:
 
 ## Best Source Types
 
+### Mandatory Hype Mix
+
+When Hermes or Codex searches for sources, do not return an official-blog-only list.
+Every source discovery run should first collect and score at least:
+
+- 2 GeekNews/Hacker News-style community signals
+- 2 Threads posts or creator posts with visible traction
+- 2 X posts from official accounts, builders, researchers, or high-signal practitioners
+- 2 currently hyped GitHub repositories, checked for stars, recent commits, README clarity, license, and real use case
+
+Then pair each social or hype signal with a verifying source such as an official doc, changelog, GitHub README, demo video, issue, release note, or product page.
+
+Reject source lists that are mostly generic announcement summaries. AI쭌 should win by finding minor-but-useful tools, practical workflows, security/cost gotchas, and Korean-friendly AX use cases before bigger AI news accounts flatten them into obvious summaries.
+
 Good sources:
 
 - official OpenAI / Anthropic / Google / Microsoft / Figma / Adobe docs
@@ -345,7 +385,18 @@ Avoid making content from a single viral post without checking the underlying so
 
 This is not a hosted SaaS.
 
-This repository does not automatically upload to Instagram, Threads, TikTok, or YouTube. Upload automation requires official platform API credentials and account review. The skills can prepare the assets and captions; publishing should be handled separately.
+By default, this repository prepares assets, captions, source notes, QA sheets, and publish queues. It does not upload anything unless you explicitly configure local credentials and run the guarded publishing workflow.
+
+Optional local automation is available for a Hermes-style setup:
+
+```text
+Hermes source search
+  -> Codex content production
+  -> Telegram review
+  -> approved-only Instagram / Threads publishing
+```
+
+See [`docs/hermes-content-automation.md`](docs/hermes-content-automation.md) and [`docs/publish-automation.md`](docs/publish-automation.md). Upload automation requires official Meta API credentials, account permissions, public media URLs, and your approval for the exact final package.
 
 ## Repository Layout
 
@@ -368,7 +419,11 @@ skills/
 docs/
   codex-quickstart.md
   claude-code-quickstart.md
+  hermes-content-automation.md
+  publish-automation.md
 examples/
+  hermes-content.env.sample
+  hermes-source-inbox.sample.json
   one-link-ai-news-prompt.md
 tests/
 ```

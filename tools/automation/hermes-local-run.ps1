@@ -3,6 +3,7 @@ param(
   [switch]$RefreshSources,
   [switch]$PublishApproved,
   [switch]$PublishExecute,
+  [switch]$SkipFinalReview,
   [string]$PublishPlatform = "all",
   [string]$Node = "node",
   [string]$Workspace = "C:\Users\letgo\Documents\New project 2"
@@ -42,6 +43,7 @@ if (!(Test-Path -LiteralPath $envFile)) {
 $envText = Get-Content -Raw -LiteralPath $envFile
 $telegramToken = [regex]::Match($envText, "(?m)^TELEGRAM_BOT_TOKEN=(.+)$").Groups[1].Value.Trim()
 $telegramChatId = [regex]::Match($envText, "(?m)^TELEGRAM_CHAT_ID=(.+)$").Groups[1].Value.Trim()
+$sourceOnlyAutopilot = [regex]::IsMatch($envText, "(?mi)^HERMES_SOURCE_ONLY_AUTOPILOT=(1|true|yes|on)$")
 
 if ([string]::IsNullOrWhiteSpace($telegramToken)) {
   Write-Host "Missing TELEGRAM_BOT_TOKEN in $envFile." -ForegroundColor Yellow
@@ -63,13 +65,24 @@ Invoke-HermesNode @($orchestrator, "--telegram-poll")
 
 if ($NoCodex) {
   Write-Host "[Hermes] Run safe hourly pass without Codex execution..." -ForegroundColor Cyan
-  $hourlyArgs = @($orchestrator, "--hourly-once", "--skip-queue-validation", "--skip-final-review")
+  $hourlyArgs = @($orchestrator, "--hourly-once", "--skip-queue-validation")
+  if ($SkipFinalReview) {
+    $hourlyArgs += "--skip-final-review"
+  }
   Invoke-HermesNode $hourlyArgs
 } else {
-  Write-Host "[Hermes] Run hourly pass with Codex draft/final execution..." -ForegroundColor Cyan
-  $hourlyArgs = @($orchestrator, "--hourly-once", "--run-draft-codex", "--run-codex", "--skip-queue-validation", "--skip-final-review")
+  if ($sourceOnlyAutopilot) {
+    Write-Host "[Hermes] Run hourly pass with Codex final execution only. Source-only autopilot is enabled." -ForegroundColor Cyan
+    $hourlyArgs = @($orchestrator, "--hourly-once", "--run-codex", "--skip-queue-validation")
+  } else {
+    Write-Host "[Hermes] Run hourly pass with Codex draft/final execution..." -ForegroundColor Cyan
+    $hourlyArgs = @($orchestrator, "--hourly-once", "--run-draft-codex", "--run-codex", "--skip-queue-validation")
+  }
   if ($RefreshSources) {
     $hourlyArgs += "--refresh-sources"
+  }
+  if ($SkipFinalReview) {
+    $hourlyArgs += "--skip-final-review"
   }
   Invoke-HermesNode $hourlyArgs
 }

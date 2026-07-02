@@ -4,6 +4,9 @@ param(
   [switch]$NoCodex,
   [switch]$RefreshSources,
   [switch]$PublishApproved,
+  [switch]$PublishExecute,
+  [switch]$SkipFinalReview,
+  [string]$PublishPlatform = "both",
   [string]$Workspace = "C:\Users\letgo\Documents\New project 2"
 )
 
@@ -30,6 +33,14 @@ if ($RefreshSources) {
 }
 if ($PublishApproved) {
   $argumentParts += "-PublishApproved"
+  $argumentParts += "-PublishPlatform"
+  $argumentParts += "`"$PublishPlatform`""
+}
+if ($PublishExecute) {
+  $argumentParts += "-PublishExecute"
+}
+if ($SkipFinalReview) {
+  $argumentParts += "-SkipFinalReview"
 }
 
 $action = New-ScheduledTaskAction `
@@ -60,4 +71,4 @@ Register-ScheduledTask `
 Write-Host "Registered scheduled task: $TaskName" -ForegroundColor Green
 Write-Host "Runner: $runner" -ForegroundColor Cyan
 Write-Host "Repeat: every $RepeatMinutes minute(s), plus at logon." -ForegroundColor Cyan
-Write-Host "RefreshSources: $RefreshSources / PublishApproved dry-run: $PublishApproved / NoCodex: $NoCodex" -ForegroundColor Cyan
+Write-Host "RefreshSources: $RefreshSources / PublishApproved dry-run: $PublishApproved / PublishExecute: $PublishExecute / PublishPlatform: $PublishPlatform / SkipFinalReview: $SkipFinalReview / NoCodex: $NoCodex" -ForegroundColor Cyan

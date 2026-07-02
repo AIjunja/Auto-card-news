@@ -18,8 +18,8 @@ const groups = [
   },
   {
     name: "threads_publish",
-    required: ["THREADS_ACCESS_TOKEN", "THREADS_USER_ID", "PUBLIC_MEDIA_BASE_URL"],
-    optional: ["THREADS_TOKEN_EXPIRES_AT"],
+    required: ["THREADS_ACCESS_TOKEN", "THREADS_USER_ID", "THREADS_TOKEN_EXPIRES_AT", "PUBLIC_MEDIA_BASE_URL"],
+    optional: ["THREADS_GRAPH_BASE_URL"],
     expiry: "THREADS_TOKEN_EXPIRES_AT",
   },
   {

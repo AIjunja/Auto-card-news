@@ -3,6 +3,7 @@ param(
   [switch]$RefreshSources,
   [switch]$PublishApproved,
   [switch]$PublishExecute,
+  [switch]$SkipFinalReview,
   [string]$PublishPlatform = "all",
   [string]$Workspace = "C:\Users\letgo\Documents\New project 2",
   [string]$Node = "node",
@@ -36,6 +37,18 @@ function Write-HermesLog {
   Write-Host $line
 }
 
+function Invoke-HermesCommand {
+  param(
+    [string]$FilePath,
+    [string[]]$Arguments
+  )
+
+  & $FilePath @Arguments 2>&1 | ForEach-Object {
+    Add-Content -LiteralPath $logPath -Value ([string]$_) -Encoding UTF8
+  }
+  return $LASTEXITCODE
+}
+
 Write-HermesLog "AIJJUN Hermes hourly loop started. Workspace=$Workspace NoCodex=$NoCodex RefreshSources=$RefreshSources PublishApproved=$PublishApproved PublishExecute=$PublishExecute PublishPlatform=$PublishPlatform IntervalMinutes=$IntervalMinutes"
 
 while ($true) {
@@ -62,11 +75,14 @@ while ($true) {
     if ($PublishExecute) {
       $args += "-PublishExecute"
     }
+    if ($SkipFinalReview) {
+      $args += "-SkipFinalReview"
+    }
 
     Write-HermesLog "Running Hermes local pass..."
-    & powershell.exe @args *>> $logPath
-    if ($LASTEXITCODE -ne 0) {
-      Write-HermesLog "Hermes local pass failed with exit code $LASTEXITCODE."
+    $exitCode = Invoke-HermesCommand -FilePath "powershell.exe" -Arguments $args
+    if ($exitCode -ne 0) {
+      Write-HermesLog "Hermes local pass failed with exit code $exitCode."
     } else {
       Write-HermesLog "Hermes local pass completed."
     }
@@ -78,9 +94,9 @@ while ($true) {
   $nextRunAt = (Get-Date).AddMinutes($IntervalMinutes)
   while ((Get-Date) -lt $nextRunAt) {
     try {
-      & $Node @($orchestrator, "--telegram-poll") *>> $logPath
-      if ($LASTEXITCODE -ne 0) {
-        Write-HermesLog "Telegram poll failed with exit code $LASTEXITCODE."
+      $exitCode = Invoke-HermesCommand -FilePath $Node -Arguments @($orchestrator, "--telegram-poll")
+      if ($exitCode -ne 0) {
+        Write-HermesLog "Telegram poll failed with exit code $exitCode."
       }
     } catch {
       Write-HermesLog "Telegram poll error: $($_.Exception.Message)"

@@ -9,9 +9,12 @@ export const DEFAULT_FAILURE_LOG = path.join("carousel-workspace", "publish-fail
 
 const INSTAGRAM_CAPTION_LIMIT = 2200;
 const THREADS_TEXT_LIMIT = 500;
+const THREADS_COMMENT_LIMIT = 500;
+export const THREADS_DEFAULT_TOPIC_TAG = "AI Threads";
 const YOUTUBE_TITLE_LIMIT = 100;
 const YOUTUBE_DESCRIPTION_LIMIT = 5000;
 const MAX_INSTAGRAM_CARDS = 10;
+const MAX_THREADS_CAROUSEL_ITEMS = 20;
 const EXPECTED_CARD_COUNT = 7;
 const IMAGE_MAX_BYTES = 8 * 1024 * 1024;
 const REEL_MAX_BYTES = 300 * 1024 * 1024;
@@ -41,21 +44,88 @@ export function extractUrls(text) {
   return [...new Set((text.match(/https?:\/\/[^\s<>"'`]+/g) ?? []).map(cleanUrl))];
 }
 
-export function splitCaptions(caption) {
+function stripUrls(value) {
+  return value.replace(/https?:\/\/[^\s<>"'`]+/g, "").trim();
+}
+
+function stripHashtagLines(value) {
+  return value
+    .split(/\r?\n/)
+    .filter((line) => !line.trim().startsWith("#"))
+    .join("\n")
+    .trim();
+}
+
+function isThreadsSourceBlock(value) {
+  const text = value.trim();
+  if (!text) return true;
+  if (isCreditLine(text)) return true;
+  if (text.split(/\r?\n/).every((line) => !stripUrls(line).trim() || isCreditLine(line.trim()))) return true;
+  return /(써보시려면|참고|출처|source|github|공식\s*문서|링크)/i.test(text) && extractUrls(text).length > 0;
+}
+
+function clampThreadsText(value, limit = THREADS_TEXT_LIMIT) {
+  const text = value.trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, Math.max(0, limit - 1)).trim()}…`;
+}
+
+function labelSourceLink(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "");
+    if (host === "github.com") {
+      const [, owner, repo] = parsed.pathname.split("/");
+      return owner && repo ? `GitHub · ${owner}/${repo}` : "GitHub";
+    }
+    if (host.includes("openai.com")) return "OpenAI 공식 글";
+    if (host.includes("developers.openai.com")) return "OpenAI Developers";
+    if (host.includes("anthropic.com")) return "Anthropic 공식 글";
+    if (host.includes("google")) return "Google 공식 글";
+    if (host.includes("hada.io")) return "GeekNews";
+    return host;
+  } catch {
+    return "Source";
+  }
+}
+
+export function buildThreadsSourceComment(sourceLinks = []) {
+  const links = [...new Set(sourceLinks)].filter(Boolean).slice(0, 4);
+  if (!links.length) return "";
+
+  for (let count = links.length; count > 0; count -= 1) {
+    const body = [
+      "자료/출처는 여기서 이어서 볼 수 있어욤.",
+      "",
+      ...links.slice(0, count).map((link, index) => `${index + 1}. ${labelSourceLink(link)}\n${link}`),
+    ].join("\n");
+    if (body.length <= THREADS_COMMENT_LIMIT) return body;
+  }
+
+  return clampThreadsText(`자료/출처는 여기서 이어서 볼 수 있어욤.\n\n${links[0]}`, THREADS_COMMENT_LIMIT);
+}
+
+export function splitCaptions(caption, { sourceLinks = null } = {}) {
   const instagram = caption.trim();
   const paragraphs = instagram
     .split(/\n{2,}/)
     .map((part) => part.trim())
     .filter(Boolean)
     .filter((part) => !isCreditLine(part));
-  const urls = extractUrls(instagram).slice(0, 2);
-  let threads = [...paragraphs.slice(0, 3), ...urls].join("\n\n").trim();
-  if (threads.length > THREADS_TEXT_LIMIT) {
-    const linkBlock = urls.length ? `\n\n${urls.join("\n")}` : "";
-    const maxBody = THREADS_TEXT_LIMIT - linkBlock.length - 3;
-    threads = `${threads.slice(0, Math.max(0, maxBody)).trim()}...${linkBlock}`;
-  }
-  return { instagram, threads };
+  const urls = sourceLinks ?? extractUrls(instagram);
+  const mainParagraphs = paragraphs
+    .filter((part) => !isThreadsSourceBlock(part))
+    .map((part) => stripHashtagLines(stripUrls(part)))
+    .filter(Boolean);
+  const threads = clampThreadsText(mainParagraphs.slice(0, 4).join("\n\n"));
+  const threadsComment = buildThreadsSourceComment(urls);
+
+  return {
+    instagram,
+    threads,
+    threadsComment,
+    threadsTopicTag: THREADS_DEFAULT_TOPIC_TAG,
+  };
 }
 
 function cleanCaptionLine(value) {
@@ -131,6 +201,33 @@ function firstExistingPath(paths) {
   return paths.find((candidate) => existsSync(candidate)) ?? null;
 }
 
+function projectSourceKey(projectSlug) {
+  return String(projectSlug ?? "").replace(/^\d{4}-\d{2}-\d{2}-/, "");
+}
+
+function projectDateTime(item) {
+  const match = String(item?.projectSlug ?? "").match(/^(\d{4})-(\d{2})-(\d{2})-/);
+  if (match) {
+    const [, year, month, day] = match;
+    const time = new Date(`${year}-${month}-${day}T00:00:00.000Z`).getTime();
+    if (!Number.isNaN(time)) return time;
+  }
+  const createdAt = new Date(item?.created_at ?? 0).getTime();
+  return Number.isNaN(createdAt) ? 0 : createdAt;
+}
+
+function selectLatestByProjectSource(items) {
+  const latest = new Map();
+  for (const item of items) {
+    const key = projectSourceKey(item.projectSlug) || item.projectSlug || item.id;
+    const previous = latest.get(key);
+    if (!previous || projectDateTime(item) >= projectDateTime(previous)) {
+      latest.set(key, item);
+    }
+  }
+  return Array.from(latest.values()).sort((a, b) => projectDateTime(b) - projectDateTime(a));
+}
+
 async function listProjectDirs(workspaceRoot, channel) {
   const projectsRoot = path.join(workspaceRoot, "projects", channel);
   if (!existsSync(projectsRoot)) return [];
@@ -164,8 +261,8 @@ async function readProject(projectPath, channel, now, defaultPublishAt) {
   ]);
   const originalCaption = await readFile(captionPath, "utf8");
   const sourcePack = await safeReadText(path.join(projectPath, "source-pack.md"));
-  const captions = splitCaptions(originalCaption);
   const sourceLinks = extractUrls(`${originalCaption}\n${sourcePack}`);
+  const captions = splitCaptions(originalCaption, { sourceLinks });
   const youtubeMetadata = buildYouTubeMetadata({
     projectSlug,
     caption: captions.instagram,
@@ -178,6 +275,7 @@ async function readProject(projectPath, channel, now, defaultPublishAt) {
     contentKey,
     channel,
     projectSlug,
+    sourceKey: projectSourceKey(projectSlug),
     projectPath: path.resolve(projectPath),
     created_at: now,
     publish_at: defaultPublishAt ?? null,
@@ -208,8 +306,11 @@ async function readProject(projectPath, channel, now, defaultPublishAt) {
       threads: {
         enabled: true,
         text: captions.threads,
+        replyText: captions.threadsComment,
+        topicTag: captions.threadsTopicTag,
+        images: cards,
         image: cards[0] ?? null,
-        video: reel,
+        video: null,
       },
       youtube: {
         enabled: Boolean(reel),
@@ -245,13 +346,35 @@ export async function buildQueue({
     const item = await readProject(projectPath, channel, timestamp, defaultPublishAt);
     if (item) items.push(item);
   }
+  const queueItems = projects?.length ? items : selectLatestByProjectSource(items);
   return {
     version: 1,
     generated_at: timestamp,
     workspaceRoot: path.resolve(workspaceRoot),
     channel,
-    items,
+    items: queueItems,
   };
+}
+
+export function getThreadsPublishFields(item) {
+  const threads = item.platforms?.threads ?? {};
+  const sourceLinks = item.sourceLinks ?? [];
+  const normalized = splitCaptions(item.captions?.instagram ?? threads.text ?? "", { sourceLinks });
+  const rawText = threads.text ?? item.captions?.threads ?? normalized.threads ?? "";
+  const textNeedsCleanup = extractUrls(rawText).length > 0 || rawText.includes("#AI");
+  return {
+    text: textNeedsCleanup ? normalized.threads : rawText,
+    replyText: threads.replyText ?? item.captions?.threadsComment ?? normalized.threadsComment ?? buildThreadsSourceComment(sourceLinks),
+    topicTag: threads.topicTag ?? item.captions?.threadsTopicTag ?? normalized.threadsTopicTag ?? THREADS_DEFAULT_TOPIC_TAG,
+  };
+}
+
+export function getThreadsCardImages(item) {
+  const threads = item.platforms?.threads ?? {};
+  const imageCandidates = Array.isArray(threads.images) && threads.images.length
+    ? threads.images
+    : [threads.image].filter(Boolean);
+  return [...new Set(imageCandidates.filter(Boolean))].slice(0, MAX_THREADS_CAROUSEL_ITEMS);
 }
 
 function problem(severity, code, message, file = null) {
@@ -312,8 +435,12 @@ async function validateItem(item, options = {}) {
   if (item.captions.instagram.length > INSTAGRAM_CAPTION_LIMIT) {
     problems.push(problem("error", "instagram_caption_too_long", `Instagram caption exceeds ${INSTAGRAM_CAPTION_LIMIT} characters.`, item.assets.caption));
   }
-  if (item.platforms.threads.text.length > THREADS_TEXT_LIMIT) {
+  const threadsFields = getThreadsPublishFields(item);
+  if (threadsFields.text.length > THREADS_TEXT_LIMIT) {
     problems.push(problem("error", "threads_caption_too_long", `Threads text exceeds ${THREADS_TEXT_LIMIT} characters.`, item.assets.caption));
+  }
+  if (threadsFields.replyText && threadsFields.replyText.length > THREADS_COMMENT_LIMIT) {
+    problems.push(problem("error", "threads_reply_too_long", `Threads source reply exceeds ${THREADS_COMMENT_LIMIT} characters.`, item.assets.caption));
   }
   if (item.platforms.youtube?.enabled) {
     if (!item.platforms.youtube.video || !existsSync(item.platforms.youtube.video)) {
@@ -385,26 +512,23 @@ export function planInstagramPublish(item, { dryRun = true, apiVersion = "v24.0"
 
 export function planThreadsPublish(item, { dryRun = true, apiVersion = "v1.0" } = {}) {
   const jobs = [];
-  jobs.push({
-    type: "threads_image_or_text",
+  const threadsFields = getThreadsPublishFields(item);
+  const images = getThreadsCardImages(item);
+  const job = {
+    type: images.length > 1 ? "threads_carousel" : "threads_image_or_text",
     dryRun,
     endpoint: `https://graph.threads.net/${apiVersion}/{threads-user-id}/threads`,
     publishEndpoint: `https://graph.threads.net/${apiVersion}/{threads-user-id}/threads_publish`,
-    mediaType: item.platforms.threads.image ? "IMAGE" : "TEXT",
-    file: item.platforms.threads.image,
-    text: item.platforms.threads.text,
-  });
-  if (item.platforms.threads.video) {
-    jobs.push({
-      type: "threads_video",
-      dryRun,
-      endpoint: `https://graph.threads.net/${apiVersion}/{threads-user-id}/threads`,
-      publishEndpoint: `https://graph.threads.net/${apiVersion}/{threads-user-id}/threads_publish`,
-      mediaType: "VIDEO",
-      file: item.platforms.threads.video,
-      text: item.platforms.threads.text,
-    });
+    mediaType: images.length > 1 ? "CAROUSEL" : images.length === 1 ? "IMAGE" : "TEXT",
+    files: images,
+    text: threadsFields.text,
+    replyText: threadsFields.replyText,
+    topicTag: threadsFields.topicTag,
+  };
+  if (images.length === 1) {
+    job.file = images[0];
   }
+  jobs.push(job);
   return { itemId: item.id, dryRun, jobs };
 }
 

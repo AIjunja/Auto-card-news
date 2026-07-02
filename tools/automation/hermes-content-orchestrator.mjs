@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { spawn } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { optionArray, parseArgs, printSummary, resolvePath, selectQueueItems } from "../publish/lib/cli-utils.mjs";
@@ -49,7 +49,19 @@ const autoPublishKinds = normalizeAutoPublishKinds(
   process.env.HERMES_AUTO_PUBLISH_KINDS || process.env.HERMES_AUTO_PUBLISH_KIND || "carousel,reel",
 );
 const hourlyOnce = flags.has("hourly_once");
-const requireDraftApproval = flags.has("require_draft_approval");
+const requireDraftApproval = flags.has("require_draft_approval") || envFlag("HERMES_REQUIRE_DRAFT_APPROVAL", false);
+const forceFinalBuild = flags.has("force_final") || envFlag("HERMES_FORCE_FINAL_BUILD", false);
+const autopilotOnNoReview = envFlag("HERMES_AUTOPILOT_ON_NO_REVIEW", false);
+const sourceOnlyAutopilot = envFlag("HERMES_SOURCE_ONLY_AUTOPILOT", false);
+const autopilotSourceReviewMinutes = envNumber("HERMES_AUTOPILOT_SOURCE_REVIEW_MINUTES", 60);
+const autopilotDailyPublishLimit = envNumber("HERMES_AUTOPILOT_DAILY_PUBLISH_LIMIT", 2);
+const archiveSourceCandidatesAfterSelection = envFlag("HERMES_ARCHIVE_SOURCE_CANDIDATES_AFTER_SELECTION", true);
+const directSourceImmediate = envFlag("HERMES_DIRECT_SOURCE_IMMEDIATE", true);
+
+if (flags.has("clean_review_state")) {
+  const state = await loadReviewState();
+  printSummary("review state cleaned", reviewStateSummary(state));
+}
 
 if (flags.has("init")) {
   await initFiles();
@@ -151,6 +163,8 @@ if (flags.has("publish_approved")) {
 }
 
 if (hourlyOnce) {
+  await applySourceReviewAutopilot();
+
   if (flags.has("refresh_sources")) {
     if (
       !(await stopForSourceReviewGate("hourly source refresh")) &&
@@ -165,7 +179,7 @@ if (hourlyOnce) {
   {
     await planDraftRuns({ runCodex: flags.has("run_draft_codex") });
     if (flags.has("draft_review")) {
-    await sendTelegramDraftReview();
+      await sendTelegramDraftReview();
     }
     await planFinalRuns({ runCodex: flags.has("run_codex") });
     await runNodeScript("tools/publish/build-publish-queue.mjs", [
@@ -184,7 +198,9 @@ if (hourlyOnce) {
         resolvePath(options.validation_out, path.join(DEFAULT_WORKSPACE_ROOT, "publish-validation.json")),
       ]);
     }
-    if (!flags.has("skip_final_review")) {
+    if (sourceOnlyAutopilot) {
+      await approveReadyFinalsForSourceOnlyAutopilot();
+    } else if (!flags.has("skip_final_review")) {
       await sendTelegramFinalReview();
     } else {
       printSummary("final review skipped", { reason: "skip_final_review flag" });
@@ -229,6 +245,106 @@ async function getActiveSourceReviewGateItems() {
     .sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime());
 }
 
+function parseProjectDateFromSlug(projectSlug) {
+  const match = String(projectSlug ?? "").match(/^(\d{4})-(\d{2})-(\d{2})-/);
+  if (!match) return null;
+
+  const [, year, month, day] = match;
+  const date = new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function finalReviewCutoffDate() {
+  const days = Number(process.env.HERMES_FINAL_REVIEW_MAX_AGE_DAYS ?? 3);
+  const safeDays = Number.isFinite(days) && days >= 0 ? days : 3;
+  const cutoff = new Date();
+  cutoff.setUTCHours(0, 0, 0, 0);
+  cutoff.setUTCDate(cutoff.getUTCDate() - safeDays);
+  return cutoff;
+}
+
+function pendingReviewCutoffDate() {
+  const days = Number(process.env.HERMES_PENDING_REVIEW_MAX_AGE_DAYS ?? process.env.HERMES_FINAL_REVIEW_MAX_AGE_DAYS ?? 3);
+  const safeDays = Number.isFinite(days) && days >= 0 ? days : 3;
+  const cutoff = new Date();
+  cutoff.setUTCDate(cutoff.getUTCDate() - safeDays);
+  return cutoff;
+}
+
+function isFreshProjectForFinalReview(itemOrSlug) {
+  const slug = typeof itemOrSlug === "string" ? itemOrSlug : itemOrSlug?.projectSlug;
+  const projectDate = parseProjectDateFromSlug(slug);
+  if (!projectDate) return true;
+  return projectDate >= finalReviewCutoffDate();
+}
+
+function projectSourceKey(projectSlug) {
+  return String(projectSlug ?? "").replace(/^\d{4}-\d{2}-\d{2}-/, "");
+}
+
+function sourceKeyForItem(item) {
+  return safeSlug(item?.id ?? item?.sourceId ?? item?.projectSlug ?? item?.contentKey ?? "");
+}
+
+function projectDateTime(item) {
+  const slugDate = parseProjectDateFromSlug(item?.projectSlug);
+  if (slugDate) return slugDate.getTime();
+  const createdAt = new Date(item?.created_at ?? 0);
+  return Number.isNaN(createdAt.getTime()) ? 0 : createdAt.getTime();
+}
+
+function selectLatestQueueItemsByProjectSource(items) {
+  const latestBySource = new Map();
+  for (const item of items) {
+    const key = projectSourceKey(item.projectSlug) || item.contentKey || item.id;
+    const previous = latestBySource.get(key);
+    if (!previous || projectDateTime(item) >= projectDateTime(previous)) {
+      latestBySource.set(key, item);
+    }
+  }
+  return Array.from(latestBySource.values()).sort((a, b) => projectDateTime(b) - projectDateTime(a));
+}
+
+function reviewSendLimit(defaultLimit) {
+  const configured = options.telegram_limit
+    ?? process.env.HERMES_TELEGRAM_LIMIT
+    ?? (hourlyOnce ? process.env.HERMES_HOURLY_REVIEW_LIMIT : undefined);
+  return positiveInteger(configured, defaultLimit);
+}
+
+function workflowItemLimit(defaultLimit = Number.POSITIVE_INFINITY) {
+  const configured = options.workflow_limit
+    ?? process.env.HERMES_WORKFLOW_ITEM_LIMIT
+    ?? (hourlyOnce ? process.env.HERMES_HOURLY_ITEM_LIMIT : undefined);
+  return positiveInteger(configured, hourlyOnce ? 1 : defaultLimit);
+}
+
+function limitItems(items, limit) {
+  if (!Number.isFinite(limit)) return items;
+  return items.slice(0, Math.max(0, limit));
+}
+
+function reviewUpdatedAtMs(item) {
+  const value = new Date(item?.updated_at ?? item?.created_at ?? 0).getTime();
+  return Number.isFinite(value) ? value : 0;
+}
+
+function koreaDateKey(value) {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
+function publishedTodayCount(state) {
+  const today = koreaDateKey(new Date());
+  return state.items.filter((item) => item.status === "published" && koreaDateKey(item.updated_at) === today).length;
+}
+
 async function stopForWorkflowBacklog(stepName) {
   const backlog = await getWorkflowBacklogItems();
   if (!backlog.length) return false;
@@ -246,13 +362,15 @@ async function getWorkflowBacklogItems() {
   const state = await loadReviewState();
   const items = normalizeInboxItems(inbox);
   const draftMap = new Map(state.drafts.map((item) => [item.sourceId, item]));
+  const finalSourceKeys = new Set(state.items.map((item) => projectSourceKey(item.projectSlug)));
   const finalMap = new Map(state.items.map((item) => [item.projectSlug, item]));
   const activeStatuses = new Set(["pending", "changes_requested"]);
   const backlog = [];
 
   for (const item of items) {
     const draftReview = draftMap.get(item.id);
-    if (isSourceApproved(item, state) && !isDraftApproved(item, state)) {
+    const hasFinalForSource = finalSourceKeys.has(sourceKeyForItem(item));
+    if (isSourceApproved(item, state) && !isDraftApproved(item, state) && !hasFinalForSource) {
       backlog.push({
         stage: "draft-needed",
         id: item.id,
@@ -260,7 +378,7 @@ async function getWorkflowBacklogItems() {
       });
     }
 
-    if (isFinalBuildAllowed(item, state)) {
+    if (isFinalBuildAllowed(item, state) && !hasFinalForSource && isFreshProjectForFinalReview(item.projectSlug ?? item.id)) {
       const finalReview = finalMap.get(item.projectSlug ?? item.id);
       if (!["pending", "approved", "published", "changes_requested"].includes(finalReview?.status)) {
         backlog.push({
@@ -272,10 +390,10 @@ async function getWorkflowBacklogItems() {
     }
   }
 
-  for (const item of state.drafts.filter((item) => activeStatuses.has(item.status))) {
+  for (const item of state.drafts.filter((item) => activeStatuses.has(item.status) && !finalSourceKeys.has(sourceKeyForItem(item)))) {
     backlog.push({ stage: "draft-review", id: item.sourceId, status: item.status });
   }
-  for (const item of state.items.filter((item) => activeStatuses.has(item.status))) {
+  for (const item of state.items.filter((item) => activeStatuses.has(item.status) && isFreshProjectForFinalReview(item))) {
     backlog.push({ stage: "final-review", id: item.projectSlug, status: item.status });
   }
 
@@ -283,15 +401,28 @@ async function getWorkflowBacklogItems() {
 }
 
 async function sendTelegramSourceReview() {
-  if (await stopForSourceReviewGate("source review send")) return;
-
   const inbox = await readInbox();
   const state = await loadReviewState();
   const sourceMap = new Map(state.sources.map((item) => [item.sourceId, item]));
-  const candidates = selectInboxItems(normalizeInboxItems(inbox), options.item)
+  const allItems = selectInboxItems(normalizeInboxItems(inbox), options.item);
+  const pendingIds = new Set(state.sources
+    .filter((item) => SOURCE_REVIEW_GATE_STATUSES.has(item.status))
+    .map((item) => item.sourceId));
+  const pendingCandidates = allItems
+    .filter((item) => pendingIds.has(item.id))
+    .sort((a, b) => Number(b.priority ?? 0) - Number(a.priority ?? 0));
+  const freshCandidates = allItems
+    .filter((item) => !pendingIds.has(item.id))
     .filter((item) => sourceNeedsReview(item, sourceMap.get(item.id)))
     .sort((a, b) => Number(b.priority ?? 0) - Number(a.priority ?? 0))
-    .slice(0, Number(options.telegram_limit ?? 5));
+  const seen = new Set();
+  const candidates = [...pendingCandidates, ...freshCandidates]
+    .filter((item) => {
+      if (seen.has(item.id)) return false;
+      seen.add(item.id);
+      return true;
+    })
+    .slice(0, reviewSendLimit(6));
 
   if (!candidates.length) {
     printSummary("source review skipped", { reason: "no source candidates need review" });
@@ -326,8 +457,105 @@ async function sendTelegramSourceReview() {
     ]),
   ].join("\n");
 
-  await sendTelegramMessage(buildSourceReviewMessageV7(candidates));
+  await sendTelegramMessage(buildSourceReviewMessageV8(candidates));
   printSummary("source review sent", { items: candidates.map((item) => item.id) });
+}
+
+async function applySourceReviewAutopilot() {
+  if (!autopilotOnNoReview) return;
+  if (!Number.isFinite(autopilotSourceReviewMinutes) || autopilotSourceReviewMinutes < 0) return;
+
+  const state = await loadReviewState();
+  const inbox = await readInbox();
+  const sourceItems = new Map(normalizeInboxItems(inbox).map((item) => [item.id, item]));
+  const cutoff = Date.now() - autopilotSourceReviewMinutes * 60 * 1000;
+  const candidates = state.sources
+    .filter((review) => review.status === "pending")
+    .filter((review) => reviewUpdatedAtMs(review) <= cutoff)
+    .map((review) => ({ review, item: sourceItems.get(review.sourceId) }))
+    .filter(({ item }) => item)
+    .sort((a, b) => {
+      const priorityDiff = Number(b.item.priority ?? 0) - Number(a.item.priority ?? 0);
+      if (priorityDiff) return priorityDiff;
+      return reviewUpdatedAtMs(a.review) - reviewUpdatedAtMs(b.review);
+    });
+
+  const selected = limitItems(candidates, workflowItemLimit(1));
+  if (!selected.length) return;
+
+  for (const { review, item } of selected) {
+    await updateSourceReview(
+      review.sourceId,
+      "approved",
+      `Autopilot approved after ${autopilotSourceReviewMinutes} minutes without review. Priority ${item.priority ?? "n/a"}.`,
+    );
+  }
+
+  await sendTelegramMessage([
+    "AI JJUN 자동 진행",
+    "",
+    `${autopilotSourceReviewMinutes}분 동안 답장이 없어서, 우선순위가 제일 높은 소스 1개를 자동 승인했어욤.`,
+    "이제 이 소스만 카드뉴스/릴스 제작으로 넘길게요.",
+    "",
+    ...selected.map(({ item }, index) => `${index + 1}. ${item.title}\n- id: ${item.id}\n- link: ${item.url}`),
+  ].join("\n"));
+  printSummary("source review autopilot approved", { items: selected.map(({ item }) => item.id) });
+}
+
+async function approveReadyFinalsForSourceOnlyAutopilot({
+  ignoreDailyLimit = false,
+  approvalNote = "Auto-approved by source-only Hermes flow after source review/autopilot.",
+} = {}) {
+  if (!sourceOnlyAutopilot) return;
+
+  const queue = await readJsonIfExists(queuePath, null);
+  if (!queue) {
+    printSummary("source-only autopilot skipped", { reason: "queue not found" });
+    return;
+  }
+
+  const state = await loadReviewState();
+  const publishedToday = publishedTodayCount(state);
+  const remainingDailySlots = ignoreDailyLimit
+    ? Number.POSITIVE_INFINITY
+    : Math.max(0, autopilotDailyPublishLimit - publishedToday);
+  if (!ignoreDailyLimit && remainingDailySlots <= 0) {
+    printSummary("source-only autopilot skipped", {
+      reason: "daily publish limit reached",
+      autopilotDailyPublishLimit,
+      publishedToday,
+    });
+    return;
+  }
+
+  const validation = await validateQueue(queue);
+  const finalMap = new Map(state.items.map((item) => [item.projectSlug, item]));
+  const readyIds = new Set(validation.items.filter((item) => item.status === "ready").map((item) => item.id));
+  const candidates = selectLatestQueueItemsByProjectSource(selectQueueItems(queue, options.item)
+    .filter((item) => readyIds.has(item.id))
+    .filter((item) => isFreshProjectForFinalReview(item))
+    .filter((item) => {
+      const status = finalMap.get(item.projectSlug)?.status;
+      return !["approved", "published", "changes_requested", "rejected", "stale"].includes(status);
+    }));
+  const selected = limitItems(candidates, Math.min(workflowItemLimit(1), remainingDailySlots));
+
+  if (!selected.length) {
+    printSummary("source-only autopilot skipped", { reason: "no ready fresh final items" });
+    return;
+  }
+
+  for (const item of selected) {
+    await approveFinalReviewAndMaybePublish(
+      item.projectSlug,
+      approvalNote,
+    );
+  }
+
+  printSummary("source-only autopilot published", {
+    items: selected.map((item) => item.projectSlug),
+    remainingDailySlots: Number.isFinite(remainingDailySlots) ? remainingDailySlots - selected.length : "ignored_for_direct_source",
+  });
 }
 
 async function resendTelegramPendingReviewQueue() {
@@ -343,13 +571,13 @@ async function resendTelegramPendingReviewQueue() {
   const sortedPending = stageFilter === "source"
     ? [...pending].sort((a, b) => Number(b.priority ?? 0) - Number(a.priority ?? 0))
     : pending;
-  const visibleLimit = Number(options.telegram_limit ?? 5);
+  const visibleLimit = reviewSendLimit(5);
   const visibleItems = sortedPending.slice(0, visibleLimit);
   const hiddenCount = Math.max(0, sortedPending.length - visibleItems.length);
 
   if (stageFilter === "source") {
     await sendTelegramMessage([
-      buildSourceReviewMessageV7(visibleItems),
+      buildSourceReviewMessageV8(visibleItems),
       hiddenCount ? `\n나머지 ${hiddenCount}개는 숨겨뒀어요. 더 보고 싶으면 --telegram-limit 10처럼 늘리면 돼욤.` : null,
     ].filter(Boolean).join("\n"));
     printSummary("pending source review queue resent", {
@@ -393,10 +621,10 @@ async function resendTelegramPendingReviewQueue() {
 async function planDraftRuns({ runCodex = false } = {}) {
   const inbox = await readInbox();
   const state = await loadReviewState();
-  const items = selectInboxItems(normalizeInboxItems(inbox), options.item).filter((item) => {
+  const items = limitItems(selectInboxItems(normalizeInboxItems(inbox), options.item).filter((item) => {
     if (!isSourceApproved(item, state)) return false;
     return !isDraftApproved(item, state);
-  });
+  }), workflowItemLimit());
   await mkdir(draftsDir, { recursive: true });
   await mkdir(runsDir, { recursive: true });
 
@@ -443,7 +671,7 @@ async function sendTelegramDraftReview() {
     .filter((item) => !isDraftApproved(item, state))
     .filter((item) => !["pending", "changes_requested", "rejected"].includes(draftMap.get(item.id)?.status))
     .filter((item) => existsSync(path.join(draftsDir, safeSlug(item.id), "storyboard.md")))
-    .slice(0, Number(options.telegram_limit ?? 5));
+    .slice(0, reviewSendLimit(5));
 
   if (!items.length) {
     printSummary("draft review skipped", { reason: "no generated drafts need review" });
@@ -487,14 +715,63 @@ async function sendTelegramDraftReview() {
   printSummary("draft review sent", { items: items.map((item) => item.id) });
 }
 
+async function findExistingFinalPackageForSource(item, state) {
+  const sourceKey = sourceKeyForItem(item);
+  if (!sourceKey) return null;
+
+  const stateMatch = state.items
+    .filter((entry) => projectSourceKey(entry.projectSlug) === sourceKey)
+    .sort((a, b) => projectDateTime(b) - projectDateTime(a))[0];
+  if (stateMatch) {
+    return {
+      where: "review_state",
+      projectSlug: stateMatch.projectSlug,
+      status: stateMatch.status,
+    };
+  }
+
+  const projectsRoot = path.join(workspaceRoot, "projects", channel);
+  if (!existsSync(projectsRoot)) return null;
+
+  const entries = await readdir(projectsRoot, { withFileTypes: true });
+  const matchingSlugs = entries
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((slug) => projectSourceKey(slug) === sourceKey)
+    .sort((a, b) => (parseProjectDateFromSlug(b)?.getTime() ?? 0) - (parseProjectDateFromSlug(a)?.getTime() ?? 0));
+
+  if (!matchingSlugs.length) return null;
+  return {
+    where: "project_dir",
+    projectSlug: matchingSlugs[0],
+  };
+}
+
 async function planFinalRuns({ runCodex = false } = {}) {
   const inbox = await readInbox();
   const state = await loadReviewState();
-  const items = selectInboxItems(normalizeInboxItems(inbox), options.item).filter((item) => isFinalBuildAllowed(item, state));
+  const items = limitItems(
+    selectInboxItems(normalizeInboxItems(inbox), options.item).filter((item) => isFinalBuildAllowed(item, state)),
+    workflowItemLimit(),
+  );
   await mkdir(runsDir, { recursive: true });
 
   const planned = [];
+  const skipped = [];
   for (const item of items) {
+    if (!forceFinalBuild) {
+      const existing = await findExistingFinalPackageForSource(item, state);
+      if (existing) {
+        skipped.push({
+          id: item.id,
+          reason: "final_package_already_exists_for_source",
+          existing: existing.projectSlug,
+          where: existing.where,
+        });
+        continue;
+      }
+    }
+
     const prompt = buildFinalPrompt(item);
     const runPath = path.join(runsDir, `${safeSlug(item.id)}.final.prompt.md`);
     const psPath = path.join(runsDir, `${safeSlug(item.id)}.final.run.ps1`);
@@ -521,8 +798,9 @@ async function planFinalRuns({ runCodex = false } = {}) {
     channel,
     runCodex,
     items: planned,
+    skipped,
   });
-  printSummary("final codex run plan written", { runsDir, items: planned.length, runCodex });
+  printSummary("final codex run plan written", { runsDir, items: planned.length, skipped: skipped.length, runCodex });
 }
 
 async function refreshSourceInbox() {
@@ -541,6 +819,36 @@ async function refreshSourceInbox() {
 }
 
 async function addManualSourceCandidate() {
+  const { candidate, created } = await upsertManualSourceCandidate({
+    url: options.add_source_url,
+    title: options.title ?? options.source_title ?? options.add_source_url,
+    id: options.id,
+    summary: options.summary,
+    angle: options.angle,
+    bucket: options.bucket ?? "manual",
+    priority: Number(options.priority ?? 10),
+  });
+  printSummary(created ? "manual source added" : "manual source skipped", {
+    reason: created ? undefined : "duplicate",
+    id: candidate.id,
+    title: candidate.title,
+    url: candidate.url,
+    inbox: inboxPath,
+  });
+}
+
+async function upsertManualSourceCandidate({
+  url,
+  title,
+  id,
+  summary,
+  angle,
+  bucket = "manual",
+  priority = 10,
+  status = "candidate",
+  sourceLabel = "user-source",
+  direct = false,
+} = {}) {
   await mkdir(workspaceRoot, { recursive: true });
   const inbox = await readJsonIfExists(inboxPath, {
     version: 1,
@@ -549,35 +857,36 @@ async function addManualSourceCandidate() {
     items: [],
   });
   const items = normalizeInboxItems(inbox);
-  const url = options.add_source_url;
-  const title = options.title ?? options.source_title ?? url;
-  const id = options.id ?? `manual-${new Date().toISOString().slice(0, 10)}-${safeSlug(title).slice(0, 42)}`;
+  const cleanUrl = sanitizeSourceUrl(url);
+  const cleanTitle = title || cleanUrl;
+  const sourceId = id ?? `manual-${new Date().toISOString().slice(0, 10)}-${safeSlug(cleanTitle).slice(0, 42)}`;
 
-  const duplicate = items.find((item) => item.id === id || item.url === url);
+  const duplicate = items.find((item) => item.id === sourceId || item.url === cleanUrl);
   if (duplicate) {
-    printSummary("manual source skipped", { reason: "duplicate", id: duplicate.id, url: duplicate.url });
-    return;
+    return { candidate: duplicate, created: false };
   }
 
   const candidate = {
-    id,
-    status: "candidate",
-    priority: Number(options.priority ?? 10),
-    bucket: options.bucket ?? "manual",
-    title,
-    url,
-    summary: options.summary ?? "User-provided source. Verify the original source and related proof before content production.",
-    angle: options.angle ?? "Turn this into an AI JJUN source candidate only after checking why viewers should care now.",
+    id: sourceId,
+    status,
+    priority: Number(priority),
+    bucket,
+    title: cleanTitle,
+    url: cleanUrl,
+    summary: summary ?? "User-provided source. Verify the original source and related proof before content production.",
+    angle: angle ?? "Turn this into an AI JJUN source candidate only after checking why viewers should care now.",
     sources: [
       {
-        label: "user-source",
-        url,
+        label: sourceLabel,
+        url: cleanUrl,
         summary: "Source URL manually provided by the user.",
       },
     ],
     notes: [
       "Before drafting, verify the primary source, official docs/repo, social proof, demo media, pricing/license, and practical limitation.",
-      "If approved, produce card-news, Reel, and caption through the normal Telegram review pipeline.",
+      direct
+        ? "This was sent directly by the user in Telegram. Bypass source scouting review and produce the package immediately."
+        : "If approved, produce card-news, Reel, and caption through the normal Telegram review pipeline.",
     ],
   };
 
@@ -592,7 +901,11 @@ async function addManualSourceCandidate() {
       };
 
   await writeJson(inboxPath, nextInbox);
-  printSummary("manual source added", { id, title, url, inbox: inboxPath });
+  return { candidate, created: true };
+}
+
+function sanitizeSourceUrl(url) {
+  return String(url ?? "").trim().replace(/[)\].,，。!?]+$/g, "");
 }
 
 function buildSourceDiscoveryPrompt() {
@@ -612,8 +925,10 @@ function buildSourceDiscoveryPrompt() {
     "- Scan GeekNews/Hacker News-style Korean tech curations, X, Threads, Reddit, GitHub Trending, fresh GitHub repos, official changelogs/blogs, docs, demos, and creator posts.",
     "- Aim for diversity: GeekNews/HN-like, Threads/creator-social, X, GitHub/open-source, official docs/blogs, Reddit/community reactions.",
     "- Quality beats quota. Do not force 2 items from every bucket if the items are weak.",
-    "- Start with a shortlist of 12-20 possible sources, then write only the top 5-8 high-confidence candidates to the inbox.",
-    "- Priority scale: use 10 for the strongest candidate and 1 for the weakest. The automation sends higher numbers first.",
+    "- Start with a shortlist of 12-20 possible sources, then write only the top 6-8 high-confidence candidates to the inbox.",
+    "- Rank ruthlessly. In hourly automation, 5-6 candidates are shown to the user for selection, but only one source should move into production per cycle unless the user directly sends a source URL.",
+    "- If the user does not review in time, the automation may auto-produce the highest-ranked pending source and archive the rest of that candidate batch.",
+    "- Priority scale: use 10 for the strongest candidate and 1 for the weakest. The automation sends higher numbers first and may auto-produce the highest-ranked item if the user does not review in time.",
     "",
     "Platform scouting playbook:",
     "- GeekNews/news.hada.io: Use GeekNews as a Korean hype signal, not as the final proof. Open the original linked source, read comments when available, and prefer tools with clear install/demo/action. Reject items that are only interesting summaries with no viewer action.",
@@ -726,10 +1041,12 @@ async function sendTelegramFinalReview() {
   const state = await loadReviewState();
   const finalMap = new Map(state.items.map((item) => [item.projectSlug, item]));
   const readyIds = new Set(validation.items.filter((item) => item.status === "ready").map((item) => item.id));
-  const messageItems = selectQueueItems(queue, options.item)
+  const messageCandidates = selectQueueItems(queue, options.item)
     .filter((item) => readyIds.has(item.id))
-    .filter((item) => !["pending", "approved", "published", "changes_requested"].includes(finalMap.get(item.projectSlug)?.status))
-    .slice(0, Number(options.telegram_limit ?? 8));
+    .filter((item) => isFreshProjectForFinalReview(item))
+    .filter((item) => !["pending", "approved", "published", "changes_requested"].includes(finalMap.get(item.projectSlug)?.status));
+  const messageItems = selectLatestQueueItemsByProjectSource(messageCandidates)
+    .slice(0, reviewSendLimit(8));
 
   if (!messageItems.length) {
     printSummary("final review skipped", { reason: "no pending ready items" });
@@ -1006,6 +1323,54 @@ function formatSourceCandidateCompactV7(item, index) {
     `- ${link}`,
     "",
   ].filter(Boolean);
+}
+
+function buildSourceReviewMessageV8(candidates) {
+  const recommended = candidates[0];
+  return [
+    "AI쭌 소스 후보 큐",
+    "",
+    "이번엔 바로 콘텐츠로 만들 만한 후보만 추렸어욤.",
+    "하나 골라주면 그 소스로 카드뉴스+릴스 제작으로 넘어갑니다.",
+    "",
+    "명령 예시:",
+    "- 승인: ㄱㄱ 1번",
+    "- 보류: 대기 1번",
+    "- 수정: 수정 1번: 첫 장 훅 더 세게",
+    "- 별로면 다시 찾기: ㄴㄴ 1번",
+    "- 직접 링크 제작: 그냥 URL 보내기",
+    "",
+    ...candidates.flatMap((item, index) => formatSourceCandidateCompactV8(item, index + 1)),
+    recommended ? `추천 1픽: ${truncateForTelegramV8(recommended.title ?? recommended.id, 72)}` : null,
+    "",
+    "대기 시간이 지나면 1픽만 자동 제작하고 나머지는 보관 처리해요.",
+  ].filter(Boolean).join("\n");
+}
+
+function formatSourceCandidateCompactV8(item, index) {
+  const primaryLink = item.url || firstSourceUrl(item);
+  const title = truncateForTelegramV8(item.title ?? item.id, 70);
+  const hook = truncateForTelegramV8(item.viewerHook ?? item.angle ?? "", 92);
+  const summary = truncateForTelegramV8(item.summary ?? "", 105);
+  const why = truncateForTelegramV8(item.whyNow ?? item.whatToTryToday ?? item.whoShouldCare ?? "", 92);
+  const link = primaryLink ? `링크: ${primaryLink}` : "링크: 확인 필요";
+
+  return [
+    `${index}. ${title}`,
+    item.bucket ? `- 분류: ${item.bucket}${item.priority ? ` / 우선순위 ${item.priority}` : ""}` : null,
+    hook ? `- 첫 장 훅: ${hook}` : null,
+    summary ? `- 요약: ${summary}` : null,
+    why ? `- 왜 좋음: ${why}` : null,
+    `- ${link}`,
+    `- 명령: ㄱㄱ ${index}번 / 대기 ${index}번 / 수정 ${index}번: ... / ㄴㄴ ${index}번`,
+    "",
+  ].filter(Boolean);
+}
+
+function truncateForTelegramV8(value, limit) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, Math.max(0, limit - 1))}…`;
 }
 
 function firstSourceUrl(item) {
@@ -1325,7 +1690,179 @@ async function applyTelegramCommand(text) {
     return { stage: "final", id: revise[1], status: "changes_requested" };
   }
 
+  const directSource = parseTelegramDirectSourceMessage(text);
+  if (directSource) {
+    const { candidate, created } = await upsertManualSourceCandidate({
+      url: directSource.url,
+      title: directSource.title,
+      bucket: "telegram-direct",
+      priority: 99,
+      status: "candidate",
+      sourceLabel: "telegram-direct",
+      direct: true,
+      summary: "User sent this source directly in Telegram. Verify it, gather source-of-truth and visual/demo proof, then produce the package.",
+      angle: directSource.angle,
+    });
+    await updateSourceReview(candidate.id, "approved", "User sent a direct source URL in Telegram; bypass source candidate review.");
+    await sendTelegramMessage([
+      "직접 소스 접수했어욤.",
+      "",
+      `id: ${candidate.id}`,
+      `제목: ${candidate.title}`,
+      `링크: ${candidate.url}`,
+      "",
+      directSourceImmediate
+        ? "이건 후보 큐랑 별개로 바로 제작 루트로 태울게요."
+        : "직접 소스로 승인만 해둘게요. 다음 작업 루프에서 제작합니다.",
+      created ? null : "참고: 이미 있던 링크라 기존 소스를 다시 승인했어요.",
+    ].filter(Boolean).join("\n"));
+
+    if (directSourceImmediate) {
+      await runApprovedSourceProductionNow(candidate.id, "Telegram direct source intake.");
+    }
+
+    return {
+      stage: "source",
+      id: candidate.id,
+      status: "approved",
+      command: "direct-source-url",
+      immediate: directSourceImmediate,
+    };
+  }
+
+  const conversationalAction = await applyConversationalTelegramCommand(text);
+  if (conversationalAction) return conversationalAction;
+
   return null;
+}
+
+function parseTelegramDirectSourceMessage(text) {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  if (/^(SOURCE|DRAFT|UPLOAD|APPROVE|REVISE)\b/i.test(trimmed)) return null;
+  if (/^(\u3131\u3131|\uB300\uAE30|\uC218\uC815|\u3134\u3134)(?:\s|$)/i.test(trimmed)) return null;
+
+  const match = trimmed.match(/https?:\/\/[^\s<>"'`]+/i);
+  if (!match) return null;
+
+  const url = sanitizeSourceUrl(match[0]);
+  const titleText = trimmed
+    .replace(match[0], " ")
+    .replace(/^(source|url|link|\uC18C\uC2A4|\uB9C1\uD06C|\uC774\uAC70|\uC774\uAC78\uB85C|\uC774\uAC70\uB85C)\s*[:：-]?\s*/i, " ")
+    .replace(/(\uB9CC\uB4E4\uC5B4\uC918|\uC81C\uC791\uD574\uC918|\uCE74\uB4DC\uB274\uC2A4|\uB9B4\uC2A4|\uBD80\uD0C1|\uD574\uC918|\uACE0\uACE0|\u3131\u3131)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return {
+    url,
+    title: titleText || url,
+    angle: titleText
+      ? `User specifically asked to make content from this source: ${titleText}`
+      : "User specifically asked to make content from this source URL.",
+  };
+}
+
+async function applyConversationalTelegramCommand(text) {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  if (/^(SOURCE|DRAFT|UPLOAD|APPROVE|REVISE)\b/i.test(trimmed)) return null;
+  if (/^(\u3131\u3131|\uB300\uAE30|\uC218\uC815|\u3134\u3134)(?:\s|$)/i.test(trimmed)) return null;
+  if (/https?:\/\/[^\s<>"'`]+/i.test(trimmed)) return null;
+
+  const action = classifyConversationalTelegramAction(trimmed);
+  if (!action) return null;
+
+  const target = await resolveConversationalTelegramTarget();
+  if (!target) return { stage: "shortcut", status: "needs_id", command: "conversation" };
+
+  await applyReviewShortcutV2(target, action, trimmed);
+  return {
+    stage: target.stage,
+    id: target.id,
+    status: action === "hold" ? "pending" : target.stage === "source" && action === "reject" ? "rejected" : "changes_requested",
+    command: "conversation",
+  };
+}
+
+function classifyConversationalTelegramAction(text) {
+  if (/(\uB300\uAE30|\uBCF4\uB958|\uB098\uC911\uC5D0|\uC7A0\uAE50\s*\uBA48\uCD94|\uC2A4\uD1B1)/i.test(text)) return "hold";
+  if (/(\uBCC4\uB85C|\u3134\u3134|\uB2E4\uC2DC\s*(\uCC3E|\uC11C\uCE6D)|\uC0C8\uB85C\s*(\uCC3E|\uB9CC\uB4E4)|\uB9C8\uC74C\uC5D0\s*\uC548|\uD3D0\uAE30|\uBC84\uB824|\uAC1C\uBCC4\uB85C)/i.test(text)) return "reject";
+  if (/(\uC218\uC815|\uACE0\uCCD0|\uBC14\uAFC0|\uBC14\uAFD4|\uBC18\uC601|\uB2E4\uC2DC\s*\uB9CC\uB4E4|\uB354\s*\uC138\uAC8C|\uD6C5|\uCCAB\s*\uC7A5|\uCCAB\uC7A5|\uD6C4\uD0B9|\uC774\uBBF8\uC9C0|\uC9C0\uD53C\uD2F0|\bGPT\b|\uB3C4\uC2DD|\uB808\uC774\uC544\uC6C3|\uAE00\uC528|\uD3F0\uD2B8|\uCEA1\uC158|\uC9E7\uAC8C|\uAE38\uAC8C|\uD1A4|\uB9D0\uD22C|\uB2E4\uB4EC|\uBCF4\uC644|\uCD94\uAC00|\uBE7C\uC918|\uB0B4\uB824|\uC62C\uB824|\uD0A4\uC6CC|\uC904\uC5EC|\uACB9\uCE58|\uC5B4\uC0C9)/i.test(text)) return "revise";
+  return null;
+}
+
+async function resolveConversationalTelegramTarget() {
+  const pending = await getPendingTelegramReviewTargetsV3();
+  if (pending.length === 1) return pending[0];
+
+  const pendingFinals = pending.filter((item) => item.stage === "final");
+  if (pendingFinals.length === 1) return pendingFinals[0];
+
+  if (!pending.length) {
+    await sendTelegramMessage("지금 수정/보류할 검수 항목이 없어요. 먼저 소스 후보나 최종 미리보기를 받아야 해욤.");
+    return null;
+  }
+
+  await sendTelegramMessage([
+    "어느 항목을 말하는지 살짝만 붙여줘욤.",
+    "",
+    "예시:",
+    "수정 1번: 첫 장 훅 더 세게",
+    "ㄴㄴ 2번",
+    "대기 3번",
+    "",
+    "대기 중인 항목:",
+    ...formatPendingTelegramTargetsV3(pending),
+  ].join("\n"));
+  return null;
+}
+
+async function runApprovedSourceProductionNow(sourceId, note = "") {
+  const previousItem = options.item;
+  options.item = sourceId;
+  try {
+    await planFinalRuns({ runCodex: true });
+    await runNodeScript("tools/publish/build-publish-queue.mjs", [
+      "--workspace-root",
+      workspaceRoot,
+      "--channel",
+      channel,
+      "--out",
+      queuePath,
+    ]);
+    if (!flags.has("skip_queue_validation")) {
+      await runNodeScript("tools/publish/validate-publish-queue.mjs", [
+        "--queue",
+        queuePath,
+        "--out",
+        resolvePath(options.validation_out, path.join(DEFAULT_WORKSPACE_ROOT, "publish-validation.json")),
+      ]);
+    }
+    if (sourceOnlyAutopilot) {
+      await approveReadyFinalsForSourceOnlyAutopilot({
+        ignoreDailyLimit: true,
+        approvalNote: "Auto-approved from a user-supplied direct source URL.",
+      });
+    } else if (!flags.has("skip_final_review")) {
+      await sendTelegramFinalReview();
+    }
+    await sendTelegramMessage([
+      "직접 소스 제작 루프 끝났어욤.",
+      `id: ${sourceId}`,
+      note ? `메모: ${note}` : null,
+      "결과물이 준비되면 검수/업로드 큐로 이어집니다.",
+    ].filter(Boolean).join("\n"));
+  } catch (error) {
+    await sendTelegramMessage([
+      "직접 소스 제작 중에 막혔어욤.",
+      `id: ${sourceId}`,
+      `이유: ${error.message}`,
+      "로그 확인하고 다시 살려볼게요.",
+    ].join("\n"));
+    printSummary("direct source production failed", { sourceId, error: error.message });
+  } finally {
+    options.item = previousItem;
+  }
 }
 
 async function applyShortTelegramCommandV2(text) {
@@ -1427,13 +1964,18 @@ function parseShortTelegramCommandInputV3(text, commands) {
 
 function parseTelegramTargetHintV3(rawValue = "") {
   const value = rawValue.trim();
-  const numberMatch = value.match(/(?:^|\s)(\d+)\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/i);
+  const numberMatch = value.match(/(?:^|\s|#)(\d+)\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/i);
   const stageHint = parseTelegramStageHintV3(value);
-  const idCandidate = stripTelegramTargetNoiseV3(value)
-    .replace(/(?:^|\s)\d+\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/gi, " ")
-    .trim()
-    .split(/\s+/)
-    .find((token) => token && token !== ":");
+  // If the user supplied a number, treat the remaining words as the note.
+  // Example: "수정 1번: 첫장 훅 더 세게" must resolve target #1,
+  // not try to resolve "첫장" as an id.
+  const idCandidate = numberMatch
+    ? null
+    : stripTelegramTargetNoiseV3(value)
+      .replace(/(?:^|\s|#)\d+\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/gi, " ")
+      .trim()
+      .split(/\s+/)
+      .find((token) => token && token !== ":");
 
   return {
     id: idCandidate ? idCandidate.replace(/:$/, "") : null,
@@ -1980,6 +2522,8 @@ async function approveFinalReviewAndMaybePublish(projectSlug, note) {
 }
 
 async function autoPublishApprovedProject(projectSlug) {
+  return autoPublishApprovedProjectV2(projectSlug);
+
   if (!autoPublishOnFinalApproval) {
     await sendTelegramMessage(
       [
@@ -2054,6 +2598,154 @@ async function autoPublishApprovedProject(projectSlug) {
       ].join("\n"),
     );
   }
+}
+
+async function autoPublishApprovedProjectV2(projectSlug) {
+  if (!autoPublishOnFinalApproval) {
+    await sendTelegramMessage(
+      [
+        `최종본 승인됐어욤: ${projectSlug}`,
+        "",
+        "자동 게시 옵션은 꺼져 있어요. 여기서 멈출게요.",
+        "켜려면 hermes-content.env에 HERMES_AUTO_PUBLISH_ON_FINAL_APPROVAL=1 을 넣어주면 돼요.",
+      ].join("\n"),
+    );
+    return;
+  }
+
+  if (!existsSync(cdnRepoPath)) {
+    await sendTelegramMessage(
+      [
+        `최종본은 승인됐는데 업로드 준비에서 막혔어욤: ${projectSlug}`,
+        `CDN repo를 못 찾았어요: ${cdnRepoPath}`,
+      ].join("\n"),
+    );
+    return;
+  }
+
+  const platform = resolveAutoPublishPlatform();
+  const platforms = normalizePublishPlatforms(platform).filter((item) => item !== "youtube");
+  const modeLabel = autoPublishExecute ? "실제 업로드" : "드라이런";
+
+  await sendTelegramMessage(
+    [
+      "업로드 시작할게욤 👀",
+      `콘텐츠: ${projectSlug}`,
+      `플랫폼: ${platforms.join(" + ")}`,
+      "인스타: 카드뉴스 + 릴스",
+      "쓰레드: 카드뉴스 + AI Threads 태그 + 출처 댓글",
+      `모드: ${modeLabel}`,
+    ].join("\n"),
+  );
+
+  const completed = [];
+  try {
+    const cdnLogPath = await runCdnPublishProject(projectSlug);
+    completed.push(`cdn (${path.relative(cwd, cdnLogPath)})`);
+
+    for (const publishPlatform of platforms) {
+      const logPath = await runWorkspacePublishScript(projectSlug, publishPlatform, {
+        execute: autoPublishExecute,
+      });
+      completed.push(`${publishPlatform} (${path.relative(cwd, logPath)})`);
+    }
+
+    await updateFinalReview(
+      projectSlug,
+      autoPublishExecute ? "published" : "approved",
+      autoPublishExecute
+        ? `Auto-published from Telegram final approval: ${completed.join(", ")}`
+        : `Auto-publish dry-run completed from Telegram final approval: ${completed.join(", ")}`,
+    );
+
+    await sendTelegramMessage(
+      [
+        autoPublishExecute ? "게시까지 끝났어욤 ✅" : "업로드 드라이런 끝났어욤 ✅",
+        `콘텐츠: ${projectSlug}`,
+        `완료: ${completed.map((item) => item.split(" ")[0]).join(" + ")}`,
+      ].join("\n"),
+    );
+  } catch (error) {
+    await updateFinalReview(projectSlug, "approved", `Auto publish failed: ${error.message}`);
+    await sendTelegramMessage(
+      [
+        "업로드 중에 막혔어욤 🥲",
+        `콘텐츠: ${projectSlug}`,
+        error.message,
+        "",
+        "승인 상태는 유지했으니까, 문제만 고치면 다시 승인/게시할 수 있어요.",
+      ].join("\n"),
+    );
+  }
+}
+
+async function runCdnPublishProject(projectSlug) {
+  const args = ["run", "publish:project", "--", projectSlug];
+  const command = process.platform === "win32" ? "cmd.exe" : "npm";
+  const commandArgs = process.platform === "win32" ? ["/c", "npm", ...args] : args;
+  const result = await spawnCapture(command, commandArgs, { cwd: cdnRepoPath });
+
+  const logDir = path.join(runsDir, "publish-logs");
+  await mkdir(logDir, { recursive: true });
+  const logPath = path.join(logDir, `${safeSlug(projectSlug)}-cdn-${Date.now()}.log`);
+  const log = [
+    `$ ${["npm", ...args].join(" ")}`,
+    "",
+    "[stdout]",
+    result.stdout,
+    "",
+    "[stderr]",
+    result.stderr,
+  ].join("\n");
+  await writeFile(logPath, redactSensitiveText(log), "utf8");
+
+  if (result.code !== 0) {
+    throw new Error(`CDN 배포 명령이 실패했어요. 로그: ${path.relative(cwd, logPath)}`);
+  }
+  return logPath;
+}
+
+async function runWorkspacePublishScript(projectSlug, platform, { execute }) {
+  const scriptByPlatform = {
+    instagram: "tools/publish/publish-instagram.mjs",
+    threads: "tools/publish/publish-threads.mjs",
+  };
+  const scriptPath = scriptByPlatform[platform];
+  if (!scriptPath) {
+    throw new Error(`자동 게시에서 지원하지 않는 플랫폼이에요: ${platform}`);
+  }
+
+  const outPath = path.join(workspaceRoot, `publish-${platform}-plan.json`);
+  const args = [
+    scriptPath,
+    "--queue",
+    queuePath,
+    "--item",
+    projectSlug,
+    "--out",
+    outPath,
+  ];
+  if (execute) args.push("--execute");
+
+  const result = await spawnCapture(process.execPath, args, { cwd });
+  const logDir = path.join(runsDir, "publish-logs");
+  await mkdir(logDir, { recursive: true });
+  const logPath = path.join(logDir, `${safeSlug(projectSlug)}-${platform}-${Date.now()}.log`);
+  const log = [
+    `$ node ${args.join(" ")}`,
+    "",
+    "[stdout]",
+    result.stdout,
+    "",
+    "[stderr]",
+    result.stderr,
+  ].join("\n");
+  await writeFile(logPath, redactSensitiveText(log), "utf8");
+
+  if (result.code !== 0) {
+    throw new Error(`${platform} 게시 명령이 실패했어요. 로그: ${path.relative(cwd, logPath)}`);
+  }
+  return logPath;
 }
 
 async function runCdnPublishApproved(projectSlug, { platform, kind, execute, skipCdn }) {
@@ -2132,11 +2824,12 @@ async function publishApproved({ execute, platform, dailyLimit, itemSelector }) 
       .filter((item) => item.status === "approved")
       .map((item) => item.projectSlug),
   );
-  const selected = queue.items.filter((item) => {
+  const selected = selectLatestQueueItemsByProjectSource(queue.items.filter((item) => {
     if (!approvedSlugs.has(item.projectSlug)) return false;
+    if (!itemSelector && !isFreshProjectForFinalReview(item)) return false;
     if (!itemSelector) return true;
     return itemSelector === item.projectSlug || itemSelector === item.id || itemSelector === item.contentKey;
-  });
+  }));
 
   if (!selected.length) {
     printSummary("publish skipped", { reason: "no upload-approved items matched" });
@@ -2400,11 +3093,19 @@ async function readInbox() {
 
 async function loadReviewState() {
   const state = await readJsonIfExists(reviewStatePath, null);
-  if (state) return normalizeReviewState(state);
+  if (state) {
+    const normalized = normalizeReviewState(state);
+    if (markStaleReviewState(normalized)) await saveReviewState(normalized);
+    return normalized;
+  }
 
   const legacyPath = resolvePath(options.approvals, LEGACY_APPROVALS);
   const legacy = await readJsonIfExists(legacyPath, null);
-  if (legacy) return normalizeReviewState({ ...emptyReviewState(), items: legacy.items ?? [] });
+  if (legacy) {
+    const normalized = normalizeReviewState({ ...emptyReviewState(), items: legacy.items ?? [] });
+    if (markStaleReviewState(normalized)) await saveReviewState(normalized);
+    return normalized;
+  }
 
   return emptyReviewState();
 }
@@ -2427,6 +3128,66 @@ function normalizeReviewState(state) {
     drafts: Array.isArray(state.drafts) ? state.drafts : [],
     items: Array.isArray(state.items) ? state.items : [],
   };
+}
+
+function reviewStateSummary(state) {
+  const countByStatus = (items) => items.reduce((acc, item) => {
+    const status = item.status ?? "unknown";
+    acc[status] = (acc[status] ?? 0) + 1;
+    return acc;
+  }, {});
+  return {
+    sources: { total: state.sources.length, ...countByStatus(state.sources) },
+    drafts: { total: state.drafts.length, ...countByStatus(state.drafts) },
+    items: { total: state.items.length, ...countByStatus(state.items) },
+  };
+}
+
+function markStaleReviewState(state) {
+  const now = new Date().toISOString();
+  const cutoff = pendingReviewCutoffDate();
+  const activeStatuses = new Set(["pending", "changes_requested"]);
+  let changed = false;
+
+  for (const item of [...state.sources, ...state.drafts]) {
+    if (!activeStatuses.has(item.status)) continue;
+    const updatedAt = new Date(item.updated_at ?? 0);
+    if (Number.isNaN(updatedAt.getTime()) || updatedAt >= cutoff) continue;
+    item.status = "stale";
+    item.note = "Archived automatically: pending review was older than the freshness window.";
+    item.updated_at = now;
+    changed = true;
+  }
+
+  for (const item of state.items) {
+    if (!activeStatuses.has(item.status)) continue;
+    if (isFreshProjectForFinalReview(item)) continue;
+    item.status = "stale";
+    item.note = "Archived automatically: older than final review freshness window; not eligible for upload.";
+    item.updated_at = now;
+    changed = true;
+  }
+
+  const latestBySource = new Map();
+  for (const item of state.items) {
+    const key = projectSourceKey(item.projectSlug);
+    if (!key) continue;
+    const previous = latestBySource.get(key);
+    if (!previous || projectDateTime(item) >= projectDateTime(previous)) {
+      latestBySource.set(key, item);
+    }
+  }
+
+  for (const item of state.items) {
+    const key = projectSourceKey(item.projectSlug);
+    if (!key || latestBySource.get(key) === item || item.status === "stale") continue;
+    item.status = "stale";
+    item.note = "Archived automatically: newer final package exists for the same source.";
+    item.updated_at = now;
+    changed = true;
+  }
+
+  return changed;
 }
 
 async function saveReviewState(state) {
@@ -2468,7 +3229,29 @@ function upsertByKey(list, key, value, update) {
 
 async function updateSourceReview(sourceId, status, note) {
   const updated = await upsertSourceReview({ sourceId, status, note });
+  if (status === "approved" && archiveSourceCandidatesAfterSelection) {
+    await archiveOtherPendingSourceReviews(sourceId);
+  }
   printSummary("source review updated", updated);
+}
+
+async function archiveOtherPendingSourceReviews(selectedSourceId) {
+  const state = await loadReviewState();
+  const now = new Date().toISOString();
+  const archived = [];
+
+  for (const item of state.sources) {
+    if (item.sourceId === selectedSourceId) continue;
+    if (!SOURCE_REVIEW_GATE_STATUSES.has(item.status)) continue;
+    item.status = "stale";
+    item.note = `Archived automatically: source ${selectedSourceId} was selected for this candidate batch.`;
+    item.updated_at = now;
+    archived.push(item.sourceId);
+  }
+
+  if (!archived.length) return;
+  await saveReviewState(state);
+  printSummary("other source candidates archived", { selectedSourceId, archived });
 }
 
 async function updateDraftReview(sourceId, status, note) {
@@ -2484,7 +3267,7 @@ async function updateFinalReview(projectSlug, status, note) {
 function sourceNeedsReview(item, sourceReview) {
   if (["source_approved", "approved", "ready"].includes(item.status ?? "")) return false;
   if (!sourceReview) return true;
-  return !["pending", "approved", "rejected"].includes(sourceReview.status);
+  return !["pending", "approved", "rejected", "stale"].includes(sourceReview.status);
 }
 
 function isSourceApproved(item, state) {
@@ -2572,6 +3355,17 @@ function envFlag(name, defaultValue = false) {
   return ["1", "true", "yes", "y", "on"].includes(String(value).trim().toLowerCase());
 }
 
+function envNumber(name, defaultValue) {
+  return positiveInteger(process.env[name], defaultValue);
+}
+
+function positiveInteger(value, defaultValue) {
+  if (value === undefined || value === null || value === "") return defaultValue;
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return defaultValue;
+  return Math.floor(number);
+}
+
 function normalizeAutoPublishKinds(value) {
   const aliases = {
     all: ["carousel", "reel"],
@@ -2593,7 +3387,7 @@ function resolveAutoPublishPlatform() {
   const configured = process.env.HERMES_AUTO_PUBLISH_PLATFORM || options.auto_publish_platform;
   if (configured && configured !== "auto") return configured;
   const threadsReady = Boolean(process.env.THREADS_ACCESS_TOKEN && process.env.THREADS_USER_ID);
-  return threadsReady ? "all" : "instagram";
+  return threadsReady ? "both" : "instagram";
 }
 
 function requireEnv(name) {
@@ -2727,8 +3521,24 @@ function envTemplate() {
     "AIJJUN_CDN_REPO_PATH=ai-jjun-cdn",
     "HERMES_AUTO_PUBLISH_ON_FINAL_APPROVAL=1",
     "HERMES_AUTO_PUBLISH_EXECUTE=1",
-    "HERMES_AUTO_PUBLISH_PLATFORM=auto",
+    "HERMES_AUTO_PUBLISH_PLATFORM=both",
     "HERMES_AUTO_PUBLISH_KINDS=carousel,reel",
+    "HERMES_FINAL_REVIEW_MAX_AGE_DAYS=3",
+    "HERMES_PENDING_REVIEW_MAX_AGE_DAYS=3",
+    "",
+    "# Hourly source scouting autopilot.",
+    "# Sends 5-6 source candidates per hour and produces one selected/top-ranked source.",
+    "# Final upload still waits for a rendered Telegram preview and explicit approval.",
+    "HERMES_TELEGRAM_LIMIT=6",
+    "HERMES_HOURLY_REVIEW_LIMIT=6",
+    "HERMES_HOURLY_ITEM_LIMIT=1",
+    "HERMES_REQUIRE_DRAFT_APPROVAL=0",
+    "HERMES_AUTOPILOT_ON_NO_REVIEW=1",
+    "HERMES_AUTOPILOT_SOURCE_REVIEW_MINUTES=60",
+    "HERMES_SOURCE_ONLY_AUTOPILOT=0",
+    "HERMES_AUTOPILOT_DAILY_PUBLISH_LIMIT=2",
+    "HERMES_ARCHIVE_SOURCE_CANDIDATES_AFTER_SELECTION=1",
+    "HERMES_DIRECT_SOURCE_IMMEDIATE=1",
     "",
     "# Optional YouTube Data API, used later only with --publish-approved --platform youtube/all --execute",
     "# OAuth refresh token must include https://www.googleapis.com/auth/youtube.upload scope.",
@@ -2760,6 +3570,7 @@ Review-first flow:
   node tools/automation/hermes-content-orchestrator.mjs --run-codex
   node tools/automation/hermes-content-orchestrator.mjs --build-queue --validate --telegram-send
   node tools/automation/hermes-content-orchestrator.mjs --telegram-poll
+  node tools/automation/hermes-content-orchestrator.mjs --clean-review-state
   node tools/automation/hermes-content-orchestrator.mjs --publish-approved
   node tools/automation/hermes-content-orchestrator.mjs --publish-approved --platform all
   node tools/automation/hermes-content-orchestrator.mjs --publish-approved --platform all --execute
@@ -2768,7 +3579,17 @@ Review-first flow:
   # final Telegram approval (ㄱㄱ / UPLOAD) automatically runs ai-jjun-cdn publish.
 
 Hourly/local automation:
-  node tools/automation/hermes-content-orchestrator.mjs --hourly-once --refresh-sources --run-draft-codex --run-codex --skip-queue-validation --skip-final-review
+  node tools/automation/hermes-content-orchestrator.mjs --hourly-once --refresh-sources --run-codex --skip-queue-validation
+
+  # Recommended hourly mode:
+  # - Telegram receives 5-6 source candidates per hour.
+  # - Only one selected or top-ranked source moves into production per cycle.
+  # - If no source review arrives within HERMES_AUTOPILOT_SOURCE_REVIEW_MINUTES,
+  #   Hermes auto-approves the highest-priority source and archives the rest.
+  # - The rendered final package is always sent back to Telegram for review.
+  #   It is uploaded only after final approval/UPLOAD.
+  # - If the user sends a URL directly in Telegram, Hermes bypasses source scouting
+  #   and immediately starts production for that source.
 
 Manual source intake:
   node tools/automation/hermes-content-orchestrator.mjs --add-source-url "https://example.com/source" --title "source title" --source-send
@@ -2789,8 +3610,20 @@ Auto publish env:
   AIJJUN_CDN_REPO_PATH=ai-jjun-cdn
   HERMES_AUTO_PUBLISH_ON_FINAL_APPROVAL=1
   HERMES_AUTO_PUBLISH_EXECUTE=1
-  HERMES_AUTO_PUBLISH_PLATFORM=auto
+  HERMES_AUTO_PUBLISH_PLATFORM=both
   HERMES_AUTO_PUBLISH_KINDS=carousel,reel
+  HERMES_FINAL_REVIEW_MAX_AGE_DAYS=3
+  HERMES_PENDING_REVIEW_MAX_AGE_DAYS=3
+  HERMES_TELEGRAM_LIMIT=6
+  HERMES_HOURLY_REVIEW_LIMIT=6
+  HERMES_HOURLY_ITEM_LIMIT=1
+  HERMES_REQUIRE_DRAFT_APPROVAL=0
+  HERMES_AUTOPILOT_ON_NO_REVIEW=1
+  HERMES_AUTOPILOT_SOURCE_REVIEW_MINUTES=60
+  HERMES_SOURCE_ONLY_AUTOPILOT=0
+  HERMES_AUTOPILOT_DAILY_PUBLISH_LIMIT=2
+  HERMES_ARCHIVE_SOURCE_CANDIDATES_AFTER_SELECTION=1
+  HERMES_DIRECT_SOURCE_IMMEDIATE=1
 
 Manual CLI commands:
   --approve-source <source-id>

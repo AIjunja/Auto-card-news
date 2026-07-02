@@ -17,6 +17,20 @@ This is a conversation-driven production workflow, not a SaaS app. Do not upload
 
 Default output is a ready-to-publish package. If upload credentials are missing, create a publish queue/checklist instead of pretending upload is available.
 
+## Hermes Source Automation Rule
+
+When this skill is called by Hermes for AIjjuun automation:
+
+- Source scouting should send 5-6 compact source candidates to Telegram so the user can choose from a real pool.
+- Production should still use only one source per cycle: the user-approved source, the highest-priority timed-out source, or a user-supplied direct URL.
+- If the user sends a good source URL/link directly, skip the recommendation queue and immediately create the finished carousel package from that source.
+- Even when a source is auto-selected after timeout, never auto-upload the finished package immediately. Send the rendered card-news/Reel preview to Telegram at least once and wait for explicit final approval.
+- After one source is selected, archive the other pending candidates as stale so old recommendations do not keep coming back.
+- Never revive old CDN files, old publish queues, stale review state, or previously posted projects as fresh review candidates.
+- Do not create multiple packages from the same source unless the user explicitly asks for variants.
+
+Default Hermes flow: `source scout -> 5-6 candidates -> one selected source -> finished carousel -> render QA -> final Telegram preview -> approved publish`.
+
 ## Non-Negotiable AIjjuun Visual Standard
 
 For AIjjuun-style AI/tool/news card-news, treat the approved `google-surf-mcp` visual as the baseline:
@@ -28,6 +42,28 @@ For AIjjuun-style AI/tool/news card-news, treat the approved `google-surf-mcp` v
 - If the first card is only a GitHub/code/docs screenshot, revise. The first card needs a hook-worthy visual: real demo, product UI, source proof crop, or GPT Image-generated core scene.
 - Do not over-blur or black-and-white real source images. The viewer must understand what the image/video is within 1 second.
 - Avoid decorative connector lines, weak graphs, and abstract diagrams unless they are the clearest way to explain the point.
+
+## Cover Visual Contract
+
+For every source-based AIjjuun carousel, Card 01 must be treated as a visual hook, not a title slide.
+
+Default order:
+
+1. Use a real hook-worthy visual if one exists: official demo frame, product UI, app screenshot, creator demo, before/after, source proof crop, benchmark/proof screen, or user-provided media.
+2. If no strong real visual exists, create a GPT Image 2 / generated editorial cover that visually summarizes the topic in one glance.
+3. If GPT Image 2 is unavailable, create an HTML-native editorial scene that behaves like a generated cover, not a plain diagram.
+
+The cover visual must show the viewer's concrete situation, payoff, risk, or "what changes now" moment. It should not merely show a GitHub repo, README, docs page, terminal, or abstract AI glow.
+
+For generated covers, write a topic-specific image prompt in `source-pack.md` or `storyboard.md` before rendering. The prompt must include:
+
+- the exact source/product/repo/theme;
+- the viewer situation or use case;
+- recognizable UI/object cues;
+- mood, composition, and color direction;
+- what text area should remain clean for the Korean hook.
+
+Hard fail and revise if Card 01 would still make sense after deleting the visual, if the visual is generic, or if the viewer cannot understand the subject within 1 second.
 
 ## Required Layout QA
 
@@ -146,6 +182,10 @@ Safe behavior:
 
 - If Meta API credentials, app permissions, account IDs, or media hosting are missing, stop at `publish-queue.json` and tell the user what is missing.
 - Instagram and Threads uploads must use official Meta APIs and the user's configured professional/business account access.
+- Instagram default cross-post plan: publish the card-news carousel and the Reel when both assets exist. Keep Instagram as the richer mixed-media channel.
+- Threads default cross-post plan: publish only the card-news image set/carousel, then put source links in a reply/comment. Do not publish the Reel/video to Threads unless the user explicitly asks for a Threads video post.
+- Do not reuse the Instagram caption as-is for Threads. Instagram can keep a fuller caption, but Threads should use a shorter main body, a source/link reply, and the `AI Threads` topic tag by default.
+- Put GitHub, docs, paper, official blog, demo, and source links in the Threads reply/comment unless the user explicitly asks to put them in the main Threads body.
 - Before actual upload, check file paths, aspect ratio, duration, caption, source links, and whether the user approved this exact final package.
 - Do not post private drafts, local-only media URLs, unverified claims, or source screenshots with unclear rights.
 
