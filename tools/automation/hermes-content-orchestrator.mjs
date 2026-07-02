@@ -23,6 +23,8 @@ const DEFAULT_TELEGRAM_STATE = path.join(DEFAULT_WORKSPACE_ROOT, "telegram-state
 const DEFAULT_ENV_FILE = path.join(DEFAULT_WORKSPACE_ROOT, "hermes-content.env");
 const DEFAULT_CDN_REPO = "ai-jjun-cdn";
 const SOURCE_REVIEW_GATE_STATUSES = new Set(["pending", "changes_requested"]);
+const SOURCE_REVIEW_FINAL_BLOCK_STATUSES = new Set(["rejected", "stale"]);
+const FINAL_REVIEW_BLOCKABLE_STATUSES = new Set(["pending", "changes_requested", "approved"]);
 
 const { options, flags } = parseArgs();
 
@@ -53,6 +55,7 @@ const requireDraftApproval = flags.has("require_draft_approval") || envFlag("HER
 const forceFinalBuild = flags.has("force_final") || envFlag("HERMES_FORCE_FINAL_BUILD", false);
 const autopilotOnNoReview = envFlag("HERMES_AUTOPILOT_ON_NO_REVIEW", false);
 const sourceOnlyAutopilot = envFlag("HERMES_SOURCE_ONLY_AUTOPILOT", false);
+const sourceOnlyAutoPublishFinals = envFlag("HERMES_SOURCE_ONLY_AUTOPUBLISH_FINALS", false);
 const autopilotSourceReviewMinutes = envNumber("HERMES_AUTOPILOT_SOURCE_REVIEW_MINUTES", 60);
 const autopilotDailyPublishLimit = envNumber("HERMES_AUTOPILOT_DAILY_PUBLISH_LIMIT", 2);
 const archiveSourceCandidatesAfterSelection = envFlag("HERMES_ARCHIVE_SOURCE_CANDIDATES_AFTER_SELECTION", true);
@@ -198,7 +201,7 @@ if (hourlyOnce) {
         resolvePath(options.validation_out, path.join(DEFAULT_WORKSPACE_ROOT, "publish-validation.json")),
       ]);
     }
-    if (sourceOnlyAutopilot) {
+    if (sourceOnlyAutopilot && sourceOnlyAutoPublishFinals) {
       await approveReadyFinalsForSourceOnlyAutopilot();
     } else if (!flags.has("skip_final_review")) {
       await sendTelegramFinalReview();
@@ -280,6 +283,28 @@ function isFreshProjectForFinalReview(itemOrSlug) {
 
 function projectSourceKey(projectSlug) {
   return String(projectSlug ?? "").replace(/^\d{4}-\d{2}-\d{2}-/, "");
+}
+
+function blockedSourceReviewIds(state) {
+  return new Set((state?.sources ?? [])
+    .filter((item) => SOURCE_REVIEW_FINAL_BLOCK_STATUSES.has(item.status))
+    .map((item) => item.sourceId)
+    .filter(Boolean));
+}
+
+function sourceReviewStatusById(state) {
+  return new Map((state?.sources ?? [])
+    .map((item) => [item.sourceId, item.status])
+    .filter(([sourceId]) => Boolean(sourceId)));
+}
+
+function isProjectBlockedBySourceReview(projectSlug, blockedSourceIds) {
+  const key = projectSourceKey(projectSlug);
+  return Boolean(key && blockedSourceIds.has(key));
+}
+
+function isFinalReviewItemBlockedBySource(item, blockedSourceIds) {
+  return isProjectBlockedBySourceReview(item?.projectSlug ?? item?.id, blockedSourceIds);
 }
 
 function sourceKeyForItem(item) {
@@ -364,6 +389,7 @@ async function getWorkflowBacklogItems() {
   const draftMap = new Map(state.drafts.map((item) => [item.sourceId, item]));
   const finalSourceKeys = new Set(state.items.map((item) => projectSourceKey(item.projectSlug)));
   const finalMap = new Map(state.items.map((item) => [item.projectSlug, item]));
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const activeStatuses = new Set(["pending", "changes_requested"]);
   const backlog = [];
 
@@ -393,7 +419,11 @@ async function getWorkflowBacklogItems() {
   for (const item of state.drafts.filter((item) => activeStatuses.has(item.status) && !finalSourceKeys.has(sourceKeyForItem(item)))) {
     backlog.push({ stage: "draft-review", id: item.sourceId, status: item.status });
   }
-  for (const item of state.items.filter((item) => activeStatuses.has(item.status) && isFreshProjectForFinalReview(item))) {
+  for (const item of state.items.filter((item) => (
+    activeStatuses.has(item.status)
+    && isFreshProjectForFinalReview(item)
+    && !isFinalReviewItemBlockedBySource(item, blockedSourceIds)
+  ))) {
     backlog.push({ stage: "final-review", id: item.projectSlug, status: item.status });
   }
 
@@ -530,10 +560,12 @@ async function approveReadyFinalsForSourceOnlyAutopilot({
 
   const validation = await validateQueue(queue);
   const finalMap = new Map(state.items.map((item) => [item.projectSlug, item]));
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const readyIds = new Set(validation.items.filter((item) => item.status === "ready").map((item) => item.id));
   const candidates = selectLatestQueueItemsByProjectSource(selectQueueItems(queue, options.item)
     .filter((item) => readyIds.has(item.id))
     .filter((item) => isFreshProjectForFinalReview(item))
+    .filter((item) => !isProjectBlockedBySourceReview(item.projectSlug, blockedSourceIds))
     .filter((item) => {
       const status = finalMap.get(item.projectSlug)?.status;
       return !["approved", "published", "changes_requested", "rejected", "stale"].includes(status);
@@ -1040,10 +1072,12 @@ async function sendTelegramFinalReview() {
   const validation = await validateQueue(queue);
   const state = await loadReviewState();
   const finalMap = new Map(state.items.map((item) => [item.projectSlug, item]));
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const readyIds = new Set(validation.items.filter((item) => item.status === "ready").map((item) => item.id));
   const messageCandidates = selectQueueItems(queue, options.item)
     .filter((item) => readyIds.has(item.id))
     .filter((item) => isFreshProjectForFinalReview(item))
+    .filter((item) => !isProjectBlockedBySourceReview(item.projectSlug, blockedSourceIds))
     .filter((item) => !["pending", "approved", "published", "changes_requested"].includes(finalMap.get(item.projectSlug)?.status));
   const messageItems = selectLatestQueueItemsByProjectSource(messageCandidates)
     .slice(0, reviewSendLimit(8));
@@ -1937,7 +1971,7 @@ async function runApprovedSourceProductionNow(sourceId, note = "") {
         resolvePath(options.validation_out, path.join(DEFAULT_WORKSPACE_ROOT, "publish-validation.json")),
       ]);
     }
-    if (sourceOnlyAutopilot) {
+    if (sourceOnlyAutopilot && sourceOnlyAutoPublishFinals) {
       await approveReadyFinalsForSourceOnlyAutopilot({
         ignoreDailyLimit: true,
         approvalNote: "Auto-approved from a user-supplied direct source URL.",
@@ -2174,6 +2208,7 @@ async function resolveTelegramReviewTargetV3(target = {}) {
 async function getPendingTelegramReviewTargetsV3() {
   const state = await loadReviewState();
   const inboxItems = await readInboxItemsByIdSafe();
+  const blockedSourceIds = blockedSourceReviewIds(state);
   return [
     ...state.sources
       .filter((item) => SOURCE_REVIEW_GATE_STATUSES.has(item.status))
@@ -2189,13 +2224,16 @@ async function getPendingTelegramReviewTargetsV3() {
       )),
     ...state.items
       .filter((item) => item.status === "pending")
+      .filter((item) => !isFinalReviewItemBlockedBySource(item, blockedSourceIds))
       .map((item) => ({ stage: "final", id: item.projectSlug, title: item.contentKey ?? item.projectSlug, updated_at: item.updated_at })),
   ].sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime());
 }
 
 async function findFinalTelegramTargetByIdV3(id) {
   const state = await loadReviewState();
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const found = state.items.find((item) => {
+    if (isFinalReviewItemBlockedBySource(item, blockedSourceIds)) return false;
     return item.projectSlug === id || item.itemId === id || item.contentKey === id;
   });
   return found ? finalTelegramTargetFromStateItemV3(found) : null;
@@ -2203,8 +2241,10 @@ async function findFinalTelegramTargetByIdV3(id) {
 
 async function getLatestFinalTelegramTargetV3() {
   const state = await loadReviewState();
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const latest = state.items
     .filter((item) => !["published"].includes(item.status))
+    .filter((item) => !isFinalReviewItemBlockedBySource(item, blockedSourceIds))
     .sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())[0];
   return latest ? finalTelegramTargetFromStateItemV3(latest) : null;
 }
@@ -2345,6 +2385,7 @@ function parseRevisionPayloadV2(rawValue) {
 
 async function resolveTelegramReviewTargetV2(targetId) {
   const state = await loadReviewState();
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const pending = [
     ...state.sources
       .filter((item) => SOURCE_REVIEW_GATE_STATUSES.has(item.status))
@@ -2354,6 +2395,7 @@ async function resolveTelegramReviewTargetV2(targetId) {
       .map((item) => ({ stage: "draft", id: item.sourceId, title: item.title, updated_at: item.updated_at })),
     ...state.items
       .filter((item) => item.status === "pending")
+      .filter((item) => !isFinalReviewItemBlockedBySource(item, blockedSourceIds))
       .map((item) => ({ stage: "final", id: item.projectSlug, title: item.contentKey ?? item.projectSlug, updated_at: item.updated_at })),
   ].sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime());
 
@@ -2515,6 +2557,7 @@ function parseRevisionPayload(rawValue) {
 
 async function resolveTelegramReviewTarget(targetId) {
   const state = await loadReviewState();
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const pending = [
     ...state.sources
       .filter((item) => SOURCE_REVIEW_GATE_STATUSES.has(item.status))
@@ -2524,6 +2567,7 @@ async function resolveTelegramReviewTarget(targetId) {
       .map((item) => ({ stage: "draft", id: item.sourceId, title: item.title, updated_at: item.updated_at })),
     ...state.items
       .filter((item) => item.status === "pending")
+      .filter((item) => !isFinalReviewItemBlockedBySource(item, blockedSourceIds))
       .map((item) => ({ stage: "final", id: item.projectSlug, title: item.contentKey ?? item.projectSlug, updated_at: item.updated_at })),
   ].sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime());
 
@@ -2918,9 +2962,11 @@ async function publishApproved({ execute, platform, dailyLimit, itemSelector }) 
   const queue = await readJsonIfExists(queuePath, null);
   if (!queue) throw new Error(`Queue not found: ${queuePath}. Run --build-queue first.`);
   const state = await loadReviewState();
+  const blockedSourceIds = blockedSourceReviewIds(state);
   const approvedSlugs = new Set(
     state.items
       .filter((item) => item.status === "approved")
+      .filter((item) => !isFinalReviewItemBlockedBySource(item, blockedSourceIds))
       .map((item) => item.projectSlug),
   );
   const selected = selectLatestQueueItemsByProjectSource(queue.items.filter((item) => {
@@ -3267,6 +3313,18 @@ function markStaleReviewState(state) {
     changed = true;
   }
 
+  const blockedSourceIds = blockedSourceReviewIds(state);
+  const sourceStatuses = sourceReviewStatusById(state);
+  for (const item of state.items) {
+    if (!FINAL_REVIEW_BLOCKABLE_STATUSES.has(item.status)) continue;
+    const key = projectSourceKey(item.projectSlug);
+    if (!key || !blockedSourceIds.has(key)) continue;
+    item.status = "stale";
+    item.note = `Archived automatically: source review ${key} is ${sourceStatuses.get(key) ?? "blocked"}; not eligible for final review or upload.`;
+    item.updated_at = now;
+    changed = true;
+  }
+
   const latestBySource = new Map();
   for (const item of state.items) {
     const key = projectSourceKey(item.projectSlug);
@@ -3380,6 +3438,7 @@ function isDraftApproved(item, state) {
 }
 
 function isFinalBuildAllowed(item, state) {
+  if (blockedSourceReviewIds(state).has(sourceKeyForItem(item))) return false;
   if (["approved", "ready"].includes(item.status ?? "")) return true;
   return isSourceApproved(item, state) && (!requireDraftApproval || isDraftApproved(item, state));
 }
@@ -3635,6 +3694,8 @@ function envTemplate() {
     "HERMES_AUTOPILOT_ON_NO_REVIEW=1",
     "HERMES_AUTOPILOT_SOURCE_REVIEW_MINUTES=60",
     "HERMES_SOURCE_ONLY_AUTOPILOT=0",
+    "# Keep 0 unless you intentionally want no-preview final auto-publishing.",
+    "HERMES_SOURCE_ONLY_AUTOPUBLISH_FINALS=0",
     "HERMES_AUTOPILOT_DAILY_PUBLISH_LIMIT=2",
     "HERMES_ARCHIVE_SOURCE_CANDIDATES_AFTER_SELECTION=1",
     "HERMES_DIRECT_SOURCE_IMMEDIATE=1",
