@@ -25,6 +25,14 @@ const DEFAULT_CDN_REPO = "ai-jjun-cdn";
 const SOURCE_REVIEW_GATE_STATUSES = new Set(["pending", "changes_requested"]);
 const SOURCE_REVIEW_FINAL_BLOCK_STATUSES = new Set(["rejected", "stale"]);
 const FINAL_REVIEW_BLOCKABLE_STATUSES = new Set(["pending", "changes_requested", "approved"]);
+const DEFAULT_BLOCKED_TOPIC_PATTERNS = [
+  "google mcp toolbox",
+  "googleapis/mcp-toolbox",
+  "mcp-toolbox",
+  "mcp toolbox for databases",
+  "google-mcp-toolbox-db",
+  "github-google-mcp-toolbox-db",
+];
 
 const { options, flags } = parseArgs();
 
@@ -56,10 +64,12 @@ const forceFinalBuild = flags.has("force_final") || envFlag("HERMES_FORCE_FINAL_
 const autopilotOnNoReview = envFlag("HERMES_AUTOPILOT_ON_NO_REVIEW", false);
 const sourceOnlyAutopilot = envFlag("HERMES_SOURCE_ONLY_AUTOPILOT", false);
 const sourceOnlyAutoPublishFinals = envFlag("HERMES_SOURCE_ONLY_AUTOPUBLISH_FINALS", false);
+const allowUnreviewedFinalAutoPublish = envFlag("HERMES_ALLOW_UNREVIEWED_FINAL_AUTOPUBLISH", false);
 const autopilotSourceReviewMinutes = envNumber("HERMES_AUTOPILOT_SOURCE_REVIEW_MINUTES", 60);
 const autopilotDailyPublishLimit = envNumber("HERMES_AUTOPILOT_DAILY_PUBLISH_LIMIT", 2);
 const archiveSourceCandidatesAfterSelection = envFlag("HERMES_ARCHIVE_SOURCE_CANDIDATES_AFTER_SELECTION", true);
 const directSourceImmediate = envFlag("HERMES_DIRECT_SOURCE_IMMEDIATE", true);
+const blockedTopicPatterns = parseBlockedTopicPatterns(process.env.HERMES_BLOCKED_TOPIC_PATTERNS);
 
 if (flags.has("clean_review_state")) {
   const state = await loadReviewState();
@@ -201,7 +211,7 @@ if (hourlyOnce) {
         resolvePath(options.validation_out, path.join(DEFAULT_WORKSPACE_ROOT, "publish-validation.json")),
       ]);
     }
-    if (sourceOnlyAutopilot && sourceOnlyAutoPublishFinals) {
+    if (sourceOnlyAutopilot && sourceOnlyAutoPublishFinals && allowUnreviewedFinalAutoPublish) {
       await approveReadyFinalsForSourceOnlyAutopilot();
     } else if (!flags.has("skip_final_review")) {
       await sendTelegramFinalReview();
@@ -385,7 +395,7 @@ async function stopForWorkflowBacklog(stepName) {
 async function getWorkflowBacklogItems() {
   const inbox = await readInbox();
   const state = await loadReviewState();
-  const items = normalizeInboxItems(inbox);
+  const items = normalizeInboxItems(inbox).filter((item) => !isBlockedSourceCandidate(item));
   const draftMap = new Map(state.drafts.map((item) => [item.sourceId, item]));
   const finalSourceKeys = new Set(state.items.map((item) => projectSourceKey(item.projectSlug)));
   const finalMap = new Map(state.items.map((item) => [item.projectSlug, item]));
@@ -423,6 +433,7 @@ async function getWorkflowBacklogItems() {
     activeStatuses.has(item.status)
     && isFreshProjectForFinalReview(item)
     && !isFinalReviewItemBlockedBySource(item, blockedSourceIds)
+    && !isBlockedQueueItem(item)
   ))) {
     backlog.push({ stage: "final-review", id: item.projectSlug, status: item.status });
   }
@@ -434,7 +445,8 @@ async function sendTelegramSourceReview() {
   const inbox = await readInbox();
   const state = await loadReviewState();
   const sourceMap = new Map(state.sources.map((item) => [item.sourceId, item]));
-  const allItems = selectInboxItems(normalizeInboxItems(inbox), options.item);
+  const allItems = selectInboxItems(normalizeInboxItems(inbox), options.item)
+    .filter((item) => !isBlockedSourceCandidate(item));
   const pendingIds = new Set(state.sources
     .filter((item) => SOURCE_REVIEW_GATE_STATUSES.has(item.status))
     .map((item) => item.sourceId));
@@ -487,7 +499,7 @@ async function sendTelegramSourceReview() {
     ]),
   ].join("\n");
 
-  await sendTelegramMessage(buildSourceReviewMessageV8(candidates));
+  await sendTelegramMessage(buildSourceReviewMessageV9(candidates));
   printSummary("source review sent", { items: candidates.map((item) => item.id) });
 }
 
@@ -497,7 +509,9 @@ async function applySourceReviewAutopilot() {
 
   const state = await loadReviewState();
   const inbox = await readInbox();
-  const sourceItems = new Map(normalizeInboxItems(inbox).map((item) => [item.id, item]));
+  const sourceItems = new Map(normalizeInboxItems(inbox)
+    .filter((item) => !isBlockedSourceCandidate(item))
+    .map((item) => [item.id, item]));
   const cutoff = Date.now() - autopilotSourceReviewMinutes * 60 * 1000;
   const candidates = state.sources
     .filter((review) => review.status === "pending")
@@ -566,6 +580,7 @@ async function approveReadyFinalsForSourceOnlyAutopilot({
     .filter((item) => readyIds.has(item.id))
     .filter((item) => isFreshProjectForFinalReview(item))
     .filter((item) => !isProjectBlockedBySourceReview(item.projectSlug, blockedSourceIds))
+    .filter((item) => !isBlockedQueueItem(item))
     .filter((item) => {
       const status = finalMap.get(item.projectSlug)?.status;
       return !["approved", "published", "changes_requested", "rejected", "stale"].includes(status);
@@ -609,7 +624,7 @@ async function resendTelegramPendingReviewQueue() {
 
   if (stageFilter === "source") {
     await sendTelegramMessage([
-      buildSourceReviewMessageV8(visibleItems),
+      buildSourceReviewMessageV9(visibleItems),
       hiddenCount ? `\n나머지 ${hiddenCount}개는 숨겨뒀어요. 더 보고 싶으면 --telegram-limit 10처럼 늘리면 돼욤.` : null,
     ].filter(Boolean).join("\n"));
     printSummary("pending source review queue resent", {
@@ -1078,6 +1093,7 @@ async function sendTelegramFinalReview() {
     .filter((item) => readyIds.has(item.id))
     .filter((item) => isFreshProjectForFinalReview(item))
     .filter((item) => !isProjectBlockedBySourceReview(item.projectSlug, blockedSourceIds))
+    .filter((item) => !isBlockedQueueItem(item))
     .filter((item) => !["pending", "approved", "published", "changes_requested"].includes(finalMap.get(item.projectSlug)?.status));
   const messageItems = selectLatestQueueItemsByProjectSource(messageCandidates)
     .slice(0, reviewSendLimit(8));
@@ -1357,6 +1373,53 @@ function formatSourceCandidateCompactV7(item, index) {
     `- ${link}`,
     "",
   ].filter(Boolean);
+}
+
+function buildSourceReviewMessageV9(candidates) {
+  const recommended = candidates[0];
+  return [
+    "AI쭌 소스 후보 큐",
+    "",
+    "바로 콘텐츠로 만들 만한 후보만 추렸어요.",
+    "번호만 보내도 되고, 마음에 안 들면 ㄴㄴ 보내면 다시 찾습니다.",
+    "",
+    "명령 예시:",
+    "- 승인: ㄱㄱ 1번",
+    "- 보류: 대기 1번",
+    "- 수정: 수정 1번: 첫 장 훅 더 세게",
+    "- 별로면 다시 찾기: ㄴㄴ 1번",
+    "- 직접 링크 제작: 그냥 URL 보내기",
+    "",
+    ...candidates.flatMap((item, index) => formatSourceCandidateCompactV9(item, index + 1)),
+    recommended ? `추천 1픽: ${truncateForTelegramV9(recommended.title ?? recommended.id, 72)}` : null,
+    "",
+    "대기 시간이 지나면 1픽만 자동 제작하고 나머지는 보관 처리합니다.",
+  ].filter(Boolean).join("\n");
+}
+
+function formatSourceCandidateCompactV9(item, index) {
+  const primaryLink = item.url || firstSourceUrl(item);
+  const title = truncateForTelegramV9(item.title ?? item.id, 54);
+  const hook = truncateForTelegramV9(item.viewerHook ?? item.angle ?? "", 74);
+  const summary = truncateForTelegramV9(item.summary ?? "", 78);
+  const why = truncateForTelegramV9(item.whyNow ?? item.whatToTryToday ?? item.whoShouldCare ?? "", 78);
+  const link = primaryLink ? `링크: ${primaryLink}` : "링크: 확인 필요";
+
+  return [
+    `${index}. ${title}`,
+    item.bucket ? `- 분류: ${item.bucket}${item.priority ? ` / 우선순위 ${item.priority}` : ""}` : null,
+    hook ? `- 훅: ${hook}` : null,
+    summary ? `- 요약: ${summary}` : null,
+    why ? `- 왜 좋음: ${why}` : null,
+    `- ${link}`,
+    "",
+  ].filter(Boolean);
+}
+
+function truncateForTelegramV9(value, limit) {
+  const text = String(value ?? "").replace(/\s+/g, " ").trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, Math.max(0, limit - 1))}…`;
 }
 
 function buildSourceReviewMessageV8(candidates) {
@@ -1971,7 +2034,7 @@ async function runApprovedSourceProductionNow(sourceId, note = "") {
         resolvePath(options.validation_out, path.join(DEFAULT_WORKSPACE_ROOT, "publish-validation.json")),
       ]);
     }
-    if (sourceOnlyAutopilot && sourceOnlyAutoPublishFinals) {
+    if (sourceOnlyAutopilot && sourceOnlyAutoPublishFinals && allowUnreviewedFinalAutoPublish) {
       await approveReadyFinalsForSourceOnlyAutopilot({
         ignoreDailyLimit: true,
         approvalNote: "Auto-approved from a user-supplied direct source URL.",
@@ -2097,14 +2160,16 @@ function parseShortTelegramCommandInputV3(text, commands) {
 
 function parseTelegramTargetHintV3(rawValue = "") {
   const value = rawValue.trim();
-  const numberMatch = value.match(/(?:^|\s|#)(\d+)\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/i);
-  const stageHint = parseTelegramStageHintV3(value);
+  const colonAt = value.search(/[:\uFF1A]/);
+  const targetPart = (colonAt >= 0 ? value.slice(0, colonAt) : value).trim();
+  const numberMatch = targetPart.match(/(?:^|\s|#)(\d+)\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/i);
+  const stageHint = parseTelegramStageHintV3(targetPart || value);
   // If the user supplied a number, treat the remaining words as the note.
   // Example: "수정 1번: 첫장 훅 더 세게" must resolve target #1,
   // not try to resolve "첫장" as an id.
   const idCandidate = numberMatch
     ? null
-    : stripTelegramTargetNoiseV3(value)
+    : stripTelegramTargetNoiseV3(targetPart)
       .replace(/(?:^|\s|#)\d+\s*(?:\uBC88|\uBC88\uC9F8|\uBC88\uC73C\uB85C|\uBC88\s*\uC18C\uC2A4)?/gi, " ")
       .trim()
       .split(/\s+/)
@@ -2152,6 +2217,7 @@ async function resolveTelegramReviewTargetV3(target = {}) {
     if (found) return found;
     const finalFound = await findFinalTelegramTargetByIdV3(target.id);
     if (finalFound) return finalFound;
+    if (pending.length === 1 && isLikelyInstructionFragment(target.id)) return pending[0];
     await sendTelegramMessage([
       `id를 못 찾았어욤: ${target.id}`,
       "",
@@ -2212,12 +2278,14 @@ async function getPendingTelegramReviewTargetsV3() {
   return [
     ...state.sources
       .filter((item) => SOURCE_REVIEW_GATE_STATUSES.has(item.status))
+      .filter((item) => !isBlockedSourceReviewItem(item))
       .map((item) => enrichTelegramTargetV3(
         { stage: "source", id: item.sourceId, title: item.title, url: item.url, updated_at: item.updated_at },
         inboxItems.get(item.sourceId),
       )),
     ...state.drafts
       .filter((item) => item.status === "pending")
+      .filter((item) => !isBlockedSourceReviewItem(item))
       .map((item) => enrichTelegramTargetV3(
         { stage: "draft", id: item.sourceId, title: item.title, updated_at: item.updated_at },
         inboxItems.get(item.sourceId),
@@ -2225,8 +2293,34 @@ async function getPendingTelegramReviewTargetsV3() {
     ...state.items
       .filter((item) => item.status === "pending")
       .filter((item) => !isFinalReviewItemBlockedBySource(item, blockedSourceIds))
+      .filter((item) => !isBlockedQueueItem(item))
       .map((item) => ({ stage: "final", id: item.projectSlug, title: item.contentKey ?? item.projectSlug, updated_at: item.updated_at })),
   ].sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime());
+}
+
+function isLikelyInstructionFragment(value) {
+  const compact = normalizeTopicText(value).replace(/\s+/g, "");
+  if (!compact) return false;
+  return [
+    "첫장",
+    "첫",
+    "훅",
+    "이미지",
+    "지피티",
+    "gpt",
+    "도식",
+    "폰트",
+    "글씨",
+    "레이아웃",
+    "캡션",
+    "영상",
+    "릴스",
+    "수정",
+    "다시",
+    "후킹",
+    "더세게",
+    "밝게",
+  ].some((fragment) => compact === normalizeTopicText(fragment).replace(/\s+/g, ""));
 }
 
 async function findFinalTelegramTargetByIdV3(id) {
@@ -2234,6 +2328,7 @@ async function findFinalTelegramTargetByIdV3(id) {
   const blockedSourceIds = blockedSourceReviewIds(state);
   const found = state.items.find((item) => {
     if (isFinalReviewItemBlockedBySource(item, blockedSourceIds)) return false;
+    if (isBlockedQueueItem(item)) return false;
     return item.projectSlug === id || item.itemId === id || item.contentKey === id;
   });
   return found ? finalTelegramTargetFromStateItemV3(found) : null;
@@ -2245,6 +2340,7 @@ async function getLatestFinalTelegramTargetV3() {
   const latest = state.items
     .filter((item) => !["published"].includes(item.status))
     .filter((item) => !isFinalReviewItemBlockedBySource(item, blockedSourceIds))
+    .filter((item) => !isBlockedQueueItem(item))
     .sort((a, b) => new Date(b.updated_at ?? 0).getTime() - new Date(a.updated_at ?? 0).getTime())[0];
   return latest ? finalTelegramTargetFromStateItemV3(latest) : null;
 }
@@ -2972,6 +3068,7 @@ async function publishApproved({ execute, platform, dailyLimit, itemSelector }) 
   const selected = selectLatestQueueItemsByProjectSource(queue.items.filter((item) => {
     if (!approvedSlugs.has(item.projectSlug)) return false;
     if (!itemSelector && !isFreshProjectForFinalReview(item)) return false;
+    if (isBlockedQueueItem(item)) return false;
     if (!itemSelector) return true;
     return itemSelector === item.projectSlug || itemSelector === item.id || itemSelector === item.contentKey;
   }));
@@ -3295,6 +3392,24 @@ function markStaleReviewState(state) {
   let changed = false;
 
   for (const item of [...state.sources, ...state.drafts]) {
+    if (!SOURCE_REVIEW_GATE_STATUSES.has(item.status) && item.status !== "approved") continue;
+    if (!isBlockedSourceReviewItem(item)) continue;
+    item.status = "stale";
+    item.note = "Archived automatically: blocked by HERMES_BLOCKED_TOPIC_PATTERNS.";
+    item.updated_at = now;
+    changed = true;
+  }
+
+  for (const item of state.items) {
+    if (!FINAL_REVIEW_BLOCKABLE_STATUSES.has(item.status)) continue;
+    if (!isBlockedQueueItem(item)) continue;
+    item.status = "stale";
+    item.note = "Archived automatically: blocked by HERMES_BLOCKED_TOPIC_PATTERNS.";
+    item.updated_at = now;
+    changed = true;
+  }
+
+  for (const item of [...state.sources, ...state.drafts]) {
     if (!activeStatuses.has(item.status)) continue;
     const updatedAt = new Date(item.updated_at ?? 0);
     if (Number.isNaN(updatedAt.getTime()) || updatedAt >= cutoff) continue;
@@ -3422,12 +3537,14 @@ async function updateFinalReview(projectSlug, status, note) {
 }
 
 function sourceNeedsReview(item, sourceReview) {
+  if (isBlockedSourceCandidate(item)) return false;
   if (["source_approved", "approved", "ready"].includes(item.status ?? "")) return false;
   if (!sourceReview) return true;
   return !["pending", "approved", "rejected", "stale"].includes(sourceReview.status);
 }
 
 function isSourceApproved(item, state) {
+  if (isBlockedSourceCandidate(item)) return false;
   if (["source_approved", "approved", "ready"].includes(item.status ?? "")) return true;
   return state.sources.some((source) => source.sourceId === item.id && source.status === "approved");
 }
@@ -3438,6 +3555,7 @@ function isDraftApproved(item, state) {
 }
 
 function isFinalBuildAllowed(item, state) {
+  if (isBlockedSourceCandidate(item)) return false;
   if (blockedSourceReviewIds(state).has(sourceKeyForItem(item))) return false;
   if (["approved", "ready"].includes(item.status ?? "")) return true;
   return isSourceApproved(item, state) && (!requireDraftApproval || isDraftApproved(item, state));
@@ -3522,6 +3640,96 @@ function positiveInteger(value, defaultValue) {
   const number = Number(value);
   if (!Number.isFinite(number) || number <= 0) return defaultValue;
   return Math.floor(number);
+}
+
+function parseBlockedTopicPatterns(value) {
+  const configured = String(value ?? "")
+    .split(/[\n,|]+/)
+    .map((item) => normalizeTopicText(item))
+    .filter(Boolean);
+  return [...new Set([...DEFAULT_BLOCKED_TOPIC_PATTERNS.map((item) => normalizeTopicText(item)), ...configured])];
+}
+
+function normalizeTopicText(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/https?:\/\//g, " ")
+    .replace(/[^a-z0-9가-힣]+/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function topicValueText(value, depth = 0) {
+  if (value === undefined || value === null || depth > 2) return "";
+  if (Array.isArray(value)) return value.map((item) => topicValueText(item, depth + 1)).join(" ");
+  if (typeof value === "object") {
+    return Object.values(value).map((item) => topicValueText(item, depth + 1)).join(" ");
+  }
+  return String(value);
+}
+
+function matchesBlockedTopic(...values) {
+  if (!blockedTopicPatterns.length) return false;
+  const text = normalizeTopicText(values.map((value) => topicValueText(value)).join(" "));
+  if (!text) return false;
+  const compactText = text.replace(/\s+/g, "");
+  return blockedTopicPatterns.some((pattern) => {
+    if (!pattern) return false;
+    return text.includes(pattern) || compactText.includes(pattern.replace(/\s+/g, ""));
+  });
+}
+
+function sourceTopicFields(item = {}) {
+  return [
+    item.id,
+    item.sourceId,
+    item.projectSlug,
+    item.contentKey,
+    item.title,
+    item.url,
+    item.bucket,
+    item.sourceLabel,
+    item.summary,
+    item.angle,
+    item.viewerHook,
+    item.whyNow,
+    item.whoShouldCare,
+    item.whatToTryToday,
+    item.reelFirst3Seconds,
+    item.visualAssetsToCollect,
+    item.proofSignals,
+    item.sources,
+    item.links,
+    item.sourceLinks,
+    item.note,
+  ];
+}
+
+function queueTopicFields(item = {}) {
+  return [
+    item.id,
+    item.itemId,
+    item.projectSlug,
+    item.contentKey,
+    item.title,
+    item.projectPath,
+    item.sourceLinks,
+    item.captions,
+    item.caption,
+    item.note,
+  ];
+}
+
+function isBlockedSourceCandidate(item) {
+  return matchesBlockedTopic(...sourceTopicFields(item));
+}
+
+function isBlockedQueueItem(item) {
+  return matchesBlockedTopic(...queueTopicFields(item));
+}
+
+function isBlockedSourceReviewItem(item) {
+  return matchesBlockedTopic(...sourceTopicFields(item));
 }
 
 function normalizeAutoPublishKinds(value) {
@@ -3696,9 +3904,13 @@ function envTemplate() {
     "HERMES_SOURCE_ONLY_AUTOPILOT=0",
     "# Keep 0 unless you intentionally want no-preview final auto-publishing.",
     "HERMES_SOURCE_ONLY_AUTOPUBLISH_FINALS=0",
+    "# Extra safety latch: even if the line above is 1, no-preview upload stays blocked unless this is 1 too.",
+    "HERMES_ALLOW_UNREVIEWED_FINAL_AUTOPUBLISH=0",
     "HERMES_AUTOPILOT_DAILY_PUBLISH_LIMIT=2",
     "HERMES_ARCHIVE_SOURCE_CANDIDATES_AFTER_SELECTION=1",
     "HERMES_DIRECT_SOURCE_IMMEDIATE=1",
+    "# Hard-block repeated or unwanted topics. Defaults already block Google MCP Toolbox.",
+    "HERMES_BLOCKED_TOPIC_PATTERNS=google mcp toolbox,googleapis/mcp-toolbox,mcp-toolbox,google-mcp-toolbox-db,github-google-mcp-toolbox-db",
     "",
     "# Optional YouTube Data API, used later only with --publish-approved --platform youtube/all --execute",
     "# OAuth refresh token must include https://www.googleapis.com/auth/youtube.upload scope.",
